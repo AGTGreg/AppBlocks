@@ -1,3 +1,4 @@
-# SuperComponent
+## Build autonomous and reusable micro apps in record time
 
-SuperComponent is a very small and lightweight library that makes it easy to componentize your frontend. 
+> AppBlocks is a lightweight javascript library for building micro apps. It plays nice with other server side
+template engines and makes it easy to create universal apps.

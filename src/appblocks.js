@@ -26,7 +26,8 @@ var AppBlock = function(config) {
     const comp = this;
     if (comp.state.loading) return;
 
-    if (config) { Object.assign(config, comp.axiosConfig) }
+    let cConfig = comp.axiosConfig;
+    if (config) { Object.assign(cConfig, config) }
 
     comp.resetState();
     comp.state.loading = true;
@@ -34,7 +35,7 @@ var AppBlock = function(config) {
 
     comp.render(function() {
 
-      axios.request(config)
+      axios.request(cConfig)
       .then(function(response) {
         comp.state.success = true;
         responseData = response.data;

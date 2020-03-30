@@ -66,7 +66,7 @@ body {
   -webkit-font-smoothing: antialiased;
   color: #34495e;
   font-family: Source Sans Pro, Helvetica Neue, Arial, sans-serif;
-  font-size: 15px;
+  font-size: 18px;
   letter-spacing: 0;
   margin: 0;
   overflow-x: hidden
@@ -584,7 +584,8 @@ section.cover {
 }
 
 section.cover.show {
-  display: flex
+  display: flex;
+  background: linear-gradient(0deg, rgba(39,174,109,1) 0%, rgba(144,214,183,1) 100%) !important;
 }
 
 section.cover.has-mask .mask {
@@ -598,10 +599,20 @@ section.cover.has-mask .mask {
 
 section.cover .cover-main {
   flex: 1;
+  display: flex;
+  flex-direction: column;
   margin: auto;
-  max-width: 700px;
+  max-width: 800px;
+  min-height: 400px;
+  max-height: 100%;
+  justify-content: space-evenly;
   text-align: center;
-  z-index: 1
+  color: #ffffff;
+  z-index: 1;
+}
+
+.cover-main h1 a>span, .cover-main h2 a>span { 
+  color: #ffffff; 
 }
 
 section.cover a {
@@ -619,11 +630,11 @@ section.cover p {
 
 section.cover h1 {
   color: inherit;
-  font-size: 2.5rem;
-  font-weight: 300;
-  margin: .625rem 0 2.5rem;
+  font-size: 4em;
+  font-weight: bold;
   position: relative;
-  text-align: center
+  text-align: center;
+  margin: 0;
 }
 
 section.cover h1 a {
@@ -633,7 +644,7 @@ section.cover h1 a {
 section.cover h1 small {
   bottom: -.4375rem;
   font-size: 1rem;
-  position: absolute
+  position: absolute;
 }
 
 section.cover blockquote {
@@ -642,18 +653,33 @@ section.cover blockquote {
 }
 
 section.cover ul {
+  display: flex;
   line-height: 1.8;
   list-style-type: none;
-  margin: 1em auto;
-  max-width: 500px;
-  padding: 0
+  margin: auto;
+  padding: 0;
+  font-weight: bold;
+  justify-content: space-evenly;
+}
+
+section.cover ul > li {
+  flex: 0 0 33.36%;
+  border-right: 1px solid #ffffff;
+  margin-right: 20px;
+  padding-right: 20px;
+}
+
+section.cover ul > li:last-of-type {
+  margin-right: 0;
+  padding-right: 0;
+  border-right: 0;
 }
 
 section.cover .cover-main>p:last-child a {
   border-radius: 2rem;
-  border: 1px solid var(--theme-color, #42b983);
+  border: 1px solid #ffffff;
   box-sizing: border-box;
-  color: var(--theme-color, #42b983);
+  color: #ffffff;
   display: inline-block;
   font-size: 1.05rem;
   letter-spacing: .1rem;
@@ -974,4 +1000,17 @@ pre:after {
   right: 0;
   text-align: right;
   top: 0
+}
+
+
+@media all and (max-width: 768px) {
+  section.cover .cover-main {
+    padding: 0 15px;
+  }
+  section.cover h1 {
+    font-size: 2.5em;
+  }
+  .markdown-section {
+    margin-left: 0;
+  }
 }

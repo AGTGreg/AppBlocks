@@ -1,17 +1,9 @@
 # AppBlocks
 
-## Build autonomous and reusable micro apps in record time
+> A lightweight javascript library for building micro apps for the front-end. 
 
-> AppBlocks is a lightweight javascript library for building micro apps. It plays nice with other server side
-template engines and makes it easy to create universal apps.
-
-- Simple and lightweight (~5kB minified)
-- Build to cover the most common use cases with minimum configuration
-- Plays nice with other server-side template engines such as Django templates and Jinja2
+Appblocks is simple and lightweight (~5kb minified), easy to use and master, covers the most common use cases for the 
+front-end and plays nice with server side template engines such as Django templates and Jinja2.
 
 [GitHub](https://github.com/AGTGreg/AppBlocks.git)
 [Get Started](README.md)
-[Tutorial](tutorial.md)
-
-
-![color](#bce5cd)

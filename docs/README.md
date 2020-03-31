@@ -1,6 +1,6 @@
 # Introduction
 
-AppBlocks is a tiny javascript library for building interfaces for the web.
+AppBlocks is a lightweight javascript library (~5kb minified) for building micro apps for the front-end.
 
 It is designed to be easy to use and to play nice with other server side template engines, such as Django templates
 and Jinja2.
@@ -15,8 +15,15 @@ Download and include with a script tag in your document's head:
 ```
 
 or you can use the **CDN version**:
+
 ```html
 <script src="https://cdn.jsdelivr.net/appblocks.min.js"></script>
+```
+
+or you can install via **npm**:
+
+```shell
+npm install appblocks
 ```
 
 
@@ -36,7 +43,7 @@ in curly braces `{}`:
 Next, create a new AppBlock instance for your element. You may also want to add some data:
  
 ```js
-var app = AppBlock({
+var app = new AppBlock({
   el: document.getElementById('app'),
   data: {
     message: "Hello world!"

@@ -1,0 +1,38 @@
+{
+  "name": "appblocks",
+  "version": "1.0.0",
+  "description": "A lightweight javascript library for building micro apps for the front-end.",
+  "main": "dist/appblocks.cjs.js",
+  "module": "dist/appblocks.esm.js",
+  "browser": "dist/appblocks.umd.js",
+  "minified": "dist/appblocks.min.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "test-appblocks",
+    "build": "rollup --config"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AGTGreg/AppBlocks.git"
+  },
+  "keywords": [
+    "appblocks",
+    "microapps",
+    "frontend",
+    "interface"
+  ],
+  "author": "Grigoris Chatzinikolaou",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/AGTGreg/AppBlocks/issues"
+  },
+  "homepage": "https://agtgreg.github.io/AppBlocks",
+  "devDependencies": {
+    "rollup": "^2.3.1",
+    "rollup-plugin-terser": "^5.3.0",
+    "@rollup/plugin-commonjs": "^11.0.1",
+    "@rollup/plugin-node-resolve": "^7.0.0"
+  }
+}

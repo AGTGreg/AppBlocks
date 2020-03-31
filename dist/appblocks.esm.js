@@ -1,7 +1,4 @@
-'use strict';
-
-
-export default function AppBlock(config) {
+function AppBlock(config) {
 
 
   // Sets or Updates the data and then calls render()
@@ -12,7 +9,7 @@ export default function AppBlock(config) {
       Object.assign(this.data, newData);
     }
     this.render();
-  }
+  };
   
 
   // Resets to the default state. Handy before making a request.
@@ -20,7 +17,7 @@ export default function AppBlock(config) {
     this.state.loading = false;
     this.state.error = false;
     this.state.success = false;
-  }
+  };
 
 
   // Makes a request with axios. Config and callbacks are both objects. Callbacks may contain: 
@@ -30,7 +27,7 @@ export default function AppBlock(config) {
     if (comp.state.loading) return;
 
     let cConfig = comp.axiosConfig;
-    if (config) { Object.assign(cConfig, config) }
+    if (config) { Object.assign(cConfig, config); }
 
     comp.resetState();
     comp.state.loading = true;
@@ -56,7 +53,7 @@ export default function AppBlock(config) {
       });
 
     });
-  }
+  };
 
 
   // Render ============================================================================================================
@@ -100,7 +97,7 @@ export default function AppBlock(config) {
       }
 
       return prop;
-    }
+    };
 
     // Placeholders ----------------------------------------------------------------------------------------------------
     // Returns the value of a placeholder.
@@ -228,8 +225,7 @@ export default function AppBlock(config) {
             stParts = attr.split(' in ');
             pointer = stParts[0];
             parentNode.appendChild(newNode);
-          };
-          node.remove();
+          }          node.remove();
           return true;
 
         } else {
@@ -238,7 +234,7 @@ export default function AppBlock(config) {
         
       }
 
-    }
+    };
 
     // Processes nodes recursivelly in reverse. Evaluates the nodes based on their attributes.
     // Removes and skips the nodes that evaluate to false.
@@ -269,14 +265,14 @@ export default function AppBlock(config) {
         }
       }
 
-    }
+    };
 
     let tmpDOM = comp.template.cloneNode(true);    
     processNode(tmpDOM);
     updateTextNodePlaceholders(tmpDOM);
     this.el.innerHTML = tmpDOM.innerHTML;
     if (callback instanceof Function) callback();
-  }
+  };
 
 
   // Initialization ====================================================================================================
@@ -324,7 +320,7 @@ export default function AppBlock(config) {
 
       comp.events = {};
       if (config.events instanceof Object) {
-        Object.assign(comp.events, config.events)
+        Object.assign(comp.events, config.events);
         // Add event listeners to :el for each event
         for (const ev in comp.events) {
           // Events are in this form (event element) so split at space to get the eventName and the element to attach the
@@ -345,7 +341,7 @@ export default function AppBlock(config) {
       comp.axiosConfig = { 
         headers: {'X-Requested-With': 'XMLHttpRequest'} 
       };
-      if (config.axiosConfig instanceof Object) Object.assign(comp.axiosConfig, config.axiosConfig)
+      if (config.axiosConfig instanceof Object) Object.assign(comp.axiosConfig, config.axiosConfig);
 
     } else {
       return false;
@@ -353,7 +349,9 @@ export default function AppBlock(config) {
 
     comp.render();
     return comp;
-  }
+  };
 
   return this.Init();
 }
+
+export default AppBlock;

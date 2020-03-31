@@ -11,13 +11,16 @@ and Jinja2.
 Download and include with a script tag in your document's head:
 
 ```html
+<script src="/appblocks.umd.js"></script>
+
+<!-- Or if you prefer, this is the minified version -->
 <script src="/appblocks.min.js"></script>
 ```
 
 or you can use the **CDN version**:
 
 ```html
-<script src="https://cdn.jsdelivr.net/appblocks.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/appblocks@1.0.1/dist/appblocks.min.js"></script>
 ```
 
 or you can install via **npm**:

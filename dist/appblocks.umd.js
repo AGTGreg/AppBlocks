@@ -89,7 +89,9 @@
     }
   };
 
+  // If and For directives
   const directives = {
+
     'c-if': function(comp, node, pointers) {
       let attr = node.getAttribute('c-if');
       // In case this directive was called form a c-ifnot.
@@ -285,7 +287,8 @@
     this.Init = function() {
       const comp = this;
 
-      // Initialize all the properties from the config or exit if no config is provided.
+      // Initialize all the properties and update them from the config if they are included, or exit if no 
+      // config is provided.
       if (config !== undefined) {
         
         if (config.el === undefined) {
@@ -323,6 +326,9 @@
           }
         };
         if (config.methods instanceof Object) Object.assign(comp.methods, config.methods);
+
+        comp.directives = directives;
+        if (config.directives instanceof Object) Object.assign(comp.directives, config.directives);
 
         comp.events = {};
         if (config.events instanceof Object) {

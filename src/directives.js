@@ -6,6 +6,7 @@ import {updateAttributePlaceholders, updateTextNodePlaceholders} from './placeho
 
 // If and For directives
 export const directives = {
+
   'c-if': function(comp, node, pointers) {
     let attr = node.getAttribute('c-if');
     // In case this directive was called form a c-ifnot.

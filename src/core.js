@@ -1,7 +1,7 @@
 'use strict';
 
 import {updateTextNodePlaceholders} from './placeholders';
-import {processNode} from './directives';
+import {processNode, directives} from './directives';
 
 
 export function AppBlock(config) {
@@ -80,7 +80,8 @@ export function AppBlock(config) {
   this.Init = function() {
     const comp = this;
 
-    // Initialize all the properties from the config or exit if no config is provided.
+    // Initialize all the properties and update them from the config if they are included, or exit if no 
+    // config is provided.
     if (config !== undefined) {
       
       if (config.el === undefined) {
@@ -118,6 +119,9 @@ export function AppBlock(config) {
         }
       };
       if (config.methods instanceof Object) Object.assign(comp.methods, config.methods);
+
+      comp.directives = directives;
+      if (config.directives instanceof Object) Object.assign(comp.directives, config.directives);
 
       comp.events = {};
       if (config.events instanceof Object) {

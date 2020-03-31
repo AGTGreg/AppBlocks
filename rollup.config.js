@@ -7,7 +7,7 @@ import pkg from './package.json';
 export default [
 	// browser-friendly UMD build
 	{
-		input: 'src/appblocks.js',
+		input: 'src/index.js',
 		output: {
 			name: 'AppBlock',
 			file: pkg.browser,
@@ -21,7 +21,7 @@ export default [
 
   // Minified version
   {
-    input: 'src/appblocks.js',
+    input: 'src/index.js',
     output: {
       name: 'AppBlock',
       file: pkg.minified,
@@ -32,7 +32,7 @@ export default [
 
 	// CommonJS (for Node) and ES module (for bundlers) build.
 	{
-		input: 'src/appblocks.js',
+		input: 'src/index.js',
 		output: [
 			{ file: pkg.main, format: 'cjs' },
 			{ file: pkg.module, format: 'es' }

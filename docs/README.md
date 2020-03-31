@@ -2,9 +2,6 @@
 
 AppBlocks is a lightweight javascript library (~5kb minified) for building micro apps for the front-end.
 
-It is designed to be easy to use and to play nice with other server side template engines, such as Django templates
-and Jinja2.
-
 
 ## Installation
 

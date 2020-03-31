@@ -1,5 +1,210 @@
 'use strict';
 
+/*
+Gets a property's value.
+
+:keys = An array of keys to search for
+:pointers = An object with keys that point to a specific value
+
+First search in pointers if pointers is defined. Then search in methods and lastly 
+search in the component itself. Go deeper, one key at a time until we reach the last
+one or until we get an undefined value.
+*/
+
+const getProp = function(comp, keys, pointers) {
+  const firstKey = keys[0];
+  let root = comp;
+  let prop;
+
+  if (pointers && firstKey in pointers) {
+    keys.shift();
+    root = pointers[firstKey];
+
+  } else if (firstKey in comp.methods) {
+    keys.shift();
+    prop = comp.methods[firstKey]();
+  }
+
+  if (keys.length > 0) {
+    for (let i=0; i<keys.length; i++) {
+      prop = root[keys[i]];
+      if (prop === undefined) {
+        break;
+      } else {
+        root = prop;
+      }
+    }
+  }
+
+  return prop;
+};
+
+// Returns the value of a placeholder.
+const getPlaceholderVal = function(comp, placeholder, pointers) {
+  if ( /{([^}]+)}/.test(placeholder) === false ) return; 
+  const placeholderName = placeholder.replace(/{|}/g , '');
+  let propKeys = placeholderName.split('.');
+  return getProp(comp, propKeys, pointers);
+}; 
+
+// Replaces all placeholders in all attributes in a node.
+const updateAttributePlaceholders = function(comp, node, pointers) {
+  const attrs = node.attributes;
+  for (let i=0; i<attrs.length; i++) {
+    if ( /{([^}]+)}/.test(attrs[i].value) ) {
+      const props = attrs[i].value.match(/{([^}]+)}/g);
+
+      for (let p=0; p<props.length; p++) {
+        const re = new RegExp(props[p], 'g');
+        attrs[i].value = attrs[i].value.replace(re, getPlaceholderVal(comp, props[p], pointers));
+      }
+    }
+  }
+};
+
+// Updates all the text nodes that contain placeholders {}
+const updateTextNodePlaceholders = function(comp, nodeTree, pointers) {
+  // Create a new treeWalker with all visible text nodes that contain placeholders;
+  const textWalker = document.createTreeWalker(
+    nodeTree, NodeFilter.SHOW_TEXT, {
+      acceptNode: function(node) {
+        if ( /{([^}]+)}/.test(node.data) ) {
+          return NodeFilter.FILTER_ACCEPT;
+        }
+      }
+    }
+  );
+  while (textWalker.nextNode()) {
+    let nodeVal = textWalker.currentNode.nodeValue;
+    // Iterate over the props (if any) and replace it with the appropriate value.
+    const props = nodeVal.match(/{([^}]+)}/g);
+    for (let i=0; i<props.length; i++) {
+      nodeVal = nodeVal.replace(props[i], getPlaceholderVal(comp, props[i], pointers));
+    }
+    textWalker.currentNode.nodeValue = nodeVal;
+  }
+};
+
+const directives = {
+  'c-if': function(comp, node, pointers) {
+    let attr = node.getAttribute('c-if');
+    // In case this directive was called form a c-ifnot.
+    if (attr === null) attr = node.getAttribute('c-ifnot');
+    
+    let result = getProp(comp, attr.split('.'), pointers);
+
+    if (result === undefined) {
+      // Check if the attribute contains a logical operator. Split the condition at the
+      // operator to get the value of the object at left side and evaluate.
+      const operators = [' == ', ' === ', ' !== ', ' != ', ' > ', ' < ', ' >= ', ' <= '];
+      const validTypes = ['boolean', 'number'];
+      for (let i=0; i<operators.length; i++) {
+        if (attr.includes(operators[i])) {
+          let condition = attr;
+          const cParts = condition.split(operators[i]);
+          const condLeft = getProp(comp, cParts[0].split('.'), pointers);
+          const condRight = cParts[1];
+
+          if (validTypes.includes(String(typeof(condLeft))) === false) {
+            console.error(
+              cParts[0] + " cannot be evaluated because it is not a boolean or a number.");
+            return false;
+          } else {
+            condition = condition.replace(cParts[0], condLeft);
+            var evaluate = eval;
+            result = evaluate(condition);
+          }
+        }
+      }
+    }
+
+    if (result === undefined || result === false) {
+      return false;
+    
+    } else {
+      node.removeAttribute('c-if');
+      return true;
+    }
+  },
+
+  // Calls c-if directive and reverses the result.
+  'c-ifnot': function(comp, node, pointers) {
+    const result = !directives['c-if'](comp, node, pointers);
+    if (result === true) node.removeAttribute('c-ifnot');
+    return result;
+  },
+
+  'c-for': function(comp, node, pointers) {
+    const attr = node.getAttribute('c-for');
+
+    let stParts = attr.split(' in ');
+    let pointer = stParts[0];
+    const objectKeys = stParts[1].split('.');
+    if (pointers === undefined) pointers = {};
+
+    let iterable = getProp(comp, objectKeys, pointers);
+
+    if (iterable) {
+      node.removeAttribute('c-for');
+      const parentNode = node.parentNode;
+
+      for (let i=0; i<iterable.length; i++) {
+        const item = iterable[i];
+        // Add a pointer for the current item.
+        pointers[pointer] = item;
+        
+        const newNode = node.cloneNode(true);
+        processNode(comp, newNode, pointers);
+        updateAttributePlaceholders(comp, newNode, pointers);
+        updateTextNodePlaceholders(comp, newNode, pointers);
+
+        // Reset the pointer.
+        stParts = attr.split(' in ');
+        pointer = stParts[0];
+        parentNode.appendChild(newNode);
+      }      node.remove();
+      return true;
+
+    } else {
+      return false;
+    }
+    
+  }
+};
+
+
+// Processes nodes recursivelly in reverse. Evaluates the nodes based on their attributes.
+// Removes and skips the nodes that evaluate to false.
+const processNode = function(comp, node, pointers) {
+
+  const attrs = node.attributes;
+  for (let i=0; i<attrs.length; i++) {
+    if (attrs[i].name in directives) {
+      const attr = attrs[i].name;
+      const result = directives[attr](comp, node, pointers);
+      if (result === false) {
+        node.remove();
+        return;
+      }
+    }
+  }
+
+  // If a node stays in our tree (did not evaluate to false) then update all of its attributes.
+  updateAttributePlaceholders(comp, node, pointers);
+
+  if (node.hasChildNodes()) {
+    // Iterate over the children in reverse because we might remove a node and the children count might change.
+    for (let c=node.childElementCount - 1; c >= 0; c--) {
+      if (node.children[c]) {
+        processNode(comp, node.children[c], pointers);
+      } else {
+        break;
+      }
+    }
+  }
+
+};
+
 function AppBlock(config) {
 
 
@@ -59,219 +264,14 @@ function AppBlock(config) {
 
 
   // Render ============================================================================================================
-  // This is the heart of AppBlock. This is where all placeholders and directives get evaluated based on the
-  // data and content gets updated.
+  // This is the heart of an AppBlock. This is where all placeholders and directives get evaluated based on our
+  // data, and content gets updated.
   this.render = function(callback) {
     const comp = this;
 
-    /*
-    Gets a property's value.
-
-    :keys = An array of keys to search for
-    :pointers = An object with keys that point to a specific value
-
-    First search in pointers if pointers is defined. Then search in
-    methods and lastly search in the component itself.
-    */
-    const getProp = function(keys, pointers) {
-      const firstKey = keys[0];
-      let root = comp;
-      let prop;
-
-      if (pointers && firstKey in pointers) {
-        keys.shift();
-        root = pointers[firstKey];
-
-      } else if (firstKey in comp.methods) {
-        keys.shift();
-        prop = comp.methods[firstKey]();
-      }
-
-      if (keys.length > 0) {
-        for (let i=0; i<keys.length; i++) {
-          prop = root[keys[i]];
-          if (prop === undefined) {
-            break;
-          } else {
-            root = prop;
-          }
-        }
-      }
-
-      return prop;
-    };
-
-    // Placeholders ----------------------------------------------------------------------------------------------------
-    // Returns the value of a placeholder.
-    const getPlaceholderVal = function(placeholder, pointers) {
-      if ( /{([^}]+)}/.test(placeholder) === false ) return; 
-      const placeholderName = placeholder.replace(/{|}/g , '');
-      let propKeys = placeholderName.split('.');
-      return getProp(propKeys, pointers);
-    }; 
-
-    // Replaces all placeholders in all attributes in a node.
-    const updateAttributePlaceholders = function(node, pointers) {
-      const attrs = node.attributes;
-      for (let i=0; i<attrs.length; i++) {
-        if ( /{([^}]+)}/.test(attrs[i].value) ) {
-          const props = attrs[i].value.match(/{([^}]+)}/g);
-
-          for (let p=0; p<props.length; p++) {
-            const re = new RegExp(props[p], 'g');
-            attrs[i].value = attrs[i].value.replace(re, getPlaceholderVal(props[p], pointers));
-          }
-        }
-      }
-    };
-
-    // Updates all the text nodes that contain placeholders {}
-    const updateTextNodePlaceholders = function(nodeTree, pointers) {
-      // Create a new treeWalker with all visible text nodes that contain placeholders;
-      const textWalker = document.createTreeWalker(
-        nodeTree, NodeFilter.SHOW_TEXT, {
-          acceptNode: function(node) {
-            if ( /{([^}]+)}/.test(node.data) ) {
-              return NodeFilter.FILTER_ACCEPT;
-            }
-          }
-        }
-      );
-      while (textWalker.nextNode()) {
-        let nodeVal = textWalker.currentNode.nodeValue;
-        // Iterate over the props (if any) and replace it with the appropriate value.
-        const props = nodeVal.match(/{([^}]+)}/g);
-        for (let i=0; i<props.length; i++) {
-          nodeVal = nodeVal.replace(props[i], getPlaceholderVal(props[i], pointers));
-        }
-        textWalker.currentNode.nodeValue = nodeVal;
-      }
-    };
-
-    // Directives ------------------------------------------------------------------------------------------------------
-    // If and For directives
-    const directives = {
-      'c-if': function(node, pointers) {
-        let attr = node.getAttribute('c-if');
-        // In case this directive was called form a c-ifnot.
-        if (attr === null) attr = node.getAttribute('c-ifnot');
-        
-        let result = getProp(attr.split('.'), pointers);
-
-        if (result === undefined) {
-          // Check if the attribute contains a logical operator. Split the condition at the
-          // operator to get the value of the object at left side and evaluate.
-          const operators = [' == ', ' === ', ' !== ', ' != ', ' > ', ' < ', ' >= ', ' <= '];
-          const validTypes = ['boolean', 'number'];
-          for (let i=0; i<operators.length; i++) {
-            if (attr.includes(operators[i])) {
-              let condition = attr;
-              const cParts = condition.split(operators[i]);
-              const condLeft = getProp(cParts[0].split('.'), pointers);
-              const condRight = cParts[1];
-
-              if (validTypes.includes(String(typeof(condLeft))) === false) {
-                console.error(
-                  cParts[0] + " cannot be evaluated because it is not a boolean or a number.");
-                return false;
-              } else {
-                condition = condition.replace(cParts[0], condLeft);
-                var evaluate = eval;
-                result = evaluate(condition);
-              }
-            }
-          }
-        }
-
-        if (result === undefined || result === false) {
-          return false;
-        
-        } else {
-          node.removeAttribute('c-if');
-          return true;
-        }
-      },
-
-      // Calls c-if directive and reverses the result.
-      'c-ifnot': function(node, pointers) {
-        const result = !directives['c-if'](node, pointers);
-        if (result === true) node.removeAttribute('c-ifnot');
-        return result;
-      },
-
-      'c-for': function(node, pointers) {
-        const attr = node.getAttribute('c-for');
-
-        let stParts = attr.split(' in ');
-        let pointer = stParts[0];
-        const objectKeys = stParts[1].split('.');
-        if (pointers === undefined) pointers = {};
-
-        let iterable = getProp(objectKeys, pointers);
-
-        if (iterable) {
-          node.removeAttribute('c-for');
-          const parentNode = node.parentNode;
-
-          for (let i=0; i<iterable.length; i++) {
-            const item = iterable[i];
-            // Add a pointer for the current item.
-            pointers[pointer] = item;
-            
-            const newNode = node.cloneNode(true);
-            processNode(newNode, pointers);
-            updateAttributePlaceholders(newNode, pointers);
-            updateTextNodePlaceholders(newNode, pointers);
-
-            // Reset the pointer.
-            stParts = attr.split(' in ');
-            pointer = stParts[0];
-            parentNode.appendChild(newNode);
-          }          node.remove();
-          return true;
-
-        } else {
-          return false;
-        }
-        
-      }
-
-    };
-
-    // Processes nodes recursivelly in reverse. Evaluates the nodes based on their attributes.
-    // Removes and skips the nodes that evaluate to false.
-    const processNode = function(node, pointers) {
-
-      const attrs = node.attributes;
-      for (let i=0; i<attrs.length; i++) {
-        if (attrs[i].name in directives) {
-          const attr = attrs[i].name;
-          const result = directives[attr](node, pointers);
-          if (result === false) {
-            node.remove();
-            return;
-          }
-        }
-      }
-
-      // If a node stays in our tree (did not evaluate to false) then update all of its attributes.
-      updateAttributePlaceholders(node, pointers);
-
-      if (node.hasChildNodes()) {
-        for (let c=node.childElementCount - 1; c >= 0; c--) {
-          if (node.children[c]) {
-            processNode(node.children[c], pointers);
-          } else {
-            break;
-          }
-        }
-      }
-
-    };
-
-    let tmpDOM = comp.template.cloneNode(true);    
-    processNode(tmpDOM);
-    updateTextNodePlaceholders(tmpDOM);
+    let tmpDOM = comp.template.cloneNode(true);
+    processNode(comp, tmpDOM);
+    updateTextNodePlaceholders(comp, tmpDOM);
     this.el.innerHTML = tmpDOM.innerHTML;
     if (callback instanceof Function) callback();
   };

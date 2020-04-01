@@ -631,7 +631,7 @@ section.cover p {
 section.cover h1 {
   color: inherit;
   font-size: 4em;
-  font-weight: bold;
+  font-weight: 300;
   position: relative;
   text-align: center;
   margin: 0;

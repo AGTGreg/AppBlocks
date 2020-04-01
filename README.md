@@ -1,6 +1,8 @@
 # Introduction
 
-AppBlocks is a lightweight javascript library (~5kb minified) for building micro apps for the front-end.
+AppBlocks is a tiny javascript library (~4kb minified) for building micro apps for the front-end.
+The Goal of AppBlocks is to provide all the necessary functionality for developing front-end micro apps while beeing
+lightweight, practical and as small as possible.
 
 
 ## Installation
@@ -218,6 +220,67 @@ var app = new AppBlock({
 > - Milk
 > - Tomatoes
 > - Orange juice
+
+
+### Making your own directives
+
+If the directives build into AppBlocks don't cover your case you can allways make your own custom directives.
+
+Directives are functions that return `true` or `false`. If it returns `true`, AppBlocks will show the element
+that has that directive, if it returns `false`, AppBlock will discard it and the element will not show up.
+
+You can create your directives in the `directives` parameter like so:
+
+```js
+var app = new AppBlock({
+  ...
+  directives: {
+    'c-custom-directive': function(appInstance, node, pointers) {
+      // Do something
+      return true;
+    }
+  },
+  ...
+})
+```
+
+A directive needs to have the following parameters that AppBlocks will pass to it, when it invokes it:
+- **appInstance**: This is the instance of our app.
+- **node**: This is the element that contains our directive.
+- **pointers**: This is needed in case the element with our directive, is inside a `c-for` block. It is an object whose
+keys are set by a `c-for` block and point to specific data.
+
+Then we can use it like any other directive:
+
+```html
+<div c-custom-directive="something"></div>
+```
+
+Let's make a directive that gets a name as a value prints a greeting inside an element:
+
+```js
+var app = new AppBlock({
+  ...
+  directives: {
+    'c-my-custom-dir': function(app, node, pointers) {
+      var message = "Hi there " + node.getAttribute('c-my-custom-dir') + "!";
+      var newContent = document.createTextNode(message);
+      node.appendChild(newContent);
+      return true;
+    }
+  },
+  ...
+})
+```
+
+```html
+<div c-my-custom-dir="Greg"></div>
+```
+
+The result will be:
+> Hi there Greg!
+
+?> Note that we have to return `true` in order for our element to show up. Otherwise AppBlocks would have discarded it.
 
 
 ## Event handling

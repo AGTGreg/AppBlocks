@@ -245,8 +245,11 @@ function AppBlock(config) {
       axios.request(cConfig)
       .then(function(response) {
         comp.state.success = true;
+        if (callbacks && callbacks['success'] instanceof Function) {
+          const callReturn = callbacks['success'](response);
+          if (callReturn instanceof Object) response = callReturn;
+        }
         responseData = response.data;
-        if (callbacks && callbacks['success'] instanceof Function) callbacks['success'](response);
       })
       .catch(function(error) {
         comp.state.error = true;

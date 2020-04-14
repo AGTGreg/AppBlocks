@@ -19,7 +19,7 @@ Download and include with a script tag in your document's head:
 or you can use the **CDN version**:
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/appblocks@1.1.0/dist/appblocks.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/appblocks@1.2.0/dist/appblocks.min.js"></script>
 ```
 
 or you can install via **npm**:
@@ -59,10 +59,12 @@ We have created our very first app! Inside our app we use placeholders enclosed 
 Lets test this! Open up your browser's console and type: `app.setData({message: "Hi"})`. Now you should see
 that our element is automatically updated to display the new message.
 
-?> Whenever you need to update your data, you should use the `setData()` method instead of changing your data
-directly. This way your app will re-render every time your data changes and your Interface will always be
-updated automatically. If, for any reason you want to change your data without updating your interface then
-you can change your data directly and call the `render()` method whenever you want to update your interface.
+?> Whenever you need to update your data, you should use the `setData()` method if you want your app to update along
+with your data. This way your app will re-render every time your data changes and your Interface will always be
+updated automatically. 
+
+?> If, for any reason you want to change your data without updating your interface then you can do that
+and then call the `render()` method whenever you want to update your interface.
 
 We can also use placeholders in attributes:
 
@@ -71,6 +73,32 @@ We can also use placeholders in attributes:
   <p title="{data.message}">{data.message}</p>
 </div>
 ```
+
+## Custom template
+
+A more efficient way for creating our apps would be to have all our content inside a template element and tell
+AppBlocks were it should render it:
+
+```html
+<div id="app"></div>
+
+<template id="appTemplate">
+  <p title="{data.message}">{data.message}</p>
+</template>
+```
+
+```js
+var app = new AppBlock({
+  el: document.getElementById('app'),
+  template: document.getElementById('appTemplate'),
+  data: {
+    message: "Hello world!"
+  }
+});
+```
+
+This is the recommended way for creating our AppBlocks but in order to keep our snippets short and simple,
+we will use the first method for the rest of the documentation .
 
 
 ## Methods
@@ -91,8 +119,8 @@ var app = new AppBlock({
   },
   
   methods: {
-    message() {
-      return this.Parent.data.message.toUpperCase();
+    message(thisApp) {
+      return thisApp.data.message.toUpperCase();
     }
   }
 
@@ -119,8 +147,9 @@ Of course methods get updated along with our data. Go ahead and open your browse
 `app.setData({message: "this is uppercase"})`. You'll see that our message is displayed in uppercase
 because it went through our method before showing up in our element.
 
-?> Also note how we access our `data`. We use `this.Parent` to access our app from 
-inside `methods`.
+> Also note how we access our `data`. There are 2 ways of accessing our App from within our methods: 
+> * We can add an argument to our method. In this case `thisApp`. AppBlocks will pass the instance to our App into this argument.
+> * Or alternatively, we can use `this.Parent` to access our App from inside `methods`.
 
 
 ## Conditional rendering
@@ -408,6 +437,17 @@ App.request({method: 'get'},
   replaceData = false  // Update (don't replace) our data when the request is finished.
 )
 ```
+
+> We can mutate the response data inside the `success` callback and pass it to our app before it renders. To do that we
+> just need to return the altered response object:
+> ```js
+> success(response) {
+>   response.data = {message: "The response was a Success!"}
+>   return response;
+>  }
+> ```
+> Be careful though, AppBlocks expects to find a `data` object inside the response. So be sure that whatever your
+> callback returns has a data object inside.
 
 ### State
 

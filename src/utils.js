@@ -1,6 +1,5 @@
 'use strict';
 
-
 /*
 Gets a property's value.
 

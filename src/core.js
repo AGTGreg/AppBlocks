@@ -1,7 +1,8 @@
 'use strict';
 
 import {updateTextNodePlaceholders} from './placeholders';
-import {processNode, directives} from './directives';
+import {directives} from './directives';
+import {processNode} from './processing';
 
 
 export function AppBlock(config) {

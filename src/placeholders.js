@@ -9,7 +9,10 @@ const getPlaceholderVal = function(comp, placeholder, pointers) {
   if ( /{([^}]+)}/.test(placeholder) === false ) return; 
   const placeholderName = placeholder.replace(/{|}/g , '');
   let propKeys = placeholderName.split('.');
-  return getProp(comp, propKeys, pointers);
+  let result = getProp(comp, propKeys, pointers);
+  // Return empty text instead of undefined.
+  if (result === undefined) return '';
+  return result;
 }; 
 
 // Replaces all placeholders in all attributes in a node.

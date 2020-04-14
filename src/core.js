@@ -70,11 +70,16 @@ export function AppBlock(config) {
   // data, and content gets updated.
   this.render = function(callback) {
     const comp = this;
+    if (comp.methods.beforeRender instanceof Function) comp.methods.beforeRender();
 
     let tmpDOM = comp.template.cloneNode(true);
     processNode(comp, tmpDOM);
+    // Update text nodes in one pass
     updateTextNodePlaceholders(comp, tmpDOM);
-    this.el.innerHTML = tmpDOM.innerHTML;
+    // Clear the old contents and append the new
+    this.el.innerHTML = '';
+    this.el.appendChild(tmpDOM);
+    if (comp.methods.afterRender instanceof Function) comp.methods.afterRender();
     if (callback instanceof Function) callback();
   }
 
@@ -93,11 +98,14 @@ export function AppBlock(config) {
       
       comp.el = config.el;
 
+      // Get or create a document fragment with all the app's contents and pass it to the template.
       if (config.template) {
-        comp.template = config.template; 
+        comp.template = config.template.content;
       } else {
-        comp.template = comp.el.cloneNode(true);
-        comp.el.innerHTML = "";
+        comp.template = document.createDocumentFragment();
+        while (comp.el.firstChild) { 
+          comp.template.appendChild(comp.el.firstChild); 
+        }
       }
 
       comp.state = {
@@ -119,6 +127,12 @@ export function AppBlock(config) {
         },
         hasError() {
           return this.Parent.state.error;
+        },
+        beforeRender() {
+
+        },
+        afterRender() {
+
         }
       };
       if (config.methods instanceof Object) Object.assign(comp.methods, config.methods);

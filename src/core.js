@@ -46,8 +46,8 @@ export function AppBlock(config) {
       .then(function(response) {
         comp.state.success = true;
         if (callbacks && callbacks['success'] instanceof Function) {
-          const callReturn = callbacks['success'](response);
-          if (callReturn instanceof Object) response = callReturn;
+          const callbackResponse = callbacks['success'](response);
+          if (callbackResponse instanceof Object) response = callbackResponse;
         }
         responseData = response.data;
       })

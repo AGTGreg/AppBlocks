@@ -20,7 +20,7 @@ const getProp = function(comp, keys, pointers) {
 
   } else if (firstKey in comp.methods) {
     keys.shift();
-    prop = comp.methods[firstKey]();
+    prop = comp.methods[firstKey](comp);
   }
 
   if (keys.length > 0) {
@@ -42,7 +42,10 @@ const getPlaceholderVal = function(comp, placeholder, pointers) {
   if ( /{([^}]+)}/.test(placeholder) === false ) return; 
   const placeholderName = placeholder.replace(/{|}/g , '');
   let propKeys = placeholderName.split('.');
-  return getProp(comp, propKeys, pointers);
+  let result = getProp(comp, propKeys, pointers);
+  // Return empty text instead of undefined.
+  if (result === undefined) return '';
+  return result;
 }; 
 
 // Replaces all placeholders in all attributes in a node.
@@ -81,6 +84,38 @@ const updateTextNodePlaceholders = function(comp, nodeTree, pointers) {
     }
     textWalker.currentNode.nodeValue = nodeVal;
   }
+};
+
+// Processes nodes recursivelly in reverse. Evaluates the nodes based on their attributes.
+// Removes and skips the nodes that evaluate to false.
+const processNode = function(comp, node, pointers) {
+  const attrs = node.attributes;
+  if (attrs){
+    for (let i=0; i<attrs.length; i++) {
+      if (attrs[i].name in comp.directives) {
+        const attr = attrs[i].name;
+        const result = comp.directives[attr](comp, node, pointers);
+        if (result === false) {
+          node.remove();
+          return;
+        }
+      }
+    }
+    // If a node stays in our tree (did not evaluate to false) then update all of its attributes.
+    updateAttributePlaceholders(comp, node, pointers);
+  }
+
+  if (node.hasChildNodes()) {
+    // Iterate over the children in reverse because we might remove a node and the children count might change.
+    for (let c=node.childElementCount - 1; c >= 0; c--) {
+      if (node.children[c]) {
+        processNode(comp, node.children[c], pointers);
+      } else {
+        break;
+      }
+    }
+  }
+
 };
 
 // If and For directives
@@ -172,39 +207,6 @@ const directives = {
   }
 };
 
-
-// Processes nodes recursivelly in reverse. Evaluates the nodes based on their attributes.
-// Removes and skips the nodes that evaluate to false.
-const processNode = function(comp, node, pointers) {
-
-  const attrs = node.attributes;
-  for (let i=0; i<attrs.length; i++) {
-    if (attrs[i].name in directives) {
-      const attr = attrs[i].name;
-      const result = directives[attr](comp, node, pointers);
-      if (result === false) {
-        node.remove();
-        return;
-      }
-    }
-  }
-
-  // If a node stays in our tree (did not evaluate to false) then update all of its attributes.
-  updateAttributePlaceholders(comp, node, pointers);
-
-  if (node.hasChildNodes()) {
-    // Iterate over the children in reverse because we might remove a node and the children count might change.
-    for (let c=node.childElementCount - 1; c >= 0; c--) {
-      if (node.children[c]) {
-        processNode(comp, node.children[c], pointers);
-      } else {
-        break;
-      }
-    }
-  }
-
-};
-
 function AppBlock(config) {
 
 
@@ -246,8 +248,8 @@ function AppBlock(config) {
       .then(function(response) {
         comp.state.success = true;
         if (callbacks && callbacks['success'] instanceof Function) {
-          const callReturn = callbacks['success'](response);
-          if (callReturn instanceof Object) response = callReturn;
+          const callbackResponse = callbacks['success'](response);
+          if (callbackResponse instanceof Object) response = callbackResponse;
         }
         responseData = response.data;
       })
@@ -271,11 +273,16 @@ function AppBlock(config) {
   // data, and content gets updated.
   this.render = function(callback) {
     const comp = this;
+    if (comp.methods.beforeRender instanceof Function) comp.methods.beforeRender(comp);
 
     let tmpDOM = comp.template.cloneNode(true);
     processNode(comp, tmpDOM);
+    // Update text nodes in one pass
     updateTextNodePlaceholders(comp, tmpDOM);
-    this.el.innerHTML = tmpDOM.innerHTML;
+    // Clear the old contents and append the new
+    this.el.innerHTML = '';
+    this.el.appendChild(tmpDOM);
+    if (comp.methods.afterRender instanceof Function) comp.methods.afterRender(comp);
     if (callback instanceof Function) callback();
   };
 
@@ -294,11 +301,14 @@ function AppBlock(config) {
       
       comp.el = config.el;
 
+      // Get or create a document fragment with all the app's contents and pass it to the template.
       if (config.template) {
-        comp.template = config.template; 
+        comp.template = config.template.content;
       } else {
-        comp.template = comp.el.cloneNode(true);
-        comp.el.innerHTML = "";
+        comp.template = document.createDocumentFragment();
+        while (comp.el.firstChild) { 
+          comp.template.appendChild(comp.el.firstChild); 
+        }
       }
 
       comp.state = {
@@ -312,14 +322,20 @@ function AppBlock(config) {
 
       comp.methods = {
         Parent: comp,
-        isLoading() {
-          return this.Parent.state.loading;
+        isLoading(thisApp) {
+          return thisApp.state.loading;
         },
-        isSuccessful() {
-          return this.Parent.state.success;
+        isSuccessful(thisApp) {
+          return thisApp.state.success;
         },
-        hasError() {
-          return this.Parent.state.error;
+        hasError(thisApp) {
+          return thisApp.state.error;
+        },
+        beforeRender(thisApp) {
+
+        },
+        afterRender(thisApp) {
+
         }
       };
       if (config.methods instanceof Object) Object.assign(comp.methods, config.methods);
@@ -327,6 +343,7 @@ function AppBlock(config) {
       comp.directives = directives;
       if (config.directives instanceof Object) Object.assign(comp.directives, config.directives);
 
+      // Event handling ------------------------------------------------------------------------------------------------
       comp.events = {};
       if (config.events instanceof Object) {
         Object.assign(comp.events, config.events);

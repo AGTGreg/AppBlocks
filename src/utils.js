@@ -22,7 +22,7 @@ export const getProp = function(comp, keys, pointers) {
 
   } else if (firstKey in comp.methods) {
     keys.shift();
-    prop = comp.methods[firstKey]();
+    prop = comp.methods[firstKey](comp);
   }
 
   if (keys.length > 0) {

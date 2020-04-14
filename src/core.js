@@ -71,7 +71,7 @@ export function AppBlock(config) {
   // data, and content gets updated.
   this.render = function(callback) {
     const comp = this;
-    if (comp.methods.beforeRender instanceof Function) comp.methods.beforeRender();
+    if (comp.methods.beforeRender instanceof Function) comp.methods.beforeRender(comp);
 
     let tmpDOM = comp.template.cloneNode(true);
     processNode(comp, tmpDOM);
@@ -80,7 +80,7 @@ export function AppBlock(config) {
     // Clear the old contents and append the new
     this.el.innerHTML = '';
     this.el.appendChild(tmpDOM);
-    if (comp.methods.afterRender instanceof Function) comp.methods.afterRender();
+    if (comp.methods.afterRender instanceof Function) comp.methods.afterRender(comp);
     if (callback instanceof Function) callback();
   }
 
@@ -120,19 +120,19 @@ export function AppBlock(config) {
 
       comp.methods = {
         Parent: comp,
-        isLoading() {
-          return this.Parent.state.loading;
+        isLoading(thisApp) {
+          return thisApp.state.loading;
         },
-        isSuccessful() {
-          return this.Parent.state.success;
+        isSuccessful(thisApp) {
+          return thisApp.state.success;
         },
-        hasError() {
-          return this.Parent.state.error;
+        hasError(thisApp) {
+          return thisApp.state.error;
         },
-        beforeRender() {
+        beforeRender(thisApp) {
 
         },
-        afterRender() {
+        afterRender(thisApp) {
 
         }
       };
@@ -141,6 +141,7 @@ export function AppBlock(config) {
       comp.directives = directives;
       if (config.directives instanceof Object) Object.assign(comp.directives, config.directives);
 
+      // Event handling ------------------------------------------------------------------------------------------------
       comp.events = {};
       if (config.events instanceof Object) {
         Object.assign(comp.events, config.events)

@@ -1,3 +1,5 @@
+[homepage](https://agtgreg.github.io/AppBlocks/#/)
+
 # Introduction
 
 AppBlocks is a tiny javascript library (~4kb minified) for building micro apps for the front-end.

@@ -1,8 +1,14 @@
 # Introduction
 
 AppBlocks is a tiny javascript library (~4kb minified) for building micro apps for the front-end.
-The Goal of AppBlocks is to provide all the necessary functionality for developing front-end micro apps while beeing
-lightweight, practical and as small as possible.
+
+AppBlocks was created to cover the need of enhancing pages with font-end applications fast and without introducing
+much overhead.
+
+The Goal of AppBlocks is to provide all the necessary functionality for developing front-end apps while beeing
+lightweight, ridiculously easy to use, practical and small.
+
+All the knowledge needed to start building applications with AppBlocks is here in a 10-15 minute read.
 
 
 ## Installation
@@ -19,7 +25,7 @@ Download and include with a script tag in your document's head:
 or you can use the **CDN version**:
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/appblocks@1.1.0/dist/appblocks.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/appblocks@1.2.0/dist/appblocks.min.js"></script>
 ```
 
 or you can install via **npm**:
@@ -31,7 +37,7 @@ npm install appblocks
 
 ## Getting started
 
-In order to create an app, the first thing you need to do, is to create an element with an appropriate id.
+In order to create an app with AppBlocks, the first thing we need to do, is to create an element with an appropriate id.
 
 To make things more interesting lets also add a placeholder that will output some data. Placeholders are enclosed
 in curly braces `{}`:
@@ -42,7 +48,7 @@ in curly braces `{}`:
 </div>
 ```
 
-Next, create a new AppBlock instance for your element. You may also want to add some data:
+Next, we need to create a new AppBlock instance for our element. You may also want to add some data:
  
 ```js
 var app = new AppBlock({
@@ -55,14 +61,12 @@ var app = new AppBlock({
 
 > Hello world!
 
-We have created our very first app! Inside our app we use placeholders enclosed in `{}` to display data. 
-Lets test this! Open up your browser's console and type: `app.setData({message: "Hi"})`. Now you should see
-that our element is automatically updated to display the new message.
+We have created our very first app! We use placeholders enclosed in `{}` to display data.
 
-?> Whenever you need to update your data, you should use the `setData()` method instead of changing your data
-directly. This way your app will re-render every time your data changes and your Interface will always be
-updated automatically. If, for any reason you want to change your data without updating your interface then
-you can change your data directly and call the `render()` method whenever you want to update your interface.
+Lets test this by updating our data! Open up your browser's console and type: `app.setData({message: "Hi"})`. 
+Now you should see that our element is automatically updated to display the new message.
+
+For more information on how we update our App's data see [The data object](data.md).
 
 We can also use placeholders in attributes:
 
@@ -72,13 +76,39 @@ We can also use placeholders in attributes:
 </div>
 ```
 
+## Custom template
+
+A more efficient way for creating our Apps would be to have all our content inside a template element and tell
+AppBlocks were it to render it:
+
+```html
+<div id="app"></div>
+
+<template id="appTemplate">
+  <p title="{data.message}">{data.message}</p>
+</template>
+```
+
+```js
+var app = new AppBlock({
+  el: document.getElementById('app'),
+  template: document.getElementById('appTemplate'),
+  data: {
+    message: "Hello world!"
+  }
+});
+```
+
+This is the recommended way for creating our Apps but in order to keep our snippets short and simple,
+we will use the first method for the rest of the documentation.
+
 
 ## Methods
 
 In the example above we get the message directly from our data. But what if we wanted to edit that message before we 
 show it to the world? Lets say we want to convert it to uppercase letters.
 
-Lets add a method that returns whatever is in our data.message but in UpperCase. All methods in AppBlocks
+Lets add a method that returns whatever is in our `data.message` but in UpperCase. All methods in AppBlocks
 exist inside the methods object:
 
 ```js
@@ -91,8 +121,9 @@ var app = new AppBlock({
   },
   
   methods: {
-    message() {
-      return this.Parent.data.message.toUpperCase();
+    // All methods take 1 optional parameter which is our app's instance
+    message(thisApp) {
+      return thisApp.data.message.toUpperCase();
     }
   }
 
@@ -119,9 +150,14 @@ Of course methods get updated along with our data. Go ahead and open your browse
 `app.setData({message: "this is uppercase"})`. You'll see that our message is displayed in uppercase
 because it went through our method before showing up in our element.
 
-?> Also note how we access our `data`. We use `this.Parent` to access our app from 
-inside `methods`.
+!>  All methods take one optional parameter. We can use that parameter to get access to our App's instance from within
+    our method. It is important to remember to include it as the first parameter when calling a method from anywhere 
+    in our App:
+    ```
+    thisApp.methods.myMethod(thisApp, paramer1, parameter2, ...);
+    ```
 
+You can read more about methods [here](methods.md)
 
 ## Conditional rendering
 
@@ -165,8 +201,8 @@ var app = new AppBlock({
   },
   
   methods: {
-    showSpan() {
-      return this.Parent.data.seen;
+    showSpan(thisApp) {
+      return thisApp.data.seen;
     }
   }
 })
@@ -235,7 +271,7 @@ You can create your directives in the `directives` parameter like so:
 var app = new AppBlock({
   ...
   directives: {
-    'c-custom-directive': function(appInstance, node, pointers) {
+    'c-custom-directive': function(thisApp, node, pointers) {
       // Do something
       return true;
     }
@@ -245,7 +281,7 @@ var app = new AppBlock({
 ```
 
 A directive needs to have the following parameters that AppBlocks will pass to it, when it invokes it:
-- **appInstance**: This is the instance of our app.
+- **thisApp**: This is the instance of our app.
 - **node**: This is the element that contains our directive.
 - **pointers**: This is needed in case the element with our directive, is inside a `c-for` block. It is an object whose
 keys are set by a `c-for` block and point to specific data.
@@ -262,7 +298,7 @@ Let's make a directive that gets a name as a value prints a greeting inside an e
 var app = new AppBlock({
   ...
   directives: {
-    'c-my-custom-dir': function(app, node, pointers) {
+    'c-my-custom-dir': function(thisApp, node, pointers) {
       var message = "Hi there " + node.getAttribute('c-my-custom-dir') + "!";
       var newContent = document.createTextNode(message);
       node.appendChild(newContent);
@@ -287,7 +323,7 @@ The result will be:
 
 AppBlocks makes it easy for us to handle events while keeping everything nice and clean. Just like `methods`
 belong in the methods object, events follows along with the same principle. So, as you might expect, `events` belong
-in the events object:
+in the creatively named events object:
 
 ```js
 var app = new AppBlock({
@@ -347,8 +383,8 @@ var app = new AppBlock({
   },
 
   methods: {
-    toggleMessage() {
-      this.Parent.setData({
+    toggleMessage(thisApp) {
+      thisApp.setData({
         seen: !this.Parent.data.seen
       });
     }
@@ -356,7 +392,7 @@ var app = new AppBlock({
 
   events: {
     'click #message-toggler': function(e) {
-      this.Parent.methods.toggleMessage();
+      this.Parent.methods.toggleMessage(this.Parent);
     } 
   }
 
@@ -368,8 +404,10 @@ var app = new AppBlock({
 A key concept in AppBlocks, is to cover the most common use cases of a front-end micro app. One of those use cases is
 to be able to make requests. 
 
-AppBlocks makes use of the awesome [Axios](https://github.com/axios/axios) to do that. AppBlocks exposes the Axios API 
-and takes care of the state and data management of our micro apps.
+AppBlocks makes use of the awesome [Axios](https://github.com/axios/axios) library to do that. AppBlocks exposes the
+Axios API and takes care of the state and data management of our micro apps.
+
+!> Axios is not included by default so you have to include it if you want to use the request feature.
 
 ### Usage
 
@@ -408,6 +446,17 @@ App.request({method: 'get'},
   replaceData = false  // Update (don't replace) our data when the request is finished.
 )
 ```
+
+> We can mutate the response data inside the `success` callback and pass it to our app before it renders. To do that we
+> just need to return the altered response object:
+> ```js
+> success(response) {
+>   response.data = {message: "The response was a Success!"}
+>   return response;
+>  }
+> ```
+> Be careful though, AppBlocks expects to find a `data` object inside the response. So be sure that whatever your
+> callback returns has a data object inside.
 
 ### State
 

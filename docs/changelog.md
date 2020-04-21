@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.2.1
+## 1.2.2
 - **FIX:** ReferenceError: data is not defined when `replaceData` in `setData` is set to `true`
 
 ## 1.2.0

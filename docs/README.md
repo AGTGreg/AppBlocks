@@ -25,7 +25,7 @@ Download and include with a script tag in your document's head:
 or you can use the **CDN version**:
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/appblocks@1.2.1/dist/appblocks.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/appblocks@1.2.2/dist/appblocks.min.js"></script>
 ```
 
 or you can install via **npm**:

@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.2.1
+- **FIX:** ReferenceError: data is not defined when `replaceData` in `setData` is set to `true`
+
 ## 1.2.0
 - **New feature:** Assign custom template.
 - **New feature:** Add `beforeRender()` and `afterRender()` methods that get called before and after rendering.
@@ -7,7 +10,3 @@
 - **Enhancement:** Undefined properties will render as empty text instead of "undefined".
 - **Enhancement:** Methods now take an optional argument which is the instance of their app.
 - **Enhancement:** Success callback can mutate the data of the response.
-
-
-## nightly
-- **FIX:** ReferenceError: data is not defined when `replaceData` in `setData` is set to `true`

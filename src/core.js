@@ -11,7 +11,7 @@ export function AppBlock(config) {
   // Sets or Updates the data and then calls render()
   this.setData = function(newData, replaceData = false) {
     if (replaceData) {
-      this.data = data;
+      this.data = newData;
     } else {
       Object.assign(this.data, newData);
     }

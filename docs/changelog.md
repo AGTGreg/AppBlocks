@@ -7,3 +7,7 @@
 - **Enhancement:** Undefined properties will render as empty text instead of "undefined".
 - **Enhancement:** Methods now take an optional argument which is the instance of their app.
 - **Enhancement:** Success callback can mutate the data of the response.
+
+
+## nightly
+- **FIX:** ReferenceError: data is not defined when `replaceData` in `setData` is set to `true`

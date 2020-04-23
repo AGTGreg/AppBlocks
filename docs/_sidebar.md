@@ -8,4 +8,6 @@
 
 - MISC
 
+- [Why use AppBlocks](whyappblocks.md)
+
 - [Changelog](changelog.md)

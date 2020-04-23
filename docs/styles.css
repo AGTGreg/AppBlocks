@@ -585,7 +585,7 @@ section.cover {
 
 section.cover.show {
   display: flex;
-  background: linear-gradient(0deg, rgba(39,174,109,1) 0%, rgba(144,214,183,1) 100%) !important;
+  background: linear-gradient(0deg, #dfdee1 10%, #f6ffff 100%) !important;
 }
 
 section.cover.has-mask .mask {
@@ -607,12 +607,16 @@ section.cover .cover-main {
   max-height: 100%;
   justify-content: space-evenly;
   text-align: center;
-  color: #ffffff;
+  color: #5a5a5a;
   z-index: 1;
 }
 
 .cover-main h1 a>span, .cover-main h2 a>span { 
-  color: #ffffff; 
+  color: #5a5a5a; 
+}
+
+.cover-main img {
+  width: 250px;
 }
 
 section.cover a {
@@ -630,7 +634,7 @@ section.cover p {
 
 section.cover h1 {
   color: inherit;
-  font-size: 4em;
+  font-size: 3em;
   font-weight: 300;
   position: relative;
   text-align: center;
@@ -676,53 +680,53 @@ section.cover ul > li:last-of-type {
 }
 
 section.cover .cover-main>p:last-child a {
-  border-radius: 2rem;
-  border: 1px solid #ffffff;
+  border-radius: 3px;
+  border: 1px solid #5a5a5a;
   box-sizing: border-box;
-  color: #ffffff;
+  color: #42b983;
   display: inline-block;
   font-size: 1.05rem;
   letter-spacing: .1rem;
   margin: .5rem 1rem;
   padding: .75em 2rem;
   text-decoration: none;
-  transition: all .15s ease
+  transition: all .15s ease;
 }
 
 section.cover .cover-main>p:last-child a:last-child {
-  background-color: var(--theme-color, #42b983);
-  color: #fff
+  background-color: var(--theme-color, #5a5a5a);
+  color: #42b983;
 }
 
 section.cover .cover-main>p:last-child a:last-child:hover {
-  color: inherit;
-  opacity: .8
+  opacity: .8;
 }
 
 section.cover .cover-main>p:last-child a:hover {
-  color: inherit
+  transform: scale(1.05);
 }
 
 section.cover blockquote>p>a {
   border-bottom: 2px solid var(--theme-color, #42b983);
-  transition: color .3s
+  transition: color .3s;
 }
 
 section.cover blockquote>p>a:hover {
-  color: var(--theme-color, #42b983)
+  color: var(--theme-color, #42b983);
 }
 
 .sidebar,
 body {
-  background-color: #fff
+  background-color: #fff;
 }
 
 .sidebar {
-  color: #364149
+  color: #364149;
+  background: #f5f5f5;
 }
 
 .sidebar li {
-  margin: 6px 0
+  margin: 6px 0;
 }
 
 .sidebar ul li a {
@@ -732,27 +736,27 @@ body {
   overflow: hidden;
   text-decoration: none;
   text-overflow: ellipsis;
-  white-space: nowrap
+  white-space: nowrap;
 }
 
 .sidebar ul li a:hover {
-  text-decoration: underline
+  text-decoration: underline;
 }
 
 .sidebar ul li ul {
-  padding: 0
+  padding: 0;
 }
 
 .sidebar ul li.active>a {
   border-right: 2px solid;
   color: var(--theme-color, #42b983);
-  font-weight: 600
+  font-weight: 600;
 }
 
 .app-sub-sidebar li:before {
   content: "-";
   padding-right: 4px;
-  float: left
+  float: left;
 }
 
 .markdown-section h1,
@@ -761,17 +765,17 @@ body {
 .markdown-section h4,
 .markdown-section strong {
   color: #2c3e50;
-  font-weight: 600
+  font-weight: 600;
 }
 
 .markdown-section a {
   color: var(--theme-color, #42b983);
-  font-weight: 600
+  font-weight: 600;
 }
 
 .markdown-section h1 {
   font-size: 2rem;
-  margin: 0 0 1rem
+  margin: 0 0 1rem;
 }
 
 .markdown-section h2 {
@@ -783,57 +787,57 @@ body {
 
 .markdown-section h3 {
   font-size: 1.5rem;
-  margin: 40px 0 .6rem
+  margin: 40px 0 .6rem;
 }
 
 .markdown-section h4 {
-  font-size: 1.25rem
+  font-size: 1.25rem;
 }
 
 .markdown-section h5 {
-  font-size: 1rem
+  font-size: 1rem;
 }
 
 .markdown-section h6 {
   color: #777;
-  font-size: 1rem
+  font-size: 1rem;
 }
 
 .markdown-section figure,
 .markdown-section p {
-  margin: 1.2em 0
+  margin: 1.2em 0;
 }
 
 .markdown-section ol,
 .markdown-section p,
 .markdown-section ul {
   line-height: 1.6rem;
-  word-spacing: .05rem
+  word-spacing: .05rem;
 }
 
 .markdown-section ol,
 .markdown-section ul {
-  padding-left: 1.5rem
+  padding-left: 1.5rem;
 }
 
 .markdown-section blockquote {
   border-left: 4px solid var(--theme-color, #42b983);
   color: #858585;
   margin: 2em 0;
-  padding-left: 20px
+  padding-left: 20px;
 }
 
 .markdown-section blockquote p {
   font-weight: 600;
-  margin-left: 0
+  margin-left: 0;
 }
 
 .markdown-section iframe {
-  margin: 1em 0
+  margin: 1em 0;
 }
 
 .markdown-section em {
-  color: #7f8c8d
+  color: #7f8c8d;
 }
 
 .markdown-section code {
@@ -842,13 +846,13 @@ body {
   font-size: .8rem;
   margin: 0 2px;
   padding: 3px 5px;
-  white-space: pre-wrap
+  white-space: pre-wrap;
 }
 
 .markdown-section code,
 .markdown-section pre {
   background-color: #f8f8f8;
-  font-family: Roboto Mono, Monaco, courier, monospace
+  font-family: Roboto Mono, Monaco, courier, monospace;
 }
 
 .markdown-section pre {
@@ -859,103 +863,103 @@ body {
   overflow: auto;
   padding: 0 1.4rem;
   position: relative;
-  word-wrap: normal
+  word-wrap: normal;
 }
 
 .token.cdata,
 .token.comment,
 .token.doctype,
 .token.prolog {
-  color: #8e908c
+  color: #8e908c;
 }
 
 .token.namespace {
-  opacity: .7
+  opacity: .7;
 }
 
 .token.boolean,
 .token.number {
-  color: #c76b29
+  color: #c76b29;
 }
 
 .token.punctuation {
-  color: #525252
+  color: #525252;
 }
 
 .token.property {
-  color: #c08b30
+  color: #c08b30;
 }
 
 .token.tag {
-  color: #2973b7
+  color: #2973b7;
 }
 
 .token.string {
-  color: var(--theme-color, #42b983)
+  color: var(--theme-color, #42b983);
 }
 
 .token.selector {
-  color: #6679cc
+  color: #6679cc;
 }
 
 .token.attr-name {
-  color: #2973b7
+  color: #2973b7;
 }
 
 .language-css .token.string,
 .style .token.string,
 .token.entity,
 .token.url {
-  color: #22a2c9
+  color: #22a2c9;
 }
 
 .token.attr-value,
 .token.control,
 .token.directive,
 .token.unit {
-  color: var(--theme-color, #42b983)
+  color: var(--theme-color, #42b983);
 }
 
 .token.function,
 .token.keyword {
-  color: #e96900
+  color: #e96900;
 }
 
 .token.atrule,
 .token.regex,
 .token.statement {
-  color: #22a2c9
+  color: #22a2c9;
 }
 
 .token.placeholder,
 .token.variable {
-  color: #3d8fd1
+  color: #3d8fd1;
 }
 
 .token.deleted {
-  text-decoration: line-through
+  text-decoration: line-through;
 }
 
 .token.inserted {
   border-bottom: 1px dotted #202746;
-  text-decoration: none
+  text-decoration: none;
 }
 
 .token.italic {
-  font-style: italic
+  font-style: italic;
 }
 
 .token.bold,
 .token.important {
-  font-weight: 700
+  font-weight: 700;
 }
 
 .token.important {
-  color: #c94922
+  color: #c94922;
 }
 
 .token.entity {
-  cursor: help
+  cursor: help;
 }
 
 .markdown-section pre>code {
@@ -972,12 +976,12 @@ body {
   max-width: inherit;
   overflow: inherit;
   padding: 2.2em 5px;
-  white-space: inherit
+  white-space: inherit;
 }
 
 .markdown-section code:after,
 .markdown-section code:before {
-  letter-spacing: .05rem
+  letter-spacing: .05rem;
 }
 
 code .token {
@@ -985,7 +989,7 @@ code .token {
   -webkit-font-smoothing: initial;
   min-height: 1.5rem;
   position: relative;
-  left: auto
+  left: auto;
 }
 
 pre:after {
@@ -999,13 +1003,17 @@ pre:after {
   position: absolute;
   right: 0;
   text-align: right;
-  top: 0
+  top: 0;
 }
 
 
 @media all and (max-width: 768px) {
   section.cover .cover-main {
-    padding: 0 15px;
+    padding: 15px;
+  }
+  section.cover p {
+    margin: 0.2em 0;
+    font-size: 0.8em;
   }
   section.cover h1 {
     font-size: 2.5em;

@@ -18,7 +18,7 @@ practiclal.
 It is tiny **(4.6kB minified | 1.8kB Gzipped)** and all you need to do is to include AppBlocks as a script tag on any
 page, spend 10-15 minutes reading the documentation and you're good to go. Yes it's that simple.
 
-That beeing said, AppBlocks is not meant for building large-scale applications. It does not include a router or a
+That being said, AppBlocks is not meant for building large-scale applications. It does not include a router or a
 sophisticated state management system. This field is already covered by many well known frameworks and libraries so 
 there is no point of introducing another javascript library that does the same thing. If this is your case and you need
 to develop a large-scale single page application (SPA), then other frameworks might be a better fit for you.

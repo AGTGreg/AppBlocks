@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.3
+- **Enhancement:** Compile packages through babel for better compatibility.
+- **Enhancement:** Cleanup UMD, ES and CJS packages.
+
 ## 1.2.2
 - **FIX:** ReferenceError: data is not defined when `replaceData` in `setData` is set to `true`
 

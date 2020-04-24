@@ -2,7 +2,9 @@
 ![logo](/media/appblocks_logo.png)
 # AppBlocks
 
-> A lightweight javascript library for building micro apps for the front-end in record time. 
+> All you need to build your front-end in a small package.
+>
+> 4.6kB minified | 1.8kB Gzipped
 
 
 [GitHub](https://github.com/AGTGreg/AppBlocks.git)

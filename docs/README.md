@@ -1,14 +1,14 @@
 # Introduction
 
-AppBlocks is a tiny javascript library (~4kb minified) for building micro apps for the front-end.
+AppBlocks is a tiny javascript library for building micro apps for the front-end.
 
-AppBlocks was created to cover the need of enhancing pages with font-end applications fast and without introducing
-much overhead.
+It was created to cover the need of enhancing pages and web applications fornt-ends with small and maintainable 
+applications fast and easy without overhead.
 
-The Goal of AppBlocks is to provide all the necessary functionality for developing front-end apps while beeing
-lightweight, ridiculously easy to use, practical and small.
+The main goals of AppBlocks is to provide all the necessary functionality for developing front-end apps while beeing
+lightweight, ridiculously easy to integrate in any project, practical and small.
 
-All the knowledge needed to start building applications with AppBlocks is here in a 10-15 minute read.
+All the knowledge needed to master AppBlocks and start building front-end applications is here in a 10-15 minute read.
 
 
 ## Installation
@@ -25,7 +25,7 @@ Download and include with a script tag in your document's head:
 or you can use the **CDN version**:
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/appblocks@1.2.2/dist/appblocks.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/appblocks@1.2.3/dist/appblocks.min.js"></script>
 ```
 
 or you can install via **npm**:

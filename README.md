@@ -6,7 +6,7 @@
 
 AppBlocks is a tiny javascript library for building micro apps for the front-end.
 
-It was created to cover the need of enhancing pages and web applications fornt-ends with small and maintainable 
+It was created to cover the need of enhancing pages and web applications front-ends with small and maintainable 
 applications fast and easy without overhead.
 
 The main goals of AppBlocks is to provide all the necessary functionality for developing front-end apps while beeing

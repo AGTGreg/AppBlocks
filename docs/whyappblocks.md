@@ -44,7 +44,7 @@ a lot of changes on how you and your team usually do things.
 Wouldn't be nice if there was something you can use that is as easy as jQuery to integrate but does not introduce all
 that extra overhead?
 
-AppBlocks comes to solve just that. **Enhancing fornt-ends with small and maintainable applications fast and easy
+AppBlocks comes to solve just that. **Enhancing front-ends with small and maintainable applications fast and easy
 without overhead.** What AppBlocks provides out of the box is this:
 - Control the structure of your application with an easy to use template syntax that plays nice with server-side
   template engines.

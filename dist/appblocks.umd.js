@@ -1,8 +1,24 @@
 (function (global, factory) {
-  typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('core-js/modules/es.array.for-each'), require('core-js/modules/es.object.assign'), require('core-js/modules/es.regexp.exec'), require('core-js/modules/es.string.split'), require('core-js/modules/web.dom-collections.for-each'), require('core-js/modules/es.regexp.constructor'), require('core-js/modules/es.regexp.to-string'), require('core-js/modules/es.string.match'), require('core-js/modules/es.string.replace'), require('core-js/modules/es.array.includes'), require('core-js/modules/es.string.includes'), require('core-js/modules/es.function.name')) :
-  typeof define === 'function' && define.amd ? define(['core-js/modules/es.array.for-each', 'core-js/modules/es.object.assign', 'core-js/modules/es.regexp.exec', 'core-js/modules/es.string.split', 'core-js/modules/web.dom-collections.for-each', 'core-js/modules/es.regexp.constructor', 'core-js/modules/es.regexp.to-string', 'core-js/modules/es.string.match', 'core-js/modules/es.string.replace', 'core-js/modules/es.array.includes', 'core-js/modules/es.string.includes', 'core-js/modules/es.function.name'], factory) :
-  (global = global || self, global.AppBlock = factory());
+  typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('core-js/modules/es.array.for-each'), require('core-js/modules/es.object.assign'), require('core-js/modules/es.regexp.exec'), require('core-js/modules/es.string.split'), require('core-js/modules/web.dom-collections.for-each'), require('core-js/modules/es.regexp.constructor'), require('core-js/modules/es.regexp.to-string'), require('core-js/modules/es.string.match'), require('core-js/modules/es.string.replace'), require('core-js/modules/es.array.includes'), require('core-js/modules/es.array.index-of'), require('core-js/modules/es.string.includes'), require('core-js/modules/es.function.name')) :
+  typeof define === 'function' && define.amd ? define(['core-js/modules/es.array.for-each', 'core-js/modules/es.object.assign', 'core-js/modules/es.regexp.exec', 'core-js/modules/es.string.split', 'core-js/modules/web.dom-collections.for-each', 'core-js/modules/es.regexp.constructor', 'core-js/modules/es.regexp.to-string', 'core-js/modules/es.string.match', 'core-js/modules/es.string.replace', 'core-js/modules/es.array.includes', 'core-js/modules/es.array.index-of', 'core-js/modules/es.string.includes', 'core-js/modules/es.function.name'], factory) :
+  (global = typeof globalThis !== 'undefined' ? globalThis : global || self, global.AppBlock = factory());
 }(this, (function () { 'use strict';
+
+  function _typeof(obj) {
+    "@babel/helpers - typeof";
+
+    if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
+      _typeof = function (obj) {
+        return typeof obj;
+      };
+    } else {
+      _typeof = function (obj) {
+        return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
+      };
+    }
+
+    return _typeof(obj);
+  }
 
   var getProp = function getProp(comp, keys, pointers) {
     var firstKey = keys[0];
@@ -10,8 +26,12 @@
     var prop;
 
     if (pointers && firstKey in pointers) {
-      keys.shift();
-      root = pointers[firstKey];
+      if (keys.length > 1) {
+        keys.shift();
+        root = pointers[firstKey];
+      } else {
+        return pointers[firstKey];
+      }
     } else if (firstKey in comp.methods) {
       keys.shift();
       prop = comp.methods[firstKey](comp);
@@ -19,7 +39,7 @@
 
     if (keys.length > 0) {
       for (var i = 0; i < keys.length; i++) {
-        prop = root[keys[i]];
+        prop = getObjectFromKey(root, keys[i]);
 
         if (prop === undefined) {
           break;
@@ -29,11 +49,51 @@
       }
     }
 
+    if (comp.debug) console.info("Result for", keys, ":", prop);
+    return prop;
+  };
+  var helpers = {
+    getNode: function getNode(selectors) {
+      return this.comp.el.querySelector(selectors);
+    },
+    getNodes: function getNodes(selectors) {
+      return this.comp.el.querySelectorAll(selectors);
+    },
+    appendIn: function appendIn(HTML, node) {
+      return node.innerHTML += HTML;
+    },
+    prependIn: function prependIn(HTML, node) {
+      return node.innerHTML = HTML + node.innerHTML;
+    }
+  };
+
+  var getObjectFromKey = function getObjectFromKey(root, key) {
+    var prop = root[key];
+
+    if (prop === undefined) {
+      var dKeys = key.match(/\[(.*?)\]/g);
+
+      if (dKeys) {
+        var dObjName = key.split('[')[0];
+        var dRoot = root[dObjName];
+
+        for (var i = 0; i < dKeys.length; i++) {
+          if (i > 0) dRoot = prop;
+          var cleanedKey = dKeys[i].split('[')[1].split(']')[0];
+          prop = dRoot[cleanedKey];
+          if (prop === undefined) break;
+        }
+      }
+    }
+
     return prop;
   };
 
   var getPlaceholderVal = function getPlaceholderVal(comp, placeholder, pointers) {
     if (/{([^}]+)}/.test(placeholder) === false) return;
+
+    if (_typeof(pointers) === 'object' && pointers !== null) ;
+
     var placeholderName = placeholder.replace(/{|}/g, '');
     var propKeys = placeholderName.split('.');
     var result = getProp(comp, propKeys, pointers);
@@ -76,22 +136,6 @@
     }
   };
 
-  function _typeof(obj) {
-    "@babel/helpers - typeof";
-
-    if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
-      _typeof = function (obj) {
-        return typeof obj;
-      };
-    } else {
-      _typeof = function (obj) {
-        return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
-      };
-    }
-
-    return _typeof(obj);
-  }
-
   var processNode = function processNode(comp, node, pointers) {
     var attrs = node.attributes;
 
@@ -130,17 +174,19 @@
 
       if (result === undefined) {
         var operators = [' == ', ' === ', ' !== ', ' != ', ' > ', ' < ', ' >= ', ' <= '];
-        var validTypes = ['boolean', 'number'];
+        var validTypes = ['boolean', 'number', 'undefined'];
 
         for (var i = 0; i < operators.length; i++) {
           if (attr.includes(operators[i])) {
             var condition = attr;
             var cParts = condition.split(operators[i]);
             var condLeft = getProp(comp, cParts[0].split('.'), pointers);
-            var condRight = cParts[1];
 
             if (validTypes.includes(String(_typeof(condLeft))) === false) {
-              console.error(cParts[0] + " cannot be evaluated because it is not a boolean or a number.");
+              if (comp.debug) {
+                console.warn(cParts[0] + " cannot be evaluated because it is not a boolean nor a number.");
+              }
+
               return false;
             } else {
               condition = condition.replace(cParts[0], condLeft);
@@ -151,7 +197,9 @@
         }
       }
 
-      if (result === undefined || result === false) {
+      var falseValues = [undefined, null, false, 0, ''];
+
+      if (falseValues.indexOf(result) > -1) {
         return false;
       } else {
         node.removeAttribute('c-if');
@@ -195,7 +243,7 @@
   };
 
   function AppBlock(config) {
-    this.setData = function (newData) {
+    this.debug = false, this.setData = function (newData) {
       var replaceData = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
 
       if (replaceData) {
@@ -261,10 +309,17 @@
 
     this.Init = function () {
       var comp = this;
+      if (config.debug) comp.debug = true;
 
       if (config !== undefined) {
         if (config.el === undefined) {
-          throw "==> el is not set or not present in DOM. Set el to a valid DOM element on init.";
+          if (comp.debug) console.warn("el is empty. Please assign a DOM element to el. Current AppBlock is exiting.");
+          return;
+        }
+
+        if (config.el === null) {
+          if (comp.debug) console.warn("The element you assigned to el is not present. Current AppBlock is exiting.");
+          return;
         }
 
         comp.el = config.el;
@@ -286,6 +341,8 @@
         };
         comp.data = {};
         if (config.data instanceof Object) comp.data = config.data;
+        comp.utils = helpers;
+        comp.utils['comp'] = comp;
         comp.methods = {
           Parent: comp,
           isLoading: function isLoading(thisApp) {

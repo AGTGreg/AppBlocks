@@ -6,6 +6,10 @@
 
 - [Methods](methods.md)
 
+- [Utilities](utils.md)
+
+- [API](api.md)
+
 - MISC
 
 - [Why use AppBlocks](whyappblocks.md)

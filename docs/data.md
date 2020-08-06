@@ -32,7 +32,28 @@ Accessing our data is straightforward. We can access our data from our templates
 ```
 
 
-or from within our App via its instance. Methods, for example take an optional argument which is our App's instance:
+We can also access array and object elements with square brackets notation (handy if you want to access data 
+dynamically in the template):
+```js
+var app = new AppBlock({
+  ...
+  data: {
+    anArray: [1, 2, 3],
+    anotherArray: [{"name": "Greg"}, {"name": "Emma"}, {"name": "Theodor"}]
+    anObject: {"name": "Greg"}
+  }
+  ...
+})
+```
+```html
+<p>{data.anArray[0]}</p>
+<p>{data.anotherArray[0][name] OR {data.anotherArray[0].name}</p>
+<p>{data.anObject[name]} OR {data.anObject.name}</p>
+```
+
+
+From within our App we access the data object via our app's instance. Methods, for example take an optional argument
+which is our App's instance:
 ```js
 someMethod(myApp) {
   myApp.data;
@@ -52,12 +73,12 @@ We have two choices when it comes to updating our data:
 
 ### setData()
 
-`setData(newData, replaceData = false)`
+`setData(newData, replaceData=false)`
 
-This method tells AppBlocks to update our data and then re-render our interface to reflect the changes made in our data.
+This method tells AppBlocks to update our data and then re-render our interface to reflect the changes we made.
 It also takes the optional parameter `replaceData`. By default this is set to `false` so AppBlocks will only update 
-the parts of the data we give to it, keeping everything else intact. If we set this to `true` then AppBlocks will
-replace all of our our old data with the newData. 
+the parts of the data specify, keeping everything else intact. If we set this to `true` then AppBlocks will
+replace all of our old data with the new Data. 
 
 Here's how we would call `setData` from our methods:
 ```js
@@ -71,12 +92,12 @@ var app = new AppBlock({
   methods: {
     // This will only change the name in our data and keep the message as it is.
     changeName(myApp) {
-      myApp.setData({ name: "Emma" });
+      myApp.setData({ name: "Theodor" });
     },
 
     // This will replace all of our data. Data will no longer have a message item.
     replaceData(myApp) {
-      myApp.setData({ name: "Emma" }, true);
+      myApp.setData({ name: "Theodor" }, true);
     }
   }
   ...
@@ -87,7 +108,7 @@ Both of these methods will cause our App to re-render because they use `setData`
 
 ### Direct update:
 Re-rendering our App everytime we change our data might not be what we want. We can optimize the rendering of our App
-by updating our data directly and then call `render()` when we need it:
+by updating our data directly and then trigger our app to render when we need it:
 ```js
 var app = new AppBlock({
   ...

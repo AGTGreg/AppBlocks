@@ -1,5 +1,22 @@
 # Changelog
 
+## 1.3.0
+- **FIX:** AppBlocks would throw an error if el is not set or if the element in el does not exist effectively blocking other scripts from executing.
+
+- **Enhancement:** Get data objects with square brackets notation in templates. (dynamic keys)
+
+- **Enhancement:** Placeholders inside c-for directives would get a value only if the c-for array contained objects. Now c-for works with non object array elements as well.
+
+- **Enhancement:** c-if directives will evaluate to false if the return value is false, null, undefined, 0 or empty string.
+
+- **New feature:** Debugging. If debug is true then AppBlocks will show warnings and logging data in the console.
+
+- **New feature:** utils: A set of helper functions:
+  - `utils.getNode(selectors)`: Returns the first element that is a descendant of the AppBlock that matches the specified group of selectors.
+  - `utils.getNodes(selectors)`: Returns a static (not live) NodeList representing a list of elements matching the specified group of selectors which are descendants of the AppBlock.
+  - `utils.appendIn(HTML, node)`: Inserts the specified HTML at the end of the specified node.
+  - `utils.prependIn(HTML, node)`: Inserts the specified HTML at the begining of the specified node.
+
 ## 1.2.3
 - **Enhancement:** Compile packages through babel for better compatibility.
 - **Enhancement:** Cleanup UMD, ES and CJS packages.

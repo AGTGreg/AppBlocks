@@ -1,15 +1,11 @@
-![logo](/docs/media/appblocks_logo.png)
-
-[Homepage](https://agtgreg.github.io/AppBlocks/#/)
-
 # Introduction
 
-AppBlocks is a tiny javascript library for building micro apps for the front-end.
+AppBlocks is a tiny, fast and very lightweight javascript library for building front-end apps. It has no dependencies.
 
 It was created to cover the need of enhancing pages and web applications front-ends with small and maintainable 
-applications fast and easy without overhead.
+applications fast and easy without introducing much overhead.
 
-The main goals of AppBlocks is to provide all the necessary functionality for developing front-end apps while beeing
+The main goals of AppBlocks is to provide all the necessary functionality to develop front-end apps while beeing
 lightweight, ridiculously easy to integrate in any project, practical and small.
 
 All the knowledge needed to master AppBlocks and start building front-end applications is here in a 10-15 minute read.
@@ -29,7 +25,7 @@ Download and include with a script tag in your document's head:
 or you can use the **CDN version**:
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/appblocks@1.2.3/dist/appblocks.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/appblocks@1.3.0/dist/appblocks.min.js"></script>
 ```
 
 or you can install via **npm**:
@@ -105,6 +101,20 @@ var app = new AppBlock({
 
 This is the recommended way for creating our Apps but in order to keep our snippets short and simple,
 we will use the first method for the rest of the documentation.
+
+
+## Debugging
+
+When we are at the development stage its allways a good idea to enable debuging:
+
+```js
+var app = new AppBlock({
+  ...
+  debug: true,
+  ...
+})
+```
+Now if you open your console you will see that AppBlocks outputs logging and warnings for you.
 
 
 ## Methods
@@ -186,6 +196,8 @@ var app = new AppBlock({
 })
 ```
 When `seen` is `true` our element is visible. If we set it to `false` our element is gone.
+
+`c-if` evaluates to `false` if the value you passed to it is `undefined`, `null`, `false`, `0` or empty string.
 
 `c-if` directives can also work with 
 [Comparison operators](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Comparison_Operators) 

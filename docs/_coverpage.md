@@ -2,7 +2,7 @@
 ![logo](/media/appblocks_logo.png)
 # AppBlocks
 
-> All you need to build your front-end in a small and lightweight package with 0 dependencies.
+> All you need to build your front-end in a small and lightweight package with no dependencies.
 >
 > 5.3kB minified | 2kB Gzipped
 

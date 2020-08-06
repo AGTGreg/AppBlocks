@@ -105,7 +105,16 @@ we will use the first method for the rest of the documentation.
 
 ## Debugging
 
-When we are at the development stage of our app 
+When we are at the development stage its allways a good idea to enable debuging:
+
+```js
+var app = new AppBlock({
+  ...
+  debug: true,
+  ...
+})
+```
+Now if you open your console you will see that AppBlocks outputs logging and warnings for you.
 
 
 ## Methods

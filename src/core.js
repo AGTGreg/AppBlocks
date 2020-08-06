@@ -3,9 +3,13 @@
 import {updateTextNodePlaceholders} from './placeholders';
 import {directives} from './directives';
 import {processNode} from './processing';
+import {helpers} from './utils';
 
 
 export function AppBlock(config) {
+
+
+  this.debug = false,
 
 
   // Sets or Updates the data and then calls render()
@@ -89,12 +93,20 @@ export function AppBlock(config) {
   this.Init = function() {
     const comp = this;
 
+    if ( config.debug ) comp.debug = true;
+
     // Initialize all the properties and update them from the config if they are included, or exit if no 
     // config is provided.
     if (config !== undefined) {
       
       if (config.el === undefined) {
-        throw "==> el is not set or not present in DOM. Set el to a valid DOM element on init.";
+        if ( comp.debug ) console.warn("el is empty. Please assign a DOM element to el. Current AppBlock is exiting.")
+        return;
+      }
+
+      if (config.el === null) {
+        if ( comp.debug ) console.warn("The element you assigned to el is not present. Current AppBlock is exiting.")
+        return;
       }
       
       comp.el = config.el;
@@ -117,6 +129,10 @@ export function AppBlock(config) {
 
       comp.data = {};
       if (config.data instanceof Object) comp.data = config.data;
+
+      // A set of helper functions.
+      comp.utils = helpers;
+      comp.utils['comp'] = comp; 
 
       comp.methods = {
         Parent: comp,
@@ -147,8 +163,8 @@ export function AppBlock(config) {
         Object.assign(comp.events, config.events)
         // Add event listeners to :el for each event
         for (const ev in comp.events) {
-          // Events are in this form (event element) so split at space to get the eventName and the element to attach the
-          // event on.
+          // Events are in this form (event element) so split at space to get the eventName and the element to attach
+          // the event on.
           const eParts = ev.split(' ');
           const eventName = eParts[0];
           const eventElement = eParts[1];

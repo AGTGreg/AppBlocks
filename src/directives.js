@@ -19,17 +19,18 @@ export const directives = {
       // Check if the attribute contains a logical operator. Split the condition at the
       // operator to get the value of the object at left side and evaluate.
       const operators = [' == ', ' === ', ' !== ', ' != ', ' > ', ' < ', ' >= ', ' <= '];
-      const validTypes = ['boolean', 'number'];
+      const validTypes = ['boolean', 'number', 'undefined'];
       for (let i=0; i<operators.length; i++) {
         if (attr.includes(operators[i])) {
           let condition = attr;
           const cParts = condition.split(operators[i]);
           const condLeft = getProp(comp, cParts[0].split('.'), pointers);
-          const condRight = cParts[1];
 
           if (validTypes.includes(String(typeof(condLeft))) === false) {
-            console.error(
-              cParts[0] + " cannot be evaluated because it is not a boolean or a number.");
+            if ( comp.debug ) {
+              console.warn(
+                cParts[0] + " cannot be evaluated because it is not a boolean nor a number.");
+            }
             return false;
           } else {
             condition = condition.replace(cParts[0], condLeft);
@@ -40,9 +41,11 @@ export const directives = {
       }
     }
 
-    if (result === undefined || result === false) {
+    // Values which will cause c-if to return false.
+    const falseValues = [undefined, null, false, 0, ''];
+
+    if ( falseValues.indexOf(result) > -1 ) {
       return false;
-    
     } else {
       node.removeAttribute('c-if');
       return true;

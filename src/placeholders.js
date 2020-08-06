@@ -6,7 +6,11 @@ import {getProp} from './utils';
 
 // Returns the value of a placeholder.
 const getPlaceholderVal = function(comp, placeholder, pointers) {
-  if ( /{([^}]+)}/.test(placeholder) === false ) return; 
+  if ( /{([^}]+)}/.test(placeholder) === false ) return;
+  if ( typeof pointers === 'object' && pointers !== null ) {
+
+  }
+
   const placeholderName = placeholder.replace(/{|}/g , '');
   let propKeys = placeholderName.split('.');
   let result = getProp(comp, propKeys, pointers);

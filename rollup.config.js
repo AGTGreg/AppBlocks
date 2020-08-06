@@ -3,7 +3,7 @@ import {terser} from 'rollup-plugin-terser';
 import resolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
 import cleanup from 'rollup-plugin-cleanup';
-import babel from 'rollup-plugin-babel';
+import babel from '@rollup/plugin-babel';
 import filesize from 'rollup-plugin-filesize';
 
 
@@ -48,7 +48,7 @@ export default [
 	{
 		input: 'src/index.js',
 		output: [
-			{ file: pkg.main, format: 'cjs' },
+			{ file: pkg.main, format: 'cjs', exports: 'default' },
 			{ file: pkg.module, format: 'es' }
 		],
 		plugins: [

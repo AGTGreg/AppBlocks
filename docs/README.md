@@ -2,7 +2,7 @@
 
 AppBlocks is a tiny, fast and very lightweight javascript library for building front-end apps. It has no dependencies.
 
-It was created to cover the need of enhancing pages and web applications front-ends with small and maintainable 
+It was created to cover the need of enhancing pages and web applications front-ends with small and maintainable
 applications fast and easy without introducing much overhead.
 
 The main goals of AppBlocks is to provide all the necessary functionality to develop front-end apps while beeing
@@ -25,7 +25,7 @@ Download and include with a script tag in your document's head:
 or you can use the **CDN version**:
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/appblocks@1.3.0/dist/appblocks.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/appblocks@1.3.1/dist/appblocks.min.js"></script>
 ```
 
 or you can install via **npm**:
@@ -49,7 +49,7 @@ in curly braces `{}`:
 ```
 
 Next, we need to create a new AppBlock instance for our element. You may also want to add some data:
- 
+
 ```js
 var app = new AppBlock({
   el: document.getElementById('app'),
@@ -63,7 +63,7 @@ var app = new AppBlock({
 
 We have created our very first app! We use placeholders enclosed in `{}` to display data.
 
-Lets test this by updating our data! Open up your browser's console and type: `app.setData({message: "Hi"})`. 
+Lets test this by updating our data! Open up your browser's console and type: `app.setData({message: "Hi"})`.
 Now you should see that our element is automatically updated to display the new message.
 
 For more information on how we update our App's data see [The data object](data.md).
@@ -119,7 +119,7 @@ Now if you open your console you will see that AppBlocks outputs logging and war
 
 ## Methods
 
-In the example above we get the message directly from our data. But what if we wanted to edit that message before we 
+In the example above we get the message directly from our data. But what if we wanted to edit that message before we
 show it to the world? Lets say we want to convert it to uppercase letters.
 
 Lets add a method that returns whatever is in our `data.message` but in UpperCase. All methods in AppBlocks
@@ -127,13 +127,13 @@ exist inside the methods object:
 
 ```js
 var app = new AppBlock({
-  
+
   el: document.getElementById('app'),
 
   data: {
     message: 'Hello world!'
   },
-  
+
   methods: {
     // All methods take 1 optional parameter which is our app's instance
     message(thisApp) {
@@ -157,7 +157,7 @@ Now all that needs to be done is to call that method inside our element:
 Note that we don't need to type `methods.message` to access the method. In AppBlocks methods are first class citizens.
 
 We can call methods from placeholders, attributes and even directives (As you'll see later on).
-The `methods` object is the right place to put all of our application's logic. From processing data to 
+The `methods` object is the right place to put all of our application's logic. From processing data to
 anything you would write a function for.
 
 Of course methods get updated along with our data. Go ahead and open your browser's console again and type
@@ -165,7 +165,7 @@ Of course methods get updated along with our data. Go ahead and open your browse
 because it went through our method before showing up in our element.
 
 !>  All methods take one optional parameter. We can use that parameter to get access to our App's instance from within
-    our method. It is important to remember to include it as the first parameter when calling a method from anywhere 
+    our method. It is important to remember to include it as the first parameter when calling a method from anywhere
     in our App:
     ```
     thisApp.methods.myMethod(thisApp, paramer1, parameter2, ...);
@@ -175,7 +175,7 @@ You can read more about methods [here](methods.md)
 
 ## Conditional rendering
 
-It is very easy to control the structure of our app with **if** and **for** directives. We add these 
+It is very easy to control the structure of our app with **if** and **for** directives. We add these
 directives as attributes to the elements we want to control.
 
 ### c-if
@@ -199,8 +199,8 @@ When `seen` is `true` our element is visible. If we set it to `false` our elemen
 
 `c-if` evaluates to `false` if the value you passed to it is `undefined`, `null`, `false`, `0` or empty string.
 
-`c-if` directives can also work with 
-[Comparison operators](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Comparison_Operators) 
+`c-if` directives can also work with
+[Comparison operators](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Comparison_Operators)
 and evaluate **numbers** and **booleans**. For instance we could do this and it would work as expected:
 ```html
 <div id="app">
@@ -215,7 +215,7 @@ var app = new AppBlock({
   data: {
     seen: true
   },
-  
+
   methods: {
     showSpan(thisApp) {
       return thisApp.data.seen;
@@ -232,7 +232,7 @@ var app = new AppBlock({
 
 ### c-ifnot
 
-This the opposite of `c-if`. Think of it as writing if ... else. But in our case this is more verbose so it is 
+This the opposite of `c-if`. Think of it as writing if ... else. But in our case this is more verbose so it is
 easier to explain our logic inside our element. Heres a quick example:
 
 ```html
@@ -355,7 +355,7 @@ var app = new AppBlock({
 
 Every event starts with the event name, then the element that this event is attached to, followed by the method
 that will be executed when the event is triggered. AppBlocks supports all of the available events an element could
-trigger. 
+trigger.
 
 Let's create an app where the user can toggle an element with a click of a button:
 
@@ -368,9 +368,9 @@ Let's create an app where the user can toggle an element with a click of a butto
 
 ```js
 var app = new AppBlock({
-  
+
   el: document.getElementById('app'),
-  
+
   data: {
     seen: true
   },
@@ -382,18 +382,18 @@ var app = new AppBlock({
       })
     }
   }
-  
+
 })
 ```
 
-If you plan to toggle the message from multiple elements, you could use `methods` to make things even 
+If you plan to toggle the message from multiple elements, you could use `methods` to make things even
 cleaner and DRY:
 
 ```js
 var app = new AppBlock({
-  
+
   el: document.getElementById('app'),
-  
+
   data: {
     seen: true
   },
@@ -409,7 +409,7 @@ var app = new AppBlock({
   events: {
     'click #message-toggler': function(e) {
       this.Parent.methods.toggleMessage(this.Parent);
-    } 
+    }
   }
 
 })
@@ -418,15 +418,53 @@ var app = new AppBlock({
 ## Requests
 
 A key concept in AppBlocks, is to cover the most common use cases of a front-end micro app. One of those use cases is
-to be able to make requests. 
+to be able to make requests.
 
-AppBlocks makes use of the awesome [Axios](https://github.com/axios/axios) library to do that. AppBlocks exposes the
-Axios API and takes care of the state and data management of our micro apps.
+With AppBlocks you can either use `fetch` or [Axios](https://github.com/axios/axios) to do that. AppBlocks exposes these APIs and takes care of the state of our micro apps.
 
 !> Axios is not included by default so you have to include it if you want to use the request feature.
 
 ### Usage
 
+#### Fetch
+```js
+App.fetchRequest(config, callbacks);
+```
+
+**Example:**
+```js
+App.fetchRequest(
+  {
+    method: 'GET',
+    url: "https://example.com"
+  },
+  {
+    success(response) { console.log(response); },
+    error(error) { console.log(error); },
+    finally() { alert('Request is finished'); }
+  }
+)
+```
+
+> You can also add a delay in your config:
+> ```js
+>{
+>    method: 'GET',
+>    url: "https://example.com",
+>    delay: 1000
+>  }
+> ```
+
+> If `config.method` is `POST` or `PUT` you need to include a body in your `config`:
+> ```js
+>{
+>    method: 'POST',
+>    url: "https://example.com",
+>    body: {data: "some data"}
+>  }
+> ```
+
+#### Axios
 To make use of the Requests featute, we must first include the Axios library in our document:
 
 ```html
@@ -439,7 +477,7 @@ optional:
 ```js
 var app = new AppBlock({
   ...
-  axiosConfig: { 
+  axiosConfig: {
     url: 'https://example.com'
   }
   ...
@@ -450,7 +488,7 @@ This config, tells axios that every request will be made at `https://example.com
 
 Head over to the [Axios documentation](https://github.com/axios/axios) to see all the available configuration options.
 
-Then we can make the request, specifying only the method or the parameters: 
+Then we can make the request, specifying only the method or the parameters:
 
 ```js
 App.request({method: 'get'},
@@ -494,7 +532,7 @@ State is exposed as methods so we can use them in our UI with directives:
 
 ### A complete requests example
 
-Lets make an app, that makes a request to [reqres.in](https://reqres.in/), when the user clicks on a button 
+Lets make an app, that makes a request to [reqres.in](https://reqres.in/), when the user clicks on a button
 to get a list of users. Then display that list on our page.
 
 Lets make the UI part of our app:
@@ -525,7 +563,7 @@ var app = new AppBlock({
 
   el: document.getElementById('app'),
 
-  axiosConfig: { 
+  axiosConfig: {
     url: 'https://reqres.in/api/users'
   },
 

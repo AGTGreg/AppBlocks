@@ -1,38 +1,35 @@
-import 'core-js/modules/es.array.for-each';
-import 'core-js/modules/es.object.assign';
-import 'core-js/modules/es.regexp.exec';
-import 'core-js/modules/es.string.split';
-import 'core-js/modules/web.dom-collections.for-each';
-import 'core-js/modules/es.regexp.constructor';
-import 'core-js/modules/es.regexp.to-string';
-import 'core-js/modules/es.string.match';
-import 'core-js/modules/es.string.replace';
-import 'core-js/modules/es.array.includes';
-import 'core-js/modules/es.array.index-of';
-import 'core-js/modules/es.string.includes';
-import 'core-js/modules/es.function.name';
+import 'core-js/modules/es.array.for-each.js';
+import 'core-js/modules/es.array.index-of.js';
+import 'core-js/modules/es.object.assign.js';
+import 'core-js/modules/es.object.to-string.js';
+import 'core-js/modules/es.promise.js';
+import 'core-js/modules/es.promise.finally.js';
+import 'core-js/modules/web.dom-collections.for-each.js';
+import 'core-js/modules/web.timers.js';
+import 'core-js/modules/es.regexp.constructor.js';
+import 'core-js/modules/es.regexp.exec.js';
+import 'core-js/modules/es.regexp.to-string.js';
+import 'core-js/modules/es.string.match.js';
+import 'core-js/modules/es.string.replace.js';
+import 'core-js/modules/es.array.includes.js';
+import 'core-js/modules/es.string.includes.js';
+import 'core-js/modules/es.string.split.js';
+import 'core-js/modules/es.function.name.js';
 
-function _typeof(obj) {
+function _typeof(o) {
   "@babel/helpers - typeof";
 
-  if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
-    _typeof = function (obj) {
-      return typeof obj;
-    };
-  } else {
-    _typeof = function (obj) {
-      return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
-    };
-  }
-
-  return _typeof(obj);
+  return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+    return typeof o;
+  } : function (o) {
+    return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
+  }, _typeof(o);
 }
 
 var getProp = function getProp(comp, keys, pointers) {
   var firstKey = keys[0];
   var root = comp;
   var prop;
-
   if (pointers && firstKey in pointers) {
     if (keys.length > 1) {
       keys.shift();
@@ -44,11 +41,9 @@ var getProp = function getProp(comp, keys, pointers) {
     keys.shift();
     prop = comp.methods[firstKey](comp);
   }
-
   if (keys.length > 0) {
     for (var i = 0; i < keys.length; i++) {
       prop = getObjectFromKey(root, keys[i]);
-
       if (prop === undefined) {
         break;
       } else {
@@ -56,7 +51,6 @@ var getProp = function getProp(comp, keys, pointers) {
       }
     }
   }
-
   if (comp.debug) console.info("Result for", keys, ":", prop);
   return prop;
 };
@@ -74,17 +68,13 @@ var helpers = {
     return node.innerHTML = HTML + node.innerHTML;
   }
 };
-
 var getObjectFromKey = function getObjectFromKey(root, key) {
   var prop = root[key];
-
   if (prop === undefined) {
     var dKeys = key.match(/\[(.*?)\]/g);
-
     if (dKeys) {
       var dObjName = key.split('[')[0];
       var dRoot = root[dObjName];
-
       for (var i = 0; i < dKeys.length; i++) {
         if (i > 0) dRoot = prop;
         var cleanedKey = dKeys[i].split('[')[1].split(']')[0];
@@ -93,29 +83,23 @@ var getObjectFromKey = function getObjectFromKey(root, key) {
       }
     }
   }
-
   return prop;
 };
 
 var getPlaceholderVal = function getPlaceholderVal(comp, placeholder, pointers) {
   if (/{([^}]+)}/.test(placeholder) === false) return;
-
   if (_typeof(pointers) === 'object' && pointers !== null) ;
-
   var placeholderName = placeholder.replace(/{|}/g, '');
   var propKeys = placeholderName.split('.');
   var result = getProp(comp, propKeys, pointers);
   if (result === undefined) return '';
   return result;
 };
-
 var updateAttributePlaceholders = function updateAttributePlaceholders(comp, node, pointers) {
   var attrs = node.attributes;
-
   for (var i = 0; i < attrs.length; i++) {
     if (/{([^}]+)}/.test(attrs[i].value)) {
       var props = attrs[i].value.match(/{([^}]+)}/g);
-
       for (var p = 0; p < props.length; p++) {
         var re = new RegExp(props[p], 'g');
         attrs[i].value = attrs[i].value.replace(re, getPlaceholderVal(comp, props[p], pointers));
@@ -131,38 +115,31 @@ var updateTextNodePlaceholders = function updateTextNodePlaceholders(comp, nodeT
       }
     }
   });
-
   while (textWalker.nextNode()) {
     var nodeVal = textWalker.currentNode.nodeValue;
     var props = nodeVal.match(/{([^}]+)}/g);
-
     for (var i = 0; i < props.length; i++) {
       nodeVal = nodeVal.replace(props[i], getPlaceholderVal(comp, props[i], pointers));
     }
-
     textWalker.currentNode.nodeValue = nodeVal;
   }
 };
 
 var processNode = function processNode(comp, node, pointers) {
   var attrs = node.attributes;
-
   if (attrs) {
     for (var i = 0; i < attrs.length; i++) {
       if (attrs[i].name in comp.directives) {
         var attr = attrs[i].name;
         var result = comp.directives[attr](comp, node, pointers);
-
         if (result === false) {
           node.remove();
           return;
         }
       }
     }
-
     updateAttributePlaceholders(comp, node, pointers);
   }
-
   if (node.hasChildNodes()) {
     for (var c = node.childElementCount - 1; c >= 0; c--) {
       if (node.children[c]) {
@@ -179,22 +156,18 @@ var directives = {
     var attr = node.getAttribute('c-if');
     if (attr === null) attr = node.getAttribute('c-ifnot');
     var result = getProp(comp, attr.split('.'), pointers);
-
     if (result === undefined) {
       var operators = [' == ', ' === ', ' !== ', ' != ', ' > ', ' < ', ' >= ', ' <= '];
       var validTypes = ['boolean', 'number', 'undefined'];
-
       for (var i = 0; i < operators.length; i++) {
         if (attr.includes(operators[i])) {
           var condition = attr;
           var cParts = condition.split(operators[i]);
           var condLeft = getProp(comp, cParts[0].split('.'), pointers);
-
           if (validTypes.includes(String(_typeof(condLeft))) === false) {
             if (comp.debug) {
               console.warn(cParts[0] + " cannot be evaluated because it is not a boolean nor a number.");
             }
-
             return false;
           } else {
             condition = condition.replace(cParts[0], condLeft);
@@ -204,9 +177,7 @@ var directives = {
         }
       }
     }
-
     var falseValues = [undefined, null, false, 0, ''];
-
     if (falseValues.indexOf(result) > -1) {
       return false;
     } else {
@@ -226,11 +197,9 @@ var directives = {
     var objectKeys = stParts[1].split('.');
     if (pointers === undefined) pointers = {};
     var iterable = getProp(comp, objectKeys, pointers);
-
     if (iterable) {
       node.removeAttribute('c-for');
       var parentNode = node.parentNode;
-
       for (var i = 0; i < iterable.length; i++) {
         var item = iterable[i];
         pointers[pointer] = item;
@@ -253,43 +222,35 @@ var directives = {
 function AppBlock(config) {
   this.debug = false, this.setData = function (newData) {
     var replaceData = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
-
     if (replaceData) {
       this.data = newData;
     } else {
       Object.assign(this.data, newData);
     }
-
     this.render();
   };
-
   this.resetState = function () {
     this.state.loading = false;
     this.state.error = false;
     this.state.success = false;
   };
-
   this.request = function (config, callbacks, replaceData) {
     var comp = this;
     if (comp.state.loading) return;
     var cConfig = comp.axiosConfig;
-
     if (config) {
       Object.assign(cConfig, config);
     }
-
     comp.resetState();
     comp.state.loading = true;
     var responseData;
     comp.render(function () {
       axios.request(cConfig).then(function (response) {
         comp.state.success = true;
-
         if (callbacks && callbacks['success'] instanceof Function) {
           var callbackResponse = callbacks['success'](response);
           if (callbackResponse instanceof Object) response = callbackResponse;
         }
-
         responseData = response.data;
       })["catch"](function (error) {
         comp.state.error = true;
@@ -302,9 +263,59 @@ function AppBlock(config) {
       });
     });
   };
-
+  this.fetchRequest = function (config, callbacks) {
+    var comp = this;
+    if (comp.state.loading) return;
+    comp.resetState();
+    comp.state.loading = true;
+    var headers = {
+      'Content-Type': 'application/json'
+    };
+    if (config.headers) Object.assign(headers, config.headers);
+    var body = null;
+    if (['POST', 'PUT'].indexOf(config.method) > -1) {
+      body = JSON.stringify(config.body);
+    }
+    var delay = config.delay > 0 ? config.delay : 0;
+    comp.render(function () {
+      setTimeout(function () {
+        fetch(config.url, {
+          method: config.method,
+          headers: headers,
+          body: body
+        }).then(function (response) {
+          return response.json();
+        }).then(function (data) {
+          if (data.error) {
+            app.state.error = true;
+            if (callbacks && callbacks['error'] instanceof Function) {
+              callbacks['error'](data);
+            }
+          } else {
+            app.state.success = true;
+            if (callbacks && callbacks['success'] instanceof Function) {
+              callbacks['success'](data);
+            }
+          }
+        })["catch"](function (error) {
+          app.state.error = true;
+          if (callbacks && callbacks['error'] instanceof Function) {
+            callbacks['error'](error);
+          }
+        })["finally"](function () {
+          console.log("finally");
+          app.state.loading = false;
+          if (callbacks && callbacks['finally'] instanceof Function) {
+            callbacks['finally']();
+          }
+          app.render();
+        });
+      }, delay);
+    });
+  };
   this.render = function (callback) {
     var comp = this;
+    console.log("Rendering...");
     if (comp.methods.beforeRender instanceof Function) comp.methods.beforeRender(comp);
     var tmpDOM = comp.template.cloneNode(true);
     processNode(comp, tmpDOM);
@@ -314,34 +325,27 @@ function AppBlock(config) {
     if (comp.methods.afterRender instanceof Function) comp.methods.afterRender(comp);
     if (callback instanceof Function) callback();
   };
-
   this.Init = function () {
     var comp = this;
     if (config.debug) comp.debug = true;
-
     if (config !== undefined) {
       if (config.el === undefined) {
         if (comp.debug) console.warn("el is empty. Please assign a DOM element to el. Current AppBlock is exiting.");
         return;
       }
-
       if (config.el === null) {
         if (comp.debug) console.warn("The element you assigned to el is not present. Current AppBlock is exiting.");
         return;
       }
-
       comp.el = config.el;
-
       if (config.template) {
         comp.template = config.template.content;
       } else {
         comp.template = document.createDocumentFragment();
-
         while (comp.el.firstChild) {
           comp.template.appendChild(comp.el.firstChild);
         }
       }
-
       comp.state = {
         loading: false,
         error: false,
@@ -369,10 +373,8 @@ function AppBlock(config) {
       comp.directives = directives;
       if (config.directives instanceof Object) Object.assign(comp.directives, config.directives);
       comp.events = {};
-
       if (config.events instanceof Object) {
         Object.assign(comp.events, config.events);
-
         var _loop = function _loop(ev) {
           var eParts = ev.split(' ');
           var eventName = eParts[0];
@@ -383,12 +385,10 @@ function AppBlock(config) {
             });
           });
         };
-
         for (var ev in comp.events) {
           _loop(ev);
         }
       }
-
       comp.events['Parent'] = comp;
       comp.axiosConfig = {
         headers: {
@@ -399,12 +399,10 @@ function AppBlock(config) {
     } else {
       return false;
     }
-
     comp.render();
     return comp;
   };
-
   return this.Init();
 }
 
-export default AppBlock;
+export { AppBlock as default };

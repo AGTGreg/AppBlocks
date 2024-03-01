@@ -21,7 +21,7 @@ export function AppBlock(config) {
     }
     this.render();
   }
-  
+
 
   // Resets to the default state. Handy before making a request.
   this.resetState = function() {
@@ -31,7 +31,7 @@ export function AppBlock(config) {
   }
 
 
-  // Makes a request with axios. Config and callbacks are both objects. Callbacks may contain: 
+  // Makes a request with axios. Config and callbacks are both objects. Callbacks may contain:
   // success(response), error(error) and done() callbacks.
   this.request = function(config, callbacks, replaceData) {
     const comp = this;
@@ -70,11 +70,80 @@ export function AppBlock(config) {
   }
 
 
+  this.fetchRequest = function(config, callbacks) {
+    /* Makes a request with fetch.
+    Args:
+      - config: Object that contains:
+        - method: "GET", "POST", ...
+        - headers: Object
+        - url: str
+        - body: Object
+        - delay: int
+      - callbacks:
+        - success(data)
+        - error(data)
+        - finally()
+    */
+    const comp = this;
+    if (comp.state.loading) return;
+    comp.resetState();
+    comp.state.loading = true;
+    let headers = {'Content-Type': 'application/json'};
+    if (config.headers) Object.assign(headers, config.headers);
+
+    let body = null;
+    if (['POST', 'PUT'].indexOf(config.method) > -1) {
+      body = JSON.stringify(config.body);
+    }
+
+    let delay = config.delay > 0 ? config.delay : 0;
+
+    comp.render(function() {
+      setTimeout(function() {
+        fetch(config.url, {
+          method: config.method,
+          headers: headers,
+          body: body
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.error) {
+            app.state.error = true;
+            if (callbacks && callbacks['error'] instanceof Function) {
+              callbacks['error'](data);
+            }
+          } else {
+            app.state.success = true;
+            if (callbacks && callbacks['success'] instanceof Function) {
+              callbacks['success'](data);
+            }
+          }
+        })
+        .catch(error => {
+          app.state.error = true;
+          if (callbacks && callbacks['error'] instanceof Function) {
+            callbacks['error'](error);
+          }
+        })
+        .finally(() => {
+          console.log("finally");
+          app.state.loading = false;
+          if (callbacks && callbacks['finally'] instanceof Function) {
+            callbacks['finally']();
+          }
+          app.render();
+        });
+      }, delay);
+    });
+  }
+
+
   // Render ============================================================================================================
   // This is the heart of an AppBlock. This is where all placeholders and directives get evaluated based on our
   // data, and content gets updated.
   this.render = function(callback) {
     const comp = this;
+    console.log("Rendering...");
     if (comp.methods.beforeRender instanceof Function) comp.methods.beforeRender(comp);
 
     let tmpDOM = comp.template.cloneNode(true);
@@ -95,10 +164,10 @@ export function AppBlock(config) {
 
     if ( config.debug ) comp.debug = true;
 
-    // Initialize all the properties and update them from the config if they are included, or exit if no 
+    // Initialize all the properties and update them from the config if they are included, or exit if no
     // config is provided.
     if (config !== undefined) {
-      
+
       if (config.el === undefined) {
         if ( comp.debug ) console.warn("el is empty. Please assign a DOM element to el. Current AppBlock is exiting.")
         return;
@@ -108,7 +177,7 @@ export function AppBlock(config) {
         if ( comp.debug ) console.warn("The element you assigned to el is not present. Current AppBlock is exiting.")
         return;
       }
-      
+
       comp.el = config.el;
 
       // Get or create a document fragment with all the app's contents and pass it to the template.
@@ -116,8 +185,8 @@ export function AppBlock(config) {
         comp.template = config.template.content;
       } else {
         comp.template = document.createDocumentFragment();
-        while (comp.el.firstChild) { 
-          comp.template.appendChild(comp.el.firstChild); 
+        while (comp.el.firstChild) {
+          comp.template.appendChild(comp.el.firstChild);
         }
       }
 
@@ -132,7 +201,7 @@ export function AppBlock(config) {
 
       // A set of helper functions.
       comp.utils = helpers;
-      comp.utils['comp'] = comp; 
+      comp.utils['comp'] = comp;
 
       comp.methods = {
         Parent: comp,
@@ -168,7 +237,7 @@ export function AppBlock(config) {
           const eParts = ev.split(' ');
           const eventName = eParts[0];
           const eventElement = eParts[1];
-          
+
           comp.el.addEventListener(eventName, function(e) {
             comp.el.querySelectorAll(eventElement).forEach(el => {
               if (e.srcElement === el) comp.events[ev](e);
@@ -178,8 +247,8 @@ export function AppBlock(config) {
       }
       comp.events['Parent'] = comp;
 
-      comp.axiosConfig = { 
-        headers: {'X-Requested-With': 'XMLHttpRequest'} 
+      comp.axiosConfig = {
+        headers: {'X-Requested-With': 'XMLHttpRequest'}
       };
       if (config.axiosConfig instanceof Object) Object.assign(comp.axiosConfig, config.axiosConfig)
 

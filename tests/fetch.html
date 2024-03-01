@@ -20,6 +20,7 @@
     </div>
 
     <template id="appTemplate">
+        <h1>Testing fetch!</h1>
         <h2 c-if="isLoading">Loading...</h2>
         <div c-if="isSuccessful">
             <h2>Success!</h2>
@@ -32,11 +33,11 @@
     </template>
 
     <script src="../dist/appblocks.umd.js"></script>
-    <script src="testfetch.js"></script>
     <script>
         var app = new AppBlock({
             el: document.getElementById('app'),
             template: document.getElementById('appTemplate'),
+            renderEngine: 'Idiomorph',
             methods: {
                 testGet(app) {
                     app.fetchRequest(

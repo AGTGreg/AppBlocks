@@ -4,6 +4,7 @@ import {updateTextNodePlaceholders} from './placeholders';
 import {directives} from './directives';
 import {processNode} from './processing';
 import {helpers} from './utils';
+const Idiomorph = require('idiomorph/dist/idiomorph.cjs');
 
 
 export function AppBlock(config) {
@@ -126,7 +127,6 @@ export function AppBlock(config) {
           }
         })
         .finally(() => {
-          console.log("finally");
           app.state.loading = false;
           if (callbacks && callbacks['finally'] instanceof Function) {
             callbacks['finally']();
@@ -138,23 +138,53 @@ export function AppBlock(config) {
   }
 
 
+  this.prepareTmpDom = function() {
+    const comp = this;
+    let tmpDOM = comp.template.cloneNode(true);
+    processNode(comp, tmpDOM);
+    updateTextNodePlaceholders(comp, tmpDOM);
+    return tmpDOM;
+  }
+
+
   // Render ============================================================================================================
   // This is the heart of an AppBlock. This is where all placeholders and directives get evaluated based on our
   // data, and content gets updated.
   this.render = function(callback) {
     const comp = this;
-    console.log("Rendering...");
     if (comp.methods.beforeRender instanceof Function) comp.methods.beforeRender(comp);
 
-    let tmpDOM = comp.template.cloneNode(true);
-    processNode(comp, tmpDOM);
-    // Update text nodes in one pass
-    updateTextNodePlaceholders(comp, tmpDOM);
+    let tmpDOM = this.prepareTmpDom();
+
+    // Start timing
+    console.time(comp.renderEngine + " render time");
+
+    if (comp.renderEngine === 'Idiomorph') {
+      comp.idiomorphRender(tmpDOM);
+    } else if (comp.renderEngine === 'plain') {
+      comp.plainRender(tmpDOM);
+    } else {
+        console.error(`${comp.renderEngine} renderEngine does not exist.`);
+    }
+
+    // End timing
+    console.timeEnd(comp.renderEngine + " render time");
+
+    if (comp.methods.afterRender instanceof Function) comp.methods.afterRender(comp);
+    if (callback instanceof Function) callback();
+  }
+
+
+  // Render engines
+  this.plainRender = function(tmpDOM) {
     // Clear the old contents and append the new
     this.el.innerHTML = '';
     this.el.appendChild(tmpDOM);
-    if (comp.methods.afterRender instanceof Function) comp.methods.afterRender(comp);
-    if (callback instanceof Function) callback();
+  }
+
+
+  this.idiomorphRender = function(tmpDOM) {
+    Idiomorph.morph(this.el, tmpDOM, {morphStyle:'innerHTML'});
   }
 
 
@@ -179,6 +209,7 @@ export function AppBlock(config) {
       }
 
       comp.el = config.el;
+      comp.renderEngine = config.renderEngine ? config.renderEngine : "plain";
 
       // Get or create a document fragment with all the app's contents and pass it to the template.
       if (config.template) {

@@ -17,6 +17,8 @@ var testSuite1 = new AppBlock({
 
   debug: true,
 
+  renderEngine: 'plain',
+
   data: {
     testCasesCount: 0,
     testSuccess: 0,

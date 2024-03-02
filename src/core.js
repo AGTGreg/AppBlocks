@@ -1,10 +1,15 @@
 'use strict';
 
+const Idiomorph = require('idiomorph/dist/idiomorph.cjs');
 import {updateTextNodePlaceholders} from './placeholders';
 import {directives} from './directives';
 import {processNode} from './processing';
 import {helpers} from './utils';
-const Idiomorph = require('idiomorph/dist/idiomorph.cjs');
+import {fetchRequest, axiosRequest} from './requests';
+
+const defaultRequestHeaders = {
+
+}
 
 
 export function AppBlock(config) {
@@ -32,112 +37,14 @@ export function AppBlock(config) {
   }
 
 
-  // Makes a request with axios. Config and callbacks are both objects. Callbacks may contain:
-  // success(response), error(error) and done() callbacks.
-  this.request = function(config, callbacks, replaceData) {
-    const comp = this;
-    if (comp.state.loading) return;
-
-    let cConfig = comp.axiosConfig;
-    if (config) { Object.assign(cConfig, config) }
-
-    comp.resetState();
-    comp.state.loading = true;
-    let responseData;
-
-    comp.render(function() {
-
-      axios.request(cConfig)
-      .then(function(response) {
-        comp.state.success = true;
-        if (callbacks && callbacks['success'] instanceof Function) {
-          const callbackResponse = callbacks['success'](response);
-          if (callbackResponse instanceof Object) response = callbackResponse;
-        }
-        responseData = response.data;
-      })
-      .catch(function(error) {
-        comp.state.error = true;
-        responseData = error;
-        if (callbacks && callbacks['error'] instanceof Function) callbacks['error'](error);
-      })
-      .then(function() {
-        comp.state.loading = false;
-        comp.setData(responseData, replaceData);
-        if (callbacks && callbacks['done'] instanceof Function) callbacks['done']();
-      });
-
-    });
-  }
+  // Requests
+  this.axiosRequest = (options, callbacks, delay) => axiosRequest(this, options, callbacks, delay);
+  this.fetchRequest = (url, options, callbacks, delay) => fetchRequest(this, url, options, callbacks, delay);
 
 
-  this.fetchRequest = function(config, callbacks) {
-    /* Makes a request with fetch.
-    Args:
-      - config: Object that contains:
-        - method: "GET", "POST", ...
-        - headers: Object
-        - url: str
-        - body: Object
-        - delay: int
-      - callbacks:
-        - success(data)
-        - error(data)
-        - finally()
-    */
-    const comp = this;
-    if (comp.state.loading) return;
-    comp.resetState();
-    comp.state.loading = true;
-    let headers = {'Content-Type': 'application/json'};
-    if (config.headers) Object.assign(headers, config.headers);
-
-    let body = null;
-    if (['POST', 'PUT'].indexOf(config.method) > -1) {
-      body = JSON.stringify(config.body);
-    }
-
-    let delay = config.delay > 0 ? config.delay : 0;
-
-    comp.render(function() {
-      setTimeout(function() {
-        fetch(config.url, {
-          method: config.method,
-          headers: headers,
-          body: body
-        })
-        .then(response => response.json())
-        .then(data => {
-          if (data.error) {
-            app.state.error = true;
-            if (callbacks && callbacks['error'] instanceof Function) {
-              callbacks['error'](data);
-            }
-          } else {
-            app.state.success = true;
-            if (callbacks && callbacks['success'] instanceof Function) {
-              callbacks['success'](data);
-            }
-          }
-        })
-        .catch(error => {
-          app.state.error = true;
-          if (callbacks && callbacks['error'] instanceof Function) {
-            callbacks['error'](error);
-          }
-        })
-        .finally(() => {
-          app.state.loading = false;
-          if (callbacks && callbacks['finally'] instanceof Function) {
-            callbacks['finally']();
-          }
-          app.render();
-        });
-      }, delay);
-    });
-  }
-
-
+  // Render ============================================================================================================
+  // This is the heart of an AppBlock. This is where all placeholders and directives get evaluated based on our
+  // data, and content gets updated.
   this.prepareTmpDom = function() {
     const comp = this;
     let tmpDOM = comp.template.cloneNode(true);
@@ -147,9 +54,6 @@ export function AppBlock(config) {
   }
 
 
-  // Render ============================================================================================================
-  // This is the heart of an AppBlock. This is where all placeholders and directives get evaluated based on our
-  // data, and content gets updated.
   this.render = function(callback) {
     const comp = this;
     if (comp.methods.beforeRender instanceof Function) comp.methods.beforeRender(comp);
@@ -177,7 +81,6 @@ export function AppBlock(config) {
 
   // Render engines
   this.plainRender = function(tmpDOM) {
-    // Clear the old contents and append the new
     this.el.innerHTML = '';
     this.el.appendChild(tmpDOM);
   }
@@ -245,12 +148,8 @@ export function AppBlock(config) {
         hasError(thisApp) {
           return thisApp.state.error;
         },
-        beforeRender(thisApp) {
-
-        },
-        afterRender(thisApp) {
-
-        }
+        beforeRender(thisApp) {},
+        afterRender(thisApp) {}
       };
       if (config.methods instanceof Object) Object.assign(comp.methods, config.methods);
 
@@ -277,11 +176,6 @@ export function AppBlock(config) {
         }
       }
       comp.events['Parent'] = comp;
-
-      comp.axiosConfig = {
-        headers: {'X-Requested-With': 'XMLHttpRequest'}
-      };
-      if (config.axiosConfig instanceof Object) Object.assign(comp.axiosConfig, config.axiosConfig)
 
     } else {
       return false;

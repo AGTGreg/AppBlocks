@@ -32,6 +32,7 @@
         </div>
     </template>
 
+    <script src="https://cdn.jsdelivr.net/npm/axios@1.6.7/dist/axios.min.js"></script>
     <script src="../dist/appblocks.umd.js"></script>
     <script>
         var app = new AppBlock({
@@ -39,12 +40,29 @@
             template: document.getElementById('appTemplate'),
             renderEngine: 'Idiomorph',
             methods: {
-                testGet(app) {
-                    app.fetchRequest(
+                testAxiosGet(app) {
+                    app.axiosRequest(
+                        {
+                            url: 'https://reqres.in/api/users/2',
+                            method: 'GET'
+                        },
+                        {
+                            success(response) {
+                                console.log(response);
+                                app.data.user = response.data.data;
+                            },
+                            error(error) {
+                                console.log(error);
+                                app.data.error = error;
+                            },
+                            finally() {console.log('finished')}
+                        }, 1000
+                    );
+                },
+                testFetchGet(app) {
+                    app.fetchRequest('https://reqres.in/api/users/2',
                         {
                             method: 'GET',
-                            url: 'https://reqres.in/api/users/2',
-                            delay: 1000
                         },
                         {
                             success(data) {
@@ -56,19 +74,44 @@
                                 app.data.error = error;
                             },
                             finally() {console.log('finished')}
-                        }
+                        }, 1000
                     )
                 },
-                testPost(app) {
-                    app.fetchRequest(
+                testAxiosPost(app) {
+                    app.axiosRequest({
+                        url: 'https://reqres.in/api/users',
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        data: {
+                            "name": "morpheus",
+                            "job": "leader"
+                        }
+                    },
+                    {
+                        success(request) {
+                            console.log(request);
+                            app.data.user = request.data;
+                        },
+                        error(error) {
+                            console.log(error);
+                            app.data.error = error;
+                        },
+                        finally() {console.log('finished')}
+                    }, 1000)
+                },
+                testFetchPost(app) {
+                    app.fetchRequest('https://reqres.in/api/users',
                         {
                             method: 'POST',
-                            url: 'https://reqres.in/api/users',
-                            delay: 1000,
-                            body: {
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
                                 "name": "morpheus",
                                 "job": "leader"
-                            }
+                            })
                         },
                         {
                             success(data) {
@@ -80,13 +123,13 @@
                                 app.data.error = error;
                             },
                             finally() {console.log('finished')}
-                        }
+                        }, 1000
                     )
                 }
             }
         })
         setTimeout(function() {
-            app.methods.testPost(app);
+            app.methods.testAxiosPost(app);
         }, 1000);
 
     </script>

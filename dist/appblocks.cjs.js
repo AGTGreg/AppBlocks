@@ -1,22 +1,22 @@
 'use strict';
 
 require('core-js/modules/es.array.for-each.js');
-require('core-js/modules/es.array.index-of.js');
 require('core-js/modules/es.object.assign.js');
 require('core-js/modules/es.object.to-string.js');
-require('core-js/modules/es.promise.js');
-require('core-js/modules/es.promise.finally.js');
 require('core-js/modules/web.dom-collections.for-each.js');
-require('core-js/modules/web.timers.js');
 require('core-js/modules/es.regexp.constructor.js');
 require('core-js/modules/es.regexp.exec.js');
 require('core-js/modules/es.regexp.to-string.js');
 require('core-js/modules/es.string.match.js');
 require('core-js/modules/es.string.replace.js');
 require('core-js/modules/es.array.includes.js');
+require('core-js/modules/es.array.index-of.js');
 require('core-js/modules/es.string.includes.js');
 require('core-js/modules/es.string.split.js');
 require('core-js/modules/es.function.name.js');
+require('core-js/modules/es.promise.js');
+require('core-js/modules/es.promise.finally.js');
+require('core-js/modules/web.timers.js');
 
 var Idiomorph = (function () {
         let EMPTY_SET = new Set();
@@ -761,7 +761,69 @@ var directives = {
   }
 };
 
+var fetchRequest = function fetchRequest(comp, url, options, callbacks, delay) {
+  if (comp.state.loading) return;
+  comp.resetState();
+  comp.state.loading = true;
+  var delayRequest = delay ? delay : 0;
+  comp.render(function () {
+    setTimeout(function () {
+      fetch(url, options).then(function (response) {
+        return response.json();
+      }).then(function (data) {
+        if (data.error) {
+          app.state.error = true;
+          if (callbacks && callbacks['error'] instanceof Function) {
+            callbacks['error'](data);
+          }
+        } else {
+          app.state.success = true;
+          if (callbacks && callbacks['success'] instanceof Function) {
+            callbacks['success'](data);
+          }
+        }
+      })["catch"](function (error) {
+        app.state.error = true;
+        if (callbacks && callbacks['error'] instanceof Function) {
+          callbacks['error'](error);
+        }
+      })["finally"](function () {
+        app.state.loading = false;
+        if (callbacks && callbacks['finally'] instanceof Function) {
+          callbacks['finally']();
+        }
+        app.render();
+      });
+    }, delayRequest);
+  });
+};
+var axiosRequest = function axiosRequest(comp, config, callbacks, delay) {
+  if (comp.state.loading) return;
+  comp.resetState();
+  comp.state.loading = true;
+  var delayRequest = delay ? delay : 0;
+  comp.render(function () {
+    setTimeout(function () {
+      axios.request(config).then(function (response) {
+        comp.state.success = true;
+        if (callbacks && callbacks['success'] instanceof Function) {
+          var callbackResponse = callbacks['success'](response);
+          if (callbackResponse instanceof Object) response = callbackResponse;
+        }
+      })["catch"](function (error) {
+        comp.state.error = true;
+        if (callbacks && callbacks['error'] instanceof Function) callbacks['error'](error);
+      }).then(function () {
+        comp.state.loading = false;
+        if (callbacks && callbacks['finally'] instanceof Function) callbacks['finally']();
+        comp.render();
+      });
+    }, delayRequest);
+  });
+};
+
 function AppBlock(config) {
+  var _this = this;
   this.debug = false, this.setData = function (newData) {
     var replaceData = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
     if (replaceData) {
@@ -776,83 +838,11 @@ function AppBlock(config) {
     this.state.error = false;
     this.state.success = false;
   };
-  this.request = function (config, callbacks, replaceData) {
-    var comp = this;
-    if (comp.state.loading) return;
-    var cConfig = comp.axiosConfig;
-    if (config) {
-      Object.assign(cConfig, config);
-    }
-    comp.resetState();
-    comp.state.loading = true;
-    var responseData;
-    comp.render(function () {
-      axios.request(cConfig).then(function (response) {
-        comp.state.success = true;
-        if (callbacks && callbacks['success'] instanceof Function) {
-          var callbackResponse = callbacks['success'](response);
-          if (callbackResponse instanceof Object) response = callbackResponse;
-        }
-        responseData = response.data;
-      })["catch"](function (error) {
-        comp.state.error = true;
-        responseData = error;
-        if (callbacks && callbacks['error'] instanceof Function) callbacks['error'](error);
-      }).then(function () {
-        comp.state.loading = false;
-        comp.setData(responseData, replaceData);
-        if (callbacks && callbacks['done'] instanceof Function) callbacks['done']();
-      });
-    });
+  this.axiosRequest = function (options, callbacks, delay) {
+    return axiosRequest(_this, options, callbacks, delay);
   };
-  this.fetchRequest = function (config, callbacks) {
-    var comp = this;
-    if (comp.state.loading) return;
-    comp.resetState();
-    comp.state.loading = true;
-    var headers = {
-      'Content-Type': 'application/json'
-    };
-    if (config.headers) Object.assign(headers, config.headers);
-    var body = null;
-    if (['POST', 'PUT'].indexOf(config.method) > -1) {
-      body = JSON.stringify(config.body);
-    }
-    var delay = config.delay > 0 ? config.delay : 0;
-    comp.render(function () {
-      setTimeout(function () {
-        fetch(config.url, {
-          method: config.method,
-          headers: headers,
-          body: body
-        }).then(function (response) {
-          return response.json();
-        }).then(function (data) {
-          if (data.error) {
-            app.state.error = true;
-            if (callbacks && callbacks['error'] instanceof Function) {
-              callbacks['error'](data);
-            }
-          } else {
-            app.state.success = true;
-            if (callbacks && callbacks['success'] instanceof Function) {
-              callbacks['success'](data);
-            }
-          }
-        })["catch"](function (error) {
-          app.state.error = true;
-          if (callbacks && callbacks['error'] instanceof Function) {
-            callbacks['error'](error);
-          }
-        })["finally"](function () {
-          app.state.loading = false;
-          if (callbacks && callbacks['finally'] instanceof Function) {
-            callbacks['finally']();
-          }
-          app.render();
-        });
-      }, delay);
-    });
+  this.fetchRequest = function (url, options, callbacks, delay) {
+    return fetchRequest(_this, url, options, callbacks, delay);
   };
   this.prepareTmpDom = function () {
     var comp = this;
@@ -952,12 +942,6 @@ function AppBlock(config) {
         }
       }
       comp.events['Parent'] = comp;
-      comp.axiosConfig = {
-        headers: {
-          'X-Requested-With': 'XMLHttpRequest'
-        }
-      };
-      if (config.axiosConfig instanceof Object) Object.assign(comp.axiosConfig, config.axiosConfig);
     } else {
       return false;
     }

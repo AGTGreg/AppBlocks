@@ -2,14 +2,15 @@ import 'core-js/modules/es.array.for-each.js';
 import 'core-js/modules/es.object.assign.js';
 import 'core-js/modules/es.object.to-string.js';
 import 'core-js/modules/web.dom-collections.for-each.js';
+import 'core-js/modules/es.array.includes.js';
+import 'core-js/modules/es.array.slice.js';
 import 'core-js/modules/es.regexp.constructor.js';
 import 'core-js/modules/es.regexp.exec.js';
 import 'core-js/modules/es.regexp.to-string.js';
+import 'core-js/modules/es.string.includes.js';
 import 'core-js/modules/es.string.match.js';
 import 'core-js/modules/es.string.replace.js';
-import 'core-js/modules/es.array.includes.js';
 import 'core-js/modules/es.array.index-of.js';
-import 'core-js/modules/es.string.includes.js';
 import 'core-js/modules/es.string.split.js';
 import 'core-js/modules/es.function.name.js';
 import 'core-js/modules/es.promise.js';
@@ -556,6 +557,33 @@ var Idiomorph = (function () {
     })();
 var idiomorph_cjs = Idiomorph;
 
+function _iterableToArrayLimit(r, l) {
+  var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
+  if (null != t) {
+    var e,
+      n,
+      i,
+      u,
+      a = [],
+      f = !0,
+      o = !1;
+    try {
+      if (i = (t = t.call(r)).next, 0 === l) {
+        if (Object(t) !== t) return;
+        f = !1;
+      } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0);
+    } catch (r) {
+      o = !0, n = r;
+    } finally {
+      try {
+        if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return;
+      } finally {
+        if (o) throw n;
+      }
+    }
+    return a;
+  }
+}
 function _typeof(o) {
   "@babel/helpers - typeof";
 
@@ -564,6 +592,28 @@ function _typeof(o) {
   } : function (o) {
     return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
   }, _typeof(o);
+}
+function _slicedToArray(arr, i) {
+  return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest();
+}
+function _arrayWithHoles(arr) {
+  if (Array.isArray(arr)) return arr;
+}
+function _unsupportedIterableToArray(o, minLen) {
+  if (!o) return;
+  if (typeof o === "string") return _arrayLikeToArray(o, minLen);
+  var n = Object.prototype.toString.call(o).slice(8, -1);
+  if (n === "Object" && o.constructor) n = o.constructor.name;
+  if (n === "Map" || n === "Set") return Array.from(o);
+  if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen);
+}
+function _arrayLikeToArray(arr, len) {
+  if (len == null || len > arr.length) len = arr.length;
+  for (var i = 0, arr2 = new Array(len); i < len; i++) arr2[i] = arr[i];
+  return arr2;
+}
+function _nonIterableRest() {
+  throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
 }
 
 var getProp = function getProp(comp, keys, pointers) {
@@ -626,8 +676,21 @@ var getObjectFromKey = function getObjectFromKey(root, key) {
   return prop;
 };
 
+var filters = {
+  'toUpperCase': function toUpperCase(comp, value) {
+    console.log("toUpperCase");
+    console.log(value);
+    return value.toUpperCase();
+  },
+  'toLowerCase': function toLowerCase(comp, value) {
+    return value.toLowerCase();
+  }
+};
+var applyCustomFilter = function applyCustomFilter(comp, value, filterName) {
+  return filters[filterName](comp, value);
+};
+
 var getPlaceholderVal = function getPlaceholderVal(comp, placeholder, pointers) {
-  if (/{([^}]+)}/.test(placeholder) === false) return;
   if (_typeof(pointers) === 'object' && pointers !== null) ;
   var placeholderName = placeholder.replace(/{|}/g, '');
   var propKeys = placeholderName.split('.');
@@ -648,21 +711,49 @@ var updateAttributePlaceholders = function updateAttributePlaceholders(comp, nod
   }
 };
 var updateTextNodePlaceholders = function updateTextNodePlaceholders(comp, nodeTree, pointers) {
-  var textWalker = document.createTreeWalker(nodeTree, NodeFilter.SHOW_TEXT, {
-    acceptNode: function acceptNode(node) {
-      if (/{([^}]+)}/.test(node.data)) {
-        return NodeFilter.FILTER_ACCEPT;
+  var textWalker = document.createTreeWalker(nodeTree, NodeFilter.SHOW_TEXT, null, false);
+  var nodesToProcess = [];
+  while (textWalker.nextNode()) {
+    nodesToProcess.push(textWalker.currentNode);
+  }
+  nodesToProcess.forEach(function (node) {
+    var nodeVal = node.nodeValue;
+    var match;
+    var _loop = function _loop() {
+      var fullMatch = match[0];
+      var _fullMatch$match = fullMatch.match(/{([^|}]+)(\|[^}]+)?}/),
+        _fullMatch$match2 = _slicedToArray(_fullMatch$match, 3),
+        propName = _fullMatch$match2[1],
+        filters = _fullMatch$match2[2];
+      var filterList = filters ? filters.split('|').slice(1) : [];
+      var placeholderVal = getPlaceholderVal(comp, propName, pointers);
+      filterList.forEach(function (filter) {
+        switch (filter) {
+          case 'asHTML':
+            break;
+          default:
+            console.log(filter);
+            console.log(placeholderVal);
+            placeholderVal = applyCustomFilter(comp, placeholderVal, filter);
+            break;
+        }
+      });
+      if (filterList.includes('asHTML')) {
+        var docFrag = document.createRange().createContextualFragment(placeholderVal);
+        node.parentNode.insertBefore(docFrag, node);
+        node.parentNode.removeChild(node);
+        return 1; // break
+      } else {
+        nodeVal = nodeVal.replace(fullMatch, placeholderVal);
       }
+    };
+    while ((match = /{([^}]+)}/.exec(nodeVal)) !== null) {
+      if (_loop()) break;
+    }
+    if (node.parentNode) {
+      node.nodeValue = nodeVal;
     }
   });
-  while (textWalker.nextNode()) {
-    var nodeVal = textWalker.currentNode.nodeValue;
-    var props = nodeVal.match(/{([^}]+)}/g);
-    for (var i = 0; i < props.length; i++) {
-      nodeVal = nodeVal.replace(props[i], getPlaceholderVal(comp, props[i], pointers));
-    }
-    textWalker.currentNode.nodeValue = nodeVal;
-  }
 };
 
 var processNode = function processNode(comp, node, pointers) {
@@ -922,6 +1013,8 @@ function AppBlock(config) {
       if (config.methods instanceof Object) Object.assign(comp.methods, config.methods);
       comp.directives = directives;
       if (config.directives instanceof Object) Object.assign(comp.directives, config.directives);
+      comp.filters = filters;
+      if (config.filters instanceof Object) Object.assign(comp.filters, config.filters);
       comp.events = {};
       if (config.events instanceof Object) {
         Object.assign(comp.events, config.events);

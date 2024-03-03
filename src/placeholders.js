@@ -2,11 +2,12 @@
 
 
 import {getProp} from './utils';
+import {applyCustomFilter} from './filters';
 
 
 // Returns the value of a placeholder.
 const getPlaceholderVal = function(comp, placeholder, pointers) {
-  if ( /{([^}]+)}/.test(placeholder) === false ) return;
+  // if ( /{([^}]+)}/.test(placeholder) === false ) return;
   if ( typeof pointers === 'object' && pointers !== null ) {
 
   }
@@ -17,7 +18,7 @@ const getPlaceholderVal = function(comp, placeholder, pointers) {
   // Return empty text instead of undefined.
   if (result === undefined) return '';
   return result;
-}; 
+};
 
 // Replaces all placeholders in all attributes in a node.
 export const updateAttributePlaceholders = function(comp, node, pointers) {
@@ -34,25 +35,62 @@ export const updateAttributePlaceholders = function(comp, node, pointers) {
   }
 };
 
-// Updates all the text nodes that contain placeholders {}
+// Updates all the text nodes that contain placeholders `{}` and applies filters (if any).
 export const updateTextNodePlaceholders = function(comp, nodeTree, pointers) {
-  // Create a new treeWalker with all visible text nodes that contain placeholders;
   const textWalker = document.createTreeWalker(
-    nodeTree, NodeFilter.SHOW_TEXT, {
-      acceptNode: function(node) {
-        if ( /{([^}]+)}/.test(node.data) ) {
-          return NodeFilter.FILTER_ACCEPT;
+    nodeTree, NodeFilter.SHOW_TEXT, null, false
+  );
+
+  let nodesToProcess = [];
+  while (textWalker.nextNode()) {
+    nodesToProcess.push(textWalker.currentNode);
+  }
+
+  nodesToProcess.forEach((node) => {
+    let nodeVal = node.nodeValue;
+    let match;
+
+    // Use a while loop to find all placeholders in the current node value
+    while ((match = /{([^}]+)}/.exec(nodeVal)) !== null) {
+      const fullMatch = match[0];
+      // This regex now captures the propName and any filters separated by |
+      const [, propName, filters] = fullMatch.match(/{([^|}]+)(\|[^}]+)?}/);
+      const filterList = filters ? filters.split('|').slice(1) : [];
+
+      let placeholderVal = getPlaceholderVal(comp, propName, pointers);
+
+      // Process each filter
+      filterList.forEach(filter => {
+        // Example: Apply the filter based on its name.
+        switch (filter) {
+          case 'asHTML':
+            // For asHTML, we'll handle it separately outside this loop since this is a corner case and has to be
+            // hardcoded.
+            break;
+          default:
+            console.log(filter);
+            console.log(placeholderVal);
+            // Handles other filters, e.g., applying a custom function
+            placeholderVal = applyCustomFilter(comp, placeholderVal, filter);
+            break;
         }
+      });
+
+      if (filterList.includes('asHTML')) {
+        // Create a document fragment from the HTML
+        const docFrag = document.createRange().createContextualFragment(placeholderVal);
+        node.parentNode.insertBefore(docFrag, node);
+        node.parentNode.removeChild(node);
+        break; // Exit the loop since the node has been replaced
+      } else {
+        // Replace text as before
+        nodeVal = nodeVal.replace(fullMatch, placeholderVal);
       }
     }
-  );
-  while (textWalker.nextNode()) {
-    let nodeVal = textWalker.currentNode.nodeValue;
-    // Iterate over the props (if any) and replace it with the appropriate value.
-    const props = nodeVal.match(/{([^}]+)}/g);
-    for (let i=0; i<props.length; i++) {
-      nodeVal = nodeVal.replace(props[i], getPlaceholderVal(comp, props[i], pointers));
+
+    // Update the node value only if it hasn't been replaced by HTML
+    if (node.parentNode) {
+      node.nodeValue = nodeVal;
     }
-    textWalker.currentNode.nodeValue = nodeVal;
-  }
+  });
 };

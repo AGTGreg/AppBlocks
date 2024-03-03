@@ -3,6 +3,7 @@
 const Idiomorph = require('idiomorph/dist/idiomorph.cjs');
 import {updateTextNodePlaceholders} from './placeholders';
 import {directives} from './directives';
+import {filters} from './filters';
 import {processNode} from './processing';
 import {helpers} from './utils';
 import {fetchRequest, axiosRequest} from './requests';
@@ -155,6 +156,9 @@ export function AppBlock(config) {
 
       comp.directives = directives;
       if (config.directives instanceof Object) Object.assign(comp.directives, config.directives);
+
+      comp.filters = filters;
+      if (config.filters instanceof Object) Object.assign(comp.filters, config.filters);
 
       // Event handling ------------------------------------------------------------------------------------------------
       comp.events = {};

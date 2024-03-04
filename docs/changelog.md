@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.4.0
+- Add support for [Idiomorph](https://github.com/bigskysoftware/idiomorph) as a render engine.
+- Add support for fetch requests.
+- **Rendering:** Add `renderEngine` parameter so now we can choose which rendering engine to use. This parameter accepts 'plain' or 'Idiomorph`.
+- **Requests:** Replace `makeRequest()` method with `axiosRequest()` and `fetchRequest()` methods.
+- **Filters:** Now we can declare filters that take a value from the template and return another value.
+- **Filters:** Add a filter to render HTML content. (The default is to allways render data content as text)
+
 ## 1.3.0
 - **FIX:** AppBlocks would throw an error if el is not set or if the element in el does not exist effectively blocking other scripts from executing.
 

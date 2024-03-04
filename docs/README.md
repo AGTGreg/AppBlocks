@@ -1,9 +1,8 @@
 # Introduction
 
-AppBlocks is a tiny, fast and very lightweight javascript library for building front-end apps. It has no dependencies.
+AppBlocks is a tiny, fast and very lightweight javascript library for building front-end apps.
 
-It was created to cover the need of enhancing pages and web applications front-ends with small and maintainable
-applications fast and easy without introducing much overhead.
+It started as a personal challenge project that later evolved to a usable full fleged library that covered the need to quickly enhancing pages and web applications front-ends with small and maintainable applications.
 
 The main goals of AppBlocks is to provide all the necessary functionality to develop front-end apps while beeing
 lightweight, ridiculously easy to integrate in any project, practical and small.
@@ -25,7 +24,7 @@ Download and include with a script tag in your document's head:
 or you can use the **CDN version**:
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/appblocks@1.3.1/dist/appblocks.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/appblocks@1.4.0/dist/appblocks.min.js"></script>
 ```
 
 or you can install via **npm**:
@@ -78,7 +77,7 @@ We can also use placeholders in attributes:
 
 ## Custom template
 
-A more efficient way for creating our Apps would be to have all our content inside a template element and tell
+A more efficient way for creating our Apps is to have all our content inside a template element and tell
 AppBlocks were it to render it:
 
 ```html
@@ -99,22 +98,42 @@ var app = new AppBlock({
 });
 ```
 
-This is the recommended way for creating our Apps but in order to keep our snippets short and simple,
-we will use the first method for the rest of the documentation.
+This is the recommended way for creating our Apps in AppBlocks.
 
 
-## Debugging
+## Filters
+In the example above we get the message directly from our data. But what if we wanted to edit that message before we
+show it to the world? Lets say we want to convert it to uppercase letters.
 
-When we are at the development stage its allways a good idea to enable debuging:
-
+This is were filters come in. So let's add a filter that will take any value and convert it to uppercase:
 ```js
 var app = new AppBlock({
-  ...
-  debug: true,
-  ...
-})
+  el: document.getElementById('app'),
+  template: document.getElementById('appTemplate'),
+  data: {
+    message: 'Hello world!'
+  },
+
+  filters: {
+    toUpperCase(app, value) {
+      return value.toUpperCase();
+    }
+  }
+
+});
 ```
-Now if you open your console you will see that AppBlocks outputs logging and warnings for you.
+
+And this is how we use it in our template:
+
+```html
+<template id="appTemplate">
+  <p title="{data.message}">{data.message|toUpperCase}</p>
+</template>
+```
+
+> **filters** are functions that take an input value from a template and return another.
+
+
 
 
 ## Methods

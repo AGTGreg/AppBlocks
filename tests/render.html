@@ -25,7 +25,7 @@
         <h1>HTML</h1>
         <p>{data.testHTML|asHTML}</p>
         <h1>This is text again</h1>
-        <p>{data.testText|toLowerCase}</p>
+        <p>{data.testText|red|toLowerCase}</p>
         <h1>HTML*2</h1>
         <p>{data.testHTML|asHTML}</p>
         <p>{data.testHTML|asHTML}</p>
@@ -43,6 +43,9 @@
             data: {
                 testText: "This is some text",
                 testHTML: "<span>This is some HTML</span>"
+            },
+            filters: {
+                red(app, value) { return `${value} is red`}
             }
         })
     </script>

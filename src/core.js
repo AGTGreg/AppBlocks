@@ -7,6 +7,7 @@ import {filters} from './filters';
 import {processNode} from './processing';
 import {helpers} from './utils';
 import {fetchRequest, axiosRequest} from './requests';
+import { logError } from './logger';
 
 const defaultRequestHeaders = {
 
@@ -97,18 +98,23 @@ export function AppBlock(config) {
     const comp = this;
 
     if ( config.debug ) comp.debug = true;
+    if (config.name) {
+      comp.name = config.name;
+    } else {
+      comp.name = "AppBlock";
+    }
 
     // Initialize all the properties and update them from the config if they are included, or exit if no
     // config is provided.
     if (config !== undefined) {
 
       if (config.el === undefined) {
-        if ( comp.debug ) console.warn("el is empty. Please assign a DOM element to el. Current AppBlock is exiting.")
+        if ( comp.debug ) logError(comp, "el is empty. Please assign a DOM element to el.");
         return;
       }
 
       if (config.el === null) {
-        if ( comp.debug ) console.warn("The element you assigned to el is not present. Current AppBlock is exiting.")
+        if ( comp.debug ) logError(comp, "The element you assigned to el is not present.");
         return;
       }
 

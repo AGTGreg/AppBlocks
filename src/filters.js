@@ -1,15 +1,11 @@
-export const filters = {
-    'toUpperCase': function(comp, value) {
-        console.log("toUpperCase");
-        console.log(value);
-        return value.toUpperCase();
-    },
-    'toLowerCase': function(comp, value) {
-        return value.toLowerCase();
-    }
-}
+export const filters = {}
 
 
 export const applyCustomFilter = function(comp, value, filterName) {
+  if (filterName in filters) {
     return filters[filterName](comp, value);
+  } else {
+    console.error(`${filterName} is not a registered filter.`);
+    return value;
+  }
 }

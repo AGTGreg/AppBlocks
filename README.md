@@ -352,7 +352,7 @@ var app = new AppBlock({
 The result will be:
 > Hi there Greg!
 
-?> Note that we have to return `true` in order for our element to show up. Otherwise AppBlocks would have discarded it.
+> Note that we have to return `true` in order for our element to show up. Otherwise AppBlocks would have discarded it.
 
 
 ## Event handling
@@ -462,15 +462,6 @@ App.fetchRequest("https://example.com",
     finally() { alert('Request is finished'); }
   }, 300)
 ```
-
-> If `config.method` is `POST` or `PUT` you need to include a body in your `config`:
-> ```js
->{
->    method: 'POST',
->    url: "https://example.com",
->    body: {data: "some data"}
->  }
-> ```
 
 #### Axios
 > To make use of the Requests featute, we must first include the Axios library in our document since Axios is not included in AppBlocs:

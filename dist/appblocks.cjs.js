@@ -1,6 +1,7 @@
 'use strict';
 
 require('core-js/modules/es.array.for-each.js');
+require('core-js/modules/es.function.name.js');
 require('core-js/modules/es.object.assign.js');
 require('core-js/modules/es.object.to-string.js');
 require('core-js/modules/web.dom-collections.for-each.js');
@@ -12,9 +13,9 @@ require('core-js/modules/es.regexp.to-string.js');
 require('core-js/modules/es.string.includes.js');
 require('core-js/modules/es.string.match.js');
 require('core-js/modules/es.string.replace.js');
+require('core-js/modules/es.array.concat.js');
 require('core-js/modules/es.array.index-of.js');
 require('core-js/modules/es.string.split.js');
-require('core-js/modules/es.function.name.js');
 require('core-js/modules/es.promise.js');
 require('core-js/modules/es.promise.finally.js');
 require('core-js/modules/web.timers.js');
@@ -678,18 +679,18 @@ var getObjectFromKey = function getObjectFromKey(root, key) {
   return prop;
 };
 
-var filters = {
-  'toUpperCase': function toUpperCase(comp, value) {
-    console.log("toUpperCase");
-    console.log(value);
-    return value.toUpperCase();
-  },
-  'toLowerCase': function toLowerCase(comp, value) {
-    return value.toLowerCase();
-  }
+var logError = function logError(comp, msg) {
+  console.error("".concat(comp.name, ": ").concat(msg));
 };
+
+var filters = {};
 var applyCustomFilter = function applyCustomFilter(comp, value, filterName) {
-  return filters[filterName](comp, value);
+  if (filterName in filters) {
+    return filters[filterName](comp, value);
+  } else {
+    logError(comp, "".concat(filterName, " is not a registered filter."));
+    return value;
+  }
 };
 
 var getPlaceholderVal = function getPlaceholderVal(comp, placeholder, pointers) {
@@ -970,13 +971,18 @@ function AppBlock(config) {
   this.Init = function () {
     var comp = this;
     if (config.debug) comp.debug = true;
+    if (config.name) {
+      comp.name = config.name;
+    } else {
+      comp.name = "AppBlock";
+    }
     if (config !== undefined) {
       if (config.el === undefined) {
-        if (comp.debug) console.warn("el is empty. Please assign a DOM element to el. Current AppBlock is exiting.");
+        if (comp.debug) logError(comp, "el is empty. Please assign a DOM element to el.");
         return;
       }
       if (config.el === null) {
-        if (comp.debug) console.warn("The element you assigned to el is not present. Current AppBlock is exiting.");
+        if (comp.debug) logError(comp, "The element you assigned to el is not present.");
         return;
       }
       comp.el = config.el;

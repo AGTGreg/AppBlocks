@@ -6,7 +6,7 @@ Gets a property's value.
 :keys = An array of keys to search for
 :pointers = An object with keys that point to a specific variable / object
 
-First search in pointers if pointers is defined. Then search in methods and lastly 
+First search in pointers if pointers is defined. Then search in methods and lastly
 search in the component itself. Go deeper, one key at a time until we reach the last
 one or until we get an undefined value.
 */
@@ -40,8 +40,6 @@ export const getProp = function(comp, keys, pointers) {
     }
   }
 
-  if ( comp.debug ) console.info("Result for", keys, ":", prop);
-  
   return prop;
 };
 

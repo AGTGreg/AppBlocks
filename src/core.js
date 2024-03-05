@@ -17,9 +17,6 @@ const defaultRequestHeaders = {
 export function AppBlock(config) {
 
 
-  this.debug = false,
-
-
   // Sets or Updates the data and then calls render()
   this.setData = function(newData, replaceData = false) {
     if (replaceData) {
@@ -70,7 +67,7 @@ export function AppBlock(config) {
     } else if (comp.renderEngine === 'plain') {
       comp.plainRender(tmpDOM);
     } else {
-        console.error(`${comp.renderEngine} renderEngine does not exist.`);
+      logError(comp, `${comp.renderEngine} renderEngine does not exist.`);
     }
 
     // End timing
@@ -97,7 +94,6 @@ export function AppBlock(config) {
   this.Init = function() {
     const comp = this;
 
-    if ( config.debug ) comp.debug = true;
     if (config.name) {
       comp.name = config.name;
     } else {
@@ -109,12 +105,12 @@ export function AppBlock(config) {
     if (config !== undefined) {
 
       if (config.el === undefined) {
-        if ( comp.debug ) logError(comp, "el is empty. Please assign a DOM element to el.");
+        logError(comp, "el is empty. Please assign a DOM element to el.");
         return;
       }
 
       if (config.el === null) {
-        if ( comp.debug ) logError(comp, "The element you assigned to el is not present.");
+        logError(comp, "The element you assigned to el is not present.");
         return;
       }
 

@@ -1,6 +1,6 @@
 (function (global, factory) {
-    typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('core-js/modules/es.array.for-each.js'), require('core-js/modules/es.object.assign.js'), require('core-js/modules/es.object.to-string.js'), require('core-js/modules/web.dom-collections.for-each.js'), require('core-js/modules/es.array.includes.js'), require('core-js/modules/es.array.slice.js'), require('core-js/modules/es.regexp.constructor.js'), require('core-js/modules/es.regexp.exec.js'), require('core-js/modules/es.regexp.to-string.js'), require('core-js/modules/es.string.includes.js'), require('core-js/modules/es.string.match.js'), require('core-js/modules/es.string.replace.js'), require('core-js/modules/es.array.index-of.js'), require('core-js/modules/es.string.split.js'), require('core-js/modules/es.function.name.js'), require('core-js/modules/es.promise.js'), require('core-js/modules/es.promise.finally.js'), require('core-js/modules/web.timers.js')) :
-    typeof define === 'function' && define.amd ? define(['core-js/modules/es.array.for-each.js', 'core-js/modules/es.object.assign.js', 'core-js/modules/es.object.to-string.js', 'core-js/modules/web.dom-collections.for-each.js', 'core-js/modules/es.array.includes.js', 'core-js/modules/es.array.slice.js', 'core-js/modules/es.regexp.constructor.js', 'core-js/modules/es.regexp.exec.js', 'core-js/modules/es.regexp.to-string.js', 'core-js/modules/es.string.includes.js', 'core-js/modules/es.string.match.js', 'core-js/modules/es.string.replace.js', 'core-js/modules/es.array.index-of.js', 'core-js/modules/es.string.split.js', 'core-js/modules/es.function.name.js', 'core-js/modules/es.promise.js', 'core-js/modules/es.promise.finally.js', 'core-js/modules/web.timers.js'], factory) :
+    typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('core-js/modules/es.array.for-each.js'), require('core-js/modules/es.function.name.js'), require('core-js/modules/es.object.assign.js'), require('core-js/modules/es.object.to-string.js'), require('core-js/modules/web.dom-collections.for-each.js'), require('core-js/modules/es.array.includes.js'), require('core-js/modules/es.array.slice.js'), require('core-js/modules/es.regexp.constructor.js'), require('core-js/modules/es.regexp.exec.js'), require('core-js/modules/es.regexp.to-string.js'), require('core-js/modules/es.string.includes.js'), require('core-js/modules/es.string.match.js'), require('core-js/modules/es.string.replace.js'), require('core-js/modules/es.array.concat.js'), require('core-js/modules/es.array.index-of.js'), require('core-js/modules/es.string.split.js'), require('core-js/modules/es.promise.js'), require('core-js/modules/es.promise.finally.js'), require('core-js/modules/web.timers.js')) :
+    typeof define === 'function' && define.amd ? define(['core-js/modules/es.array.for-each.js', 'core-js/modules/es.function.name.js', 'core-js/modules/es.object.assign.js', 'core-js/modules/es.object.to-string.js', 'core-js/modules/web.dom-collections.for-each.js', 'core-js/modules/es.array.includes.js', 'core-js/modules/es.array.slice.js', 'core-js/modules/es.regexp.constructor.js', 'core-js/modules/es.regexp.exec.js', 'core-js/modules/es.regexp.to-string.js', 'core-js/modules/es.string.includes.js', 'core-js/modules/es.string.match.js', 'core-js/modules/es.string.replace.js', 'core-js/modules/es.array.concat.js', 'core-js/modules/es.array.index-of.js', 'core-js/modules/es.string.split.js', 'core-js/modules/es.promise.js', 'core-js/modules/es.promise.finally.js', 'core-js/modules/web.timers.js'], factory) :
     (global = typeof globalThis !== 'undefined' ? globalThis : global || self, global.AppBlock = factory());
 })(this, (function () { 'use strict';
 
@@ -663,18 +663,18 @@
       return prop;
     };
 
-    var filters = {
-      'toUpperCase': function toUpperCase(comp, value) {
-        console.log("toUpperCase");
-        console.log(value);
-        return value.toUpperCase();
-      },
-      'toLowerCase': function toLowerCase(comp, value) {
-        return value.toLowerCase();
-      }
+    var logError = function logError(comp, msg) {
+      console.error("".concat(comp.name, ": ").concat(msg));
     };
+
+    var filters = {};
     var applyCustomFilter = function applyCustomFilter(comp, value, filterName) {
-      return filters[filterName](comp, value);
+      if (filterName in filters) {
+        return filters[filterName](comp, value);
+      } else {
+        logError(comp, "".concat(filterName, " is not a registered filter."));
+        return value;
+      }
     };
 
     var getPlaceholderVal = function getPlaceholderVal(comp, placeholder, pointers) {
@@ -955,13 +955,18 @@
       this.Init = function () {
         var comp = this;
         if (config.debug) comp.debug = true;
+        if (config.name) {
+          comp.name = config.name;
+        } else {
+          comp.name = "AppBlock";
+        }
         if (config !== undefined) {
           if (config.el === undefined) {
-            if (comp.debug) console.warn("el is empty. Please assign a DOM element to el. Current AppBlock is exiting.");
+            if (comp.debug) logError(comp, "el is empty. Please assign a DOM element to el.");
             return;
           }
           if (config.el === null) {
-            if (comp.debug) console.warn("The element you assigned to el is not present. Current AppBlock is exiting.");
+            if (comp.debug) logError(comp, "The element you assigned to el is not present.");
             return;
           }
           comp.el = config.el;

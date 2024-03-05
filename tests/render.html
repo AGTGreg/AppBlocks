@@ -25,7 +25,7 @@
         <h1>HTML</h1>
         <p>{data.testHTML|asHTML}</p>
         <h1>This is text again</h1>
-        <p>{data.testText|red|toLowerCase}</p>
+        <p>{data.testText|toLowerCase}</p>
         <h1>HTML*2</h1>
         <p>{data.testHTML|asHTML}</p>
         <p>{data.testHTML|asHTML}</p>
@@ -37,6 +37,7 @@
     <script src="../dist/appblocks.umd.js"></script>
     <script>
         var app = new AppBlock({
+            name: "RenderApp",
             el: document.getElementById('app'),
             template: document.getElementById('appTemplate'),
             renderEngine: 'plain',
@@ -45,7 +46,8 @@
                 testHTML: "<span>This is some HTML</span>"
             },
             filters: {
-                red(app, value) { return `${value} is red`}
+                toUpperCase(app, value) { return value.toUpperCase(); },
+                toLowerCase(app, value) { return value.toLowerCase(); }
             }
         })
     </script>

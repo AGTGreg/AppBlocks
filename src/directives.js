@@ -3,6 +3,7 @@
 import {getProp} from './utils';
 import {processNode} from './processing';
 import {updateAttributePlaceholders, updateTextNodePlaceholders} from './placeholders';
+import { logError } from './logger';
 
 
 // If and For directives
@@ -12,7 +13,7 @@ export const directives = {
     let attr = node.getAttribute('c-if');
     // In case this directive was called form a c-ifnot.
     if (attr === null) attr = node.getAttribute('c-ifnot');
-    
+
     let result = getProp(comp, attr.split('.'), pointers);
 
     if (result === undefined) {
@@ -27,10 +28,7 @@ export const directives = {
           const condLeft = getProp(comp, cParts[0].split('.'), pointers);
 
           if (validTypes.includes(String(typeof(condLeft))) === false) {
-            if ( comp.debug ) {
-              console.warn(
-                cParts[0] + " cannot be evaluated because it is not a boolean nor a number.");
-            }
+            logError(comp, `${cParts[0]} cannot be evaluated because it is not a boolean nor a number.`);
             return false;
           } else {
             condition = condition.replace(cParts[0], condLeft);
@@ -77,7 +75,7 @@ export const directives = {
         const item = iterable[i];
         // Add a pointer for the current item.
         pointers[pointer] = item;
-        
+
         const newNode = node.cloneNode(true);
         processNode(comp, newNode, pointers);
         updateAttributePlaceholders(comp, newNode, pointers);
@@ -94,6 +92,6 @@ export const directives = {
     } else {
       return false;
     }
-    
+
   }
 };

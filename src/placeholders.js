@@ -68,8 +68,6 @@ export const updateTextNodePlaceholders = function(comp, nodeTree, pointers) {
             // hardcoded.
             break;
           default:
-            console.log(filter);
-            console.log(placeholderVal);
             // Handles other filters, e.g., applying a custom function
             placeholderVal = applyCustomFilter(comp, placeholderVal, filter);
             break;

@@ -102,11 +102,15 @@ This is the recommended way for creating our Apps in AppBlocks.
 
 
 ## Filters
+`filterName(appInstance, value) { return value }`
+
 In the example above we get the message directly from our data. But what if we wanted to edit that message before we
 show it to the world? Lets say we want to convert it to uppercase letters.
 
-This is were filters come in. So let's add a filter that will take any value and convert it to uppercase:
+This is were filters come in.
 > **filters** are functions that take an input value from a template and return another.
+
+So let's add a filter that will take any value and convert it to uppercase:
 ```js
 var app = new AppBlock({
   el: document.getElementById('app'),
@@ -145,8 +149,10 @@ It is possible to chain multiple filters together like so:
 
 
 ## Methods
+`methodName(appInstance) {}`
 
 The `methods` object is the right place to put all of our application's logic. From processing data to anything you would write a function for. This is a good way to keep our code DRY.
+
 We can call methods from placeholders, attributes and even directives (As you'll see later on).
 
 Lets add a method that returns whatever is in our `data.message` but in UpperCase. All methods in AppBlocks
@@ -194,9 +200,9 @@ directives as attributes to the elements we want to control.
 ### c-if
 
 ```html
-<div id="app">
+<template id="appTemplate">
   <span c-if="data.seen">Now you see me</span>
-</div>
+</template>
 ```
 
 ```js
@@ -288,6 +294,7 @@ var app = new AppBlock({
 
 
 ### Making your own directives
+`directiveName: function(appInstance, node, pointers) { return bool; }`
 
 You can allways make your own directives ofcourse.
 
@@ -349,6 +356,7 @@ The result will be:
 
 
 ## Event handling
+`"eventTrigger selector": function(event) {}`
 
 AppBlocks makes it easy for us to handle events while keeping everything nice and clean. Following the same pattern with `filters`, `methods` and `directives`,   `events` should go in the `events` object:
 
@@ -435,32 +443,25 @@ With AppBlocks you can use `fetch` or [Axios](https://github.com/axios/axios) to
 
 #### Fetch
 ```js
-App.fetchRequest(curl, onfig, callbacks, delay);
+App.fetchRequest(url, options, callbacks, delay);
 ```
+
+- `options`: Read [this](https://developer.mozilla.org/en-US/docs/Web/API/fetch#options) for what can go into the `options`.
+- `callbacks`: success, error and finally callback functions.
+- `delay`: You may add a delay in milliseconds for the request. This is handy if you want to throttle your requests.
 
 **Example:**
 ```js
-App.fetchRequest(
+App.fetchRequest("https://example.com",
   {
-    method: 'GET',
-    url: "https://example.com"
+    method: 'GET'
   },
   {
     success(response) { console.log(response); },
     error(error) { console.log(error); },
     finally() { alert('Request is finished'); }
-  }
-)
+  }, 300)
 ```
-
-> You can also add a delay in your config:
-> ```js
->{
->    method: 'GET',
->    url: "https://example.com",
->    delay: 1000
->  }
-> ```
 
 > If `config.method` is `POST` or `PUT` you need to include a body in your `config`:
 > ```js
@@ -472,57 +473,37 @@ App.fetchRequest(
 > ```
 
 #### Axios
-To make use of the Requests featute, we must first include the Axios library in our document:
-
-```html
-<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-```
-
-Making requests is simple. First we can add a basic configuration that axios will use on every request. This is
-optional:
+> To make use of the Requests featute, we must first include the Axios library in our document since Axios is not included in AppBlocs:
+> ```html
+> <script src="https://cdn.jsdelivr.net/npm/axios/dist/ axios.min.js"></script>
+> ```
 
 ```js
-var app = new AppBlock({
-  ...
-  axiosConfig: {
-    url: 'https://example.com'
-  }
-  ...
-})
+App.axiosRequest(config, callbacks, delay);
 ```
 
-This config, tells axios that every request will be made at `https://example.com`
+- `config`: Read [this](https://axios-http.com/docs/req_config) for what can go into the `config`.
+- `callbacks`: success, error and finally callback functions.
+- `delay`: You may add a delay in milliseconds for the request. This is handy if you want to throttle your requests.
 
-Head over to the [Axios documentation](https://github.com/axios/axios) to see all the available configuration options.
-
-Then we can make the request, specifying only the method or the parameters:
+Example:
 
 ```js
-App.request({method: 'get'},
+App.axiosRequest(
+  {
+    url: 'https://example.com',
+    method: 'GET'
+  },
   {
     success(response) { console.log(response); },
     error(error) { console.log(error); },
-    done() { alert('Request is finished'); }
-  },
-  replaceData = false  // Update (don't replace) our data when the request is finished.
-)
+    finally() { alert('Request is finished'); }
+  }, 300)
 ```
-
-> We can mutate the response data inside the `success` callback and pass it to our app before it renders. To do that we
-> just need to return the altered response object:
-> ```js
-> success(response) {
->   response.data = {message: "The response was a Success!"}
->   return response;
->  }
-> ```
-> Be careful though, AppBlocks expects to find a `data` object inside the response. So be sure that whatever your
-> callback returns has a data object inside.
 
 ### State
 
-AppBlocks will update the state of our app depending on the result of the request. We can use that state to structure
-our UI, based on the request. The state can be one of the following: `isLoading, isSuccessful, hasError`.
+AppBlocks will update the state of our app depending on the result of the request. We can use that state to structure our UI, based on the request. The state can be one of the following: `isLoading, isSuccessful, hasError`.
 
 State is exposed as methods so we can use them in our UI with directives:
 
@@ -545,7 +526,9 @@ to get a list of users. Then display that list on our page.
 Lets make the UI part of our app:
 
 ```html
-<div id="app">
+<div id="app"></div>
+
+<template id="appTemplate">
   <button id="get-data">Get Data</button>
 
   <p c-if="isLoading">Loading</p>
@@ -569,29 +552,31 @@ And this is how we make a request, when the user cliks the button:
 var app = new AppBlock({
 
   el: document.getElementById('app'),
-
-  axiosConfig: {
-    url: 'https://reqres.in/api/users'
-  },
+  template: getElementById('appTemplate'),
 
   data: {
-    errorMessage: ""
+    errorMessage: "",
+    user: {}
   },
 
   events: {
     'click #get-data': function(e) {
       const app = this.Parent;
-
-      app.request({
-        method: 'get',
-        params: {delay: 1}  // Delay the request so that we have a chance to see the Loading message
-      },
-      {
-        error(error) { app.data.errorMessage = error.message }
-      },
-      replaceData = false
-      )
-    }
+      app.fetchRequest('https://reqres.in/api/users/2',
+        {
+            method: 'GET',
+        },
+        {
+            success(data) {
+                console.log(data);
+                app.data.user = data.data;
+            },
+            error(error) {
+                app.data.errorMessage = error.message
+            },
+            finally() {console.log('finished')}
+        }, 1000
+    )
   }
 
 })

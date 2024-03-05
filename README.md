@@ -137,32 +137,10 @@ And this is how we use it in our template:
 It is possible to chain multiple filters together like so:
 ```html
 <template id="appTemplate">
-  <p title="{data.message}">{data.message|filterA|filterB|filterC}</p>
+  <p title="{data.message}">
+    {data.message|filterA|filterB|filterC}
+  </p>
 </template>
-```
-
-
-### The `asHTML` filter
-AppBlocks is safe by default. This means that if a value in your data has HTML in it and you try to add it in your template, AppBlocks will add it as text. So this for example:
-```js
-{
-  ...
-  data: {
-    someHTML: "<p>Hello!</p>"
-  }
-}
-```
-```html
-<p>{data.someHTML}</p>
-```
-will result to this:
-```html
-<p>"<p>Hello!</p>"</p>
-```
-
-In order to tell Appblocks that a value should be added as html you must use the`asHTML` filter:
-```html
-<p>{data.someHTML|asHTML}</p>
 ```
 
 
@@ -170,9 +148,6 @@ In order to tell Appblocks that a value should be added as html you must use the
 
 The `methods` object is the right place to put all of our application's logic. From processing data to anything you would write a function for. This is a good way to keep our code DRY.
 We can call methods from placeholders, attributes and even directives (As you'll see later on).
-
-In the example above we get the message directly from our data. But what if we wanted to edit that message before we
-show it to the world? Lets say we want to convert it to uppercase letters.
 
 Lets add a method that returns whatever is in our `data.message` but in UpperCase. All methods in AppBlocks
 exist inside the methods object:
@@ -188,39 +163,25 @@ var app = new AppBlock({
 
   methods: {
     // All methods take 1 optional parameter which is our app's instance
-    message(thisApp) {
-      return thisApp.data.message.toUpperCase();
+    message(app) {
+      return app.data.message.toUpperCase();
     }
   }
 
 })
 ```
 
-Now all that needs to be done is to call that method inside our element:
+Now we can call this method inside our element:
 
 ```html
-<div id="app">
-  {message}
-</div>
+<template id="appTemplate">
+  <p>{message}</p>
+</template>
 ```
 
 > HELLO WORLD!
 
 Note that we don't need to type `methods.message` to access the method. In AppBlocks methods are first class citizens.
-
-
-
-
-Of course methods get updated along with our data. Go ahead and open your browser's console again and type
-`app.setData({message: "this is uppercase"})`. You'll see that our message is displayed in uppercase
-because it went through our method before showing up in our element.
-
-!>  All methods take one optional parameter. We can use that parameter to get access to our App's instance from within
-    our method. It is important to remember to include it as the first parameter when calling a method from anywhere
-    in our App:
-    ```
-    thisApp.methods.myMethod(thisApp, paramer1, parameter2, ...);
-    ```
 
 You can read more about methods [here](methods.md)
 
@@ -228,6 +189,7 @@ You can read more about methods [here](methods.md)
 
 It is very easy to control the structure of our app with **if** and **for** directives. We add these
 directives as attributes to the elements we want to control.
+
 
 ### c-if
 
@@ -254,9 +216,9 @@ When `seen` is `true` our element is visible. If we set it to `false` our elemen
 [Comparison operators](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Comparison_Operators)
 and evaluate **numbers** and **booleans**. For instance we could do this and it would work as expected:
 ```html
-<div id="app">
+<template id="appTemplate">
   <span c-if="data.seen == true">Now you see me</span>
-</div>
+</template>
 ```
 
 **As we mentioned earlier directives have access to our methods:**
@@ -276,24 +238,24 @@ var app = new AppBlock({
 ```
 
 ```html
-<div id="app">
+<template id="appTemplate">
   <span c-if="showSpan">Now you see me</span>
-</div>
+</template>
 ```
 
 ### c-ifnot
 
-This the opposite of `c-if`. Think of it as writing if ... else. But in our case this is more verbose so it is
-easier to explain our logic inside our element. Heres a quick example:
+This is the opposite of `c-if`. Think of it as writing if ... else:
 
 ```html
-<div id="app">
+<template id="appTemplate">
   <span c-if="showSpan">Now you see me</span>
   <span c-ifnot="showSpan">Seen is false</span>
-</div>
+</template>
 ```
 
 Only one of the span elements can be visible depending on the value of `seen`.
+
 
 ### c-for
 
@@ -314,11 +276,11 @@ var app = new AppBlock({
 ```
 
 ```html
-<div id="app">
+<template id="appTemplate">
   <ul>
     <li c-for="item in data.grosseryList"> {item.title} </li>
   </ul>
-</div>
+</template>
 ```
 > - Milk
 > - Tomatoes
@@ -327,10 +289,10 @@ var app = new AppBlock({
 
 ### Making your own directives
 
-If the directives build into AppBlocks don't cover your case you can allways make your own custom directives.
+You can allways make your own directives ofcourse.
 
-Directives are functions that return `true` or `false`. If it returns `true`, AppBlocks will show the element
-that has that directive, if it returns `false`, AppBlock will discard it and the element will not show up.
+Directives are functions that return `true` or `false`. If a directive returns `true`, AppBlocks will show the element
+that is assosiated with that directive, if it returns `false`, AppBlock will discard it and the element will not show up.
 
 You can create your directives in the `directives` parameter like so:
 
@@ -388,9 +350,7 @@ The result will be:
 
 ## Event handling
 
-AppBlocks makes it easy for us to handle events while keeping everything nice and clean. Just like `methods`
-belong in the methods object, events follows along with the same principle. So, as you might expect, `events` belong
-in the creatively named events object:
+AppBlocks makes it easy for us to handle events while keeping everything nice and clean. Following the same pattern with `filters`, `methods` and `directives`,   `events` should go in the `events` object:
 
 ```js
 var app = new AppBlock({
@@ -405,16 +365,15 @@ var app = new AppBlock({
 ```
 
 Every event starts with the event name, then the element that this event is attached to, followed by the method
-that will be executed when the event is triggered. AppBlocks supports all of the available events an element could
-trigger.
+that will be executed when the event is triggered.
 
 Let's create an app where the user can toggle an element with a click of a button:
 
 ```html
-<div id="app">
+<template id="appTemplate">
   <p c-if="data.seen">Now you see me</p>
   <button id="message-toggler">Toggle message</button>
-</div>
+</template>
 ```
 
 ```js
@@ -437,8 +396,7 @@ var app = new AppBlock({
 })
 ```
 
-If you plan to toggle the message from multiple elements, you could use `methods` to make things even
-cleaner and DRY:
+If you plan to toggle the message from multiple elements, you could use `methods` to make things even cleaner and DRY:
 
 ```js
 var app = new AppBlock({
@@ -466,20 +424,18 @@ var app = new AppBlock({
 })
 ```
 
+
 ## Requests
 
-A key concept in AppBlocks, is to cover the most common use cases of a front-end micro app. One of those use cases is
-to be able to make requests.
+A key concept in AppBlocks, is to cover the most common use cases of a front-end micro app. One of those use cases is to be able to make requests.
 
-With AppBlocks you can either use `fetch` or [Axios](https://github.com/axios/axios) to do that. AppBlocks exposes these APIs and takes care of the state of our micro apps.
-
-!> Axios is not included by default so you have to include it if you want to use the request feature.
+With AppBlocks you can use `fetch` or [Axios](https://github.com/axios/axios) to do that. AppBlocks wraps these APIs and takes care of our app's state and rendering.
 
 ### Usage
 
 #### Fetch
 ```js
-App.fetchRequest(config, callbacks);
+App.fetchRequest(curl, onfig, callbacks, delay);
 ```
 
 **Example:**

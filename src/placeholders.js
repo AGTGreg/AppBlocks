@@ -23,15 +23,29 @@ const getPlaceholderVal = function(comp, placeholder, pointers) {
 // Replaces all placeholders in all attributes in a node.
 export const updateAttributePlaceholders = function(comp, node, pointers) {
   const attrs = node.attributes;
-  for (let i=0; i<attrs.length; i++) {
-    if ( /{([^}]+)}/.test(attrs[i].value) ) {
-      const props = attrs[i].value.match(/{([^}]+)}/g);
+  for (let i = 0; i < attrs.length; i++) {
+    let attrValue = attrs[i].value;
+    let match;
 
-      for (let p=0; p<props.length; p++) {
-        const re = new RegExp(props[p], 'g');
-        attrs[i].value = attrs[i].value.replace(re, getPlaceholderVal(comp, props[p], pointers));
-      }
+    // Use a while loop to find all placeholders in the current attribute value
+    while ((match = /{([^}]+)}/.exec(attrValue)) !== null) {
+      const fullMatch = match[0];
+      // This regex captures the propName and any filters separated by |
+      const [, propName, filters] = fullMatch.match(/{([^|}]+)(\|[^}]+)?}/);
+      const filterList = filters ? filters.split('|').slice(1) : [];
+
+      let placeholderVal = getPlaceholderVal(comp, propName, pointers);
+
+      // Process each filter
+      filterList.forEach(filter => {
+        // Apply the filter based on its name
+        placeholderVal = applyCustomFilter(comp, placeholderVal, filter);
+      });
+
+      attrValue = attrValue.replace(fullMatch, placeholderVal);
     }
+
+    attrs[i].value = attrValue;
   }
 };
 
@@ -53,7 +67,7 @@ export const updateTextNodePlaceholders = function(comp, nodeTree, pointers) {
     // Use a while loop to find all placeholders in the current node value
     while ((match = /{([^}]+)}/.exec(nodeVal)) !== null) {
       const fullMatch = match[0];
-      // This regex now captures the propName and any filters separated by |
+      // This regex captures the propName and any filters separated by |
       const [, propName, filters] = fullMatch.match(/{([^|}]+)(\|[^}]+)?}/);
       const filterList = filters ? filters.split('|').slice(1) : [];
 

@@ -115,7 +115,7 @@ export function AppBlock(config) {
       }
 
       comp.el = config.el;
-      comp.renderEngine = config.renderEngine ? config.renderEngine : "plain";
+      comp.renderEngine = config.renderEngine ? config.renderEngine : "Idiomorph";
 
       // Get or create a document fragment with all the app's contents and pass it to the template.
       if (config.template) {

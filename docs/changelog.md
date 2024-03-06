@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.4.0
+## 2.0.0
 - Add support for [Idiomorph](https://github.com/bigskysoftware/idiomorph) as a render engine.
 - Add support for fetch requests.
 - **Rendering:** Add `renderEngine` parameter so now we can choose which rendering engine to use. This parameter accepts 'plain' or 'Idiomorph`.

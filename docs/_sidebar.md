@@ -4,7 +4,13 @@
 
 - [The Data object](data.md)
 
+- [Filters](filters.md)
+
 - [Methods](methods.md)
+
+- [Directives](directives.md)
+
+- [Requests](requests.md)
 
 - [Utilities](utils.md)
 

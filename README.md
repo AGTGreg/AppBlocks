@@ -1,12 +1,14 @@
 # Introduction
 
-AppBlocks is a tiny, fast and lightweight javascript library for building front-end apps.
+AppBlocks is a tiny, fast and lightweight javascript library for building micro apps. It is designed to be used primarily as a script tag to enhance web pages with micro applications.
 
-It started as a personal challenge project and later evolved into the go to library that was used in an everyday basis to quickly enhance pages and web applications front-ends with small and maintainable apps.
+AppBlocks started as a personal challenge project and later evolved into the go to library for me and my team that was used on an everyday basis to quickly enhance websites with small and self-contained apps.
 
-The goal of AppBlocks is to be a small library that provide all the necessary functionality to develop front-end apps while beeing ridiculously easy to integrate in any project as a script tag, practical and small.
+The goal of AppBlocks is to be a small library that provides all the necessary ingredients to develop micro apps in websites while being ridiculously easy to integrate in any project, practical and small.
 
 All the knowledge needed to master AppBlocks and start building front-end applications is here in a 10-15 minute read.
+
+Read about the [AppBlocks use case](https://agtgreg.github.io/AppBlocks/#/whyappblocks).
 
 
 **[Documentation](https://agtgreg.github.io/AppBlocks/#/)**

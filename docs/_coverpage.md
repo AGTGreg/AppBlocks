@@ -2,7 +2,7 @@
 ![logo](/media/appblocks_logo.png)
 # AppBlocks
 
-> All you need to build your front-end in a small and lightweight package with no dependencies.
+> All you need to build micro apps for websites in a small and lightweight package.
 
 
 [GitHub](https://github.com/AGTGreg/AppBlocks.git)

@@ -1,24 +1,23 @@
 # Changelog
 
 ## 2.0.0
-- Add support for [Idiomorph](https://github.com/bigskysoftware/idiomorph) as a render engine.
-- Add support for fetch requests.
-- **Rendering:** Add `renderEngine` parameter so now we can choose which rendering engine to use. This parameter accepts 'plain' or 'Idiomorph`.
+- **Rendering:** Add support for [Idiomorph](https://github.com/bigskysoftware/idiomorph) as a render engine.
+- **Rendering:** Add `renderEngine` parameter so now we can choose which rendering engine to use. This parameter accepts 'plain' or 'Idiomorph`. Default is 'Idiomorph'
+- **Requests:** Add support for fetch requests.
 - **Requests:** Replace `makeRequest()` method with `axiosRequest()` and `fetchRequest()` methods.
 - **Filters:** Now we can declare filters that take a value from the template and return another value.
-- **Filters:** Add a filter to render HTML content. (The default is to allways render data content as text)
+- **Filters:** Add a filter to render HTML content. (The default is to allways render data content as text).
+- **Filters:** Chain multiple filters together.
+- **Filters:** Make filters available for attributes.
+- **AppName:** Add name parameter so that all errors curry the app's name for easier debugging.
+- **Documentation:** Refactor documentation and update it to the latest features.
 
 ## 1.3.0
 - **FIX:** AppBlocks would throw an error if el is not set or if the element in el does not exist effectively blocking other scripts from executing.
-
 - **Enhancement:** Get data objects with square brackets notation in templates. (dynamic keys)
-
 - **Enhancement:** Placeholders inside c-for directives would get a value only if the c-for array contained objects. Now c-for works with non object array elements as well.
-
 - **Enhancement:** c-if directives will evaluate to false if the return value is false, null, undefined, 0 or empty string.
-
 - **New feature:** Debugging. If debug is true then AppBlocks will show warnings and logging data in the console.
-
 - **New feature:** utils: A set of helper functions:
   - `utils.getNode(selectors)`: Returns the first element that is a descendant of the AppBlock that matches the specified group of selectors.
   - `utils.getNodes(selectors)`: Returns a static (not live) NodeList representing a list of elements matching the specified group of selectors which are descendants of the AppBlock.

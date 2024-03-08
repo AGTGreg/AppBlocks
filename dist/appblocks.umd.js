@@ -1,6 +1,6 @@
 (function (global, factory) {
-    typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('core-js/modules/es.array.for-each.js'), require('core-js/modules/es.function.name.js'), require('core-js/modules/es.object.assign.js'), require('core-js/modules/es.object.to-string.js'), require('core-js/modules/web.dom-collections.for-each.js'), require('core-js/modules/es.array.includes.js'), require('core-js/modules/es.array.slice.js'), require('core-js/modules/es.regexp.constructor.js'), require('core-js/modules/es.regexp.exec.js'), require('core-js/modules/es.regexp.to-string.js'), require('core-js/modules/es.string.includes.js'), require('core-js/modules/es.string.match.js'), require('core-js/modules/es.string.replace.js'), require('core-js/modules/es.array.concat.js'), require('core-js/modules/es.array.index-of.js'), require('core-js/modules/es.string.split.js'), require('core-js/modules/es.promise.js'), require('core-js/modules/es.promise.finally.js'), require('core-js/modules/web.timers.js')) :
-    typeof define === 'function' && define.amd ? define(['core-js/modules/es.array.for-each.js', 'core-js/modules/es.function.name.js', 'core-js/modules/es.object.assign.js', 'core-js/modules/es.object.to-string.js', 'core-js/modules/web.dom-collections.for-each.js', 'core-js/modules/es.array.includes.js', 'core-js/modules/es.array.slice.js', 'core-js/modules/es.regexp.constructor.js', 'core-js/modules/es.regexp.exec.js', 'core-js/modules/es.regexp.to-string.js', 'core-js/modules/es.string.includes.js', 'core-js/modules/es.string.match.js', 'core-js/modules/es.string.replace.js', 'core-js/modules/es.array.concat.js', 'core-js/modules/es.array.index-of.js', 'core-js/modules/es.string.split.js', 'core-js/modules/es.promise.js', 'core-js/modules/es.promise.finally.js', 'core-js/modules/web.timers.js'], factory) :
+    typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('core-js/modules/es.array.for-each.js'), require('core-js/modules/es.function.name.js'), require('core-js/modules/es.object.assign.js'), require('core-js/modules/es.object.to-string.js'), require('core-js/modules/web.dom-collections.for-each.js'), require('core-js/modules/es.array.includes.js'), require('core-js/modules/es.array.slice.js'), require('core-js/modules/es.regexp.exec.js'), require('core-js/modules/es.string.includes.js'), require('core-js/modules/es.string.match.js'), require('core-js/modules/es.string.replace.js'), require('core-js/modules/es.array.concat.js'), require('core-js/modules/es.array.index-of.js'), require('core-js/modules/es.string.split.js'), require('core-js/modules/es.promise.js'), require('core-js/modules/es.promise.finally.js'), require('core-js/modules/web.timers.js')) :
+    typeof define === 'function' && define.amd ? define(['core-js/modules/es.array.for-each.js', 'core-js/modules/es.function.name.js', 'core-js/modules/es.object.assign.js', 'core-js/modules/es.object.to-string.js', 'core-js/modules/web.dom-collections.for-each.js', 'core-js/modules/es.array.includes.js', 'core-js/modules/es.array.slice.js', 'core-js/modules/es.regexp.exec.js', 'core-js/modules/es.string.includes.js', 'core-js/modules/es.string.match.js', 'core-js/modules/es.string.replace.js', 'core-js/modules/es.array.concat.js', 'core-js/modules/es.array.index-of.js', 'core-js/modules/es.string.split.js', 'core-js/modules/es.promise.js', 'core-js/modules/es.promise.finally.js', 'core-js/modules/web.timers.js'], factory) :
     (global = typeof globalThis !== 'undefined' ? globalThis : global || self, global.AppBlock = factory());
 })(this, (function () { 'use strict';
 
@@ -628,7 +628,6 @@
           }
         }
       }
-      if (comp.debug) console.info("Result for", keys, ":", prop);
       return prop;
     };
     var helpers = {
@@ -688,13 +687,25 @@
     var updateAttributePlaceholders = function updateAttributePlaceholders(comp, node, pointers) {
       var attrs = node.attributes;
       for (var i = 0; i < attrs.length; i++) {
-        if (/{([^}]+)}/.test(attrs[i].value)) {
-          var props = attrs[i].value.match(/{([^}]+)}/g);
-          for (var p = 0; p < props.length; p++) {
-            var re = new RegExp(props[p], 'g');
-            attrs[i].value = attrs[i].value.replace(re, getPlaceholderVal(comp, props[p], pointers));
-          }
+        var attrValue = attrs[i].value;
+        var match = void 0;
+        var _loop = function _loop() {
+          var fullMatch = match[0];
+          var _fullMatch$match = fullMatch.match(/{([^|}]+)(\|[^}]+)?}/),
+            _fullMatch$match2 = _slicedToArray(_fullMatch$match, 3),
+            propName = _fullMatch$match2[1],
+            filters = _fullMatch$match2[2];
+          var filterList = filters ? filters.split('|').slice(1) : [];
+          var placeholderVal = getPlaceholderVal(comp, propName, pointers);
+          filterList.forEach(function (filter) {
+            placeholderVal = applyCustomFilter(comp, placeholderVal, filter);
+          });
+          attrValue = attrValue.replace(fullMatch, placeholderVal);
+        };
+        while ((match = /{([^}]+)}/.exec(attrValue)) !== null) {
+          _loop();
         }
+        attrs[i].value = attrValue;
       }
     };
     var updateTextNodePlaceholders = function updateTextNodePlaceholders(comp, nodeTree, pointers) {
@@ -706,12 +717,12 @@
       nodesToProcess.forEach(function (node) {
         var nodeVal = node.nodeValue;
         var match;
-        var _loop = function _loop() {
+        var _loop2 = function _loop2() {
           var fullMatch = match[0];
-          var _fullMatch$match = fullMatch.match(/{([^|}]+)(\|[^}]+)?}/),
-            _fullMatch$match2 = _slicedToArray(_fullMatch$match, 3),
-            propName = _fullMatch$match2[1],
-            filters = _fullMatch$match2[2];
+          var _fullMatch$match3 = fullMatch.match(/{([^|}]+)(\|[^}]+)?}/),
+            _fullMatch$match4 = _slicedToArray(_fullMatch$match3, 3),
+            propName = _fullMatch$match4[1],
+            filters = _fullMatch$match4[2];
           var filterList = filters ? filters.split('|').slice(1) : [];
           var placeholderVal = getPlaceholderVal(comp, propName, pointers);
           filterList.forEach(function (filter) {
@@ -719,8 +730,6 @@
               case 'asHTML':
                 break;
               default:
-                console.log(filter);
-                console.log(placeholderVal);
                 placeholderVal = applyCustomFilter(comp, placeholderVal, filter);
                 break;
             }
@@ -735,7 +744,7 @@
           }
         };
         while ((match = /{([^}]+)}/.exec(nodeVal)) !== null) {
-          if (_loop()) break;
+          if (_loop2()) break;
         }
         if (node.parentNode) {
           node.nodeValue = nodeVal;
@@ -783,9 +792,7 @@
               var cParts = condition.split(operators[i]);
               var condLeft = getProp(comp, cParts[0].split('.'), pointers);
               if (validTypes.includes(String(_typeof(condLeft))) === false) {
-                if (comp.debug) {
-                  console.warn(cParts[0] + " cannot be evaluated because it is not a boolean nor a number.");
-                }
+                logError(comp, "".concat(cParts[0], " cannot be evaluated because it is not a boolean nor a number."));
                 return false;
               } else {
                 condition = condition.replace(cParts[0], condLeft);
@@ -900,7 +907,7 @@
 
     function AppBlock(config) {
       var _this = this;
-      this.debug = false, this.setData = function (newData) {
+      this.setData = function (newData) {
         var replaceData = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
         if (replaceData) {
           this.data = newData;
@@ -937,7 +944,7 @@
         } else if (comp.renderEngine === 'plain') {
           comp.plainRender(tmpDOM);
         } else {
-          console.error("".concat(comp.renderEngine, " renderEngine does not exist."));
+          logError(comp, "".concat(comp.renderEngine, " renderEngine does not exist."));
         }
         console.timeEnd(comp.renderEngine + " render time");
         if (comp.methods.afterRender instanceof Function) comp.methods.afterRender(comp);
@@ -954,7 +961,6 @@
       };
       this.Init = function () {
         var comp = this;
-        if (config.debug) comp.debug = true;
         if (config.name) {
           comp.name = config.name;
         } else {
@@ -962,15 +968,15 @@
         }
         if (config !== undefined) {
           if (config.el === undefined) {
-            if (comp.debug) logError(comp, "el is empty. Please assign a DOM element to el.");
+            logError(comp, "el is empty. Please assign a DOM element to el.");
             return;
           }
           if (config.el === null) {
-            if (comp.debug) logError(comp, "The element you assigned to el is not present.");
+            logError(comp, "The element you assigned to el is not present.");
             return;
           }
           comp.el = config.el;
-          comp.renderEngine = config.renderEngine ? config.renderEngine : "plain";
+          comp.renderEngine = config.renderEngine ? config.renderEngine : "Idiomorph";
           if (config.template) {
             comp.template = config.template.content;
           } else {

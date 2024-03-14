@@ -1,6 +1,6 @@
 ## Requests
 
-A key concept in AppBlocks, is to cover the most common use cases of a front-end micro app. One of those use cases is to be able to make requests.
+A key concept in AppBlocks, is to cover the most common use cases of a front-end micro app. One of those use cases is to be able to make requests and let AppBlocks take care of your app's state for you.
 
 With AppBlocks you can use `fetch` or [Axios](https://github.com/axios/axios) to make requests. AppBlocks wraps these APIs and takes care of our app's state and rendering for us.
 
@@ -33,7 +33,7 @@ App.fetchRequest("https://example.com",
 - `callbacks`: success, error and finally callback functions.
 - `delay`: You may add a delay in milliseconds for the request. This is handy if you want to throttle your requests.
 
-> To make use of the axiosRequest featute, we must first include the Axios library in our document since Axios is not included in AppBlocs:
+> To make use of the axiosRequest feature, we must first include the Axios library in our document since Axios is not included in AppBlocs:
 > ```html
 > <script src="https://cdn.jsdelivr.net/npm/axios/dist/ axios.min.js"></script>
 > ```
@@ -102,7 +102,7 @@ And this is how we make a request, when the user cliks the button:
 var app = new AppBlock({
 
   el: document.getElementById('app'),
-  template: getElementById('appTemplate'),
+  template: document.getElementById('appTemplate'),
 
   data: {
     errorMessage: "",
@@ -127,5 +127,5 @@ var app = new AppBlock({
             finally() {console.log('finished')}
         }, 1000)
   }
-})
+});
 ```

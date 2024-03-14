@@ -644,7 +644,6 @@ var getProp = function getProp(comp, keys, pointers) {
       }
     }
   }
-  if (comp.debug) console.info("Result for", keys, ":", prop);
   return prop;
 };
 var helpers = {
@@ -735,8 +734,6 @@ var updateTextNodePlaceholders = function updateTextNodePlaceholders(comp, nodeT
           case 'asHTML':
             break;
           default:
-            console.log(filter);
-            console.log(placeholderVal);
             placeholderVal = applyCustomFilter(comp, placeholderVal, filter);
             break;
         }
@@ -799,9 +796,7 @@ var directives = {
           var cParts = condition.split(operators[i]);
           var condLeft = getProp(comp, cParts[0].split('.'), pointers);
           if (validTypes.includes(String(_typeof(condLeft))) === false) {
-            if (comp.debug) {
-              console.warn(cParts[0] + " cannot be evaluated because it is not a boolean nor a number.");
-            }
+            logError(comp, "".concat(cParts[0], " cannot be evaluated because it is not a boolean nor a number."));
             return false;
           } else {
             condition = condition.replace(cParts[0], condLeft);
@@ -916,7 +911,7 @@ var axiosRequest = function axiosRequest(comp, config, callbacks, delay) {
 
 function AppBlock(config) {
   var _this = this;
-  this.debug = false, this.setData = function (newData) {
+  this.setData = function (newData) {
     var replaceData = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
     if (replaceData) {
       this.data = newData;
@@ -953,7 +948,7 @@ function AppBlock(config) {
     } else if (comp.renderEngine === 'plain') {
       comp.plainRender(tmpDOM);
     } else {
-      console.error("".concat(comp.renderEngine, " renderEngine does not exist."));
+      logError(comp, "".concat(comp.renderEngine, " renderEngine does not exist."));
     }
     console.timeEnd(comp.renderEngine + " render time");
     if (comp.methods.afterRender instanceof Function) comp.methods.afterRender(comp);
@@ -970,7 +965,6 @@ function AppBlock(config) {
   };
   this.Init = function () {
     var comp = this;
-    if (config.debug) comp.debug = true;
     if (config.name) {
       comp.name = config.name;
     } else {
@@ -978,15 +972,15 @@ function AppBlock(config) {
     }
     if (config !== undefined) {
       if (config.el === undefined) {
-        if (comp.debug) logError(comp, "el is empty. Please assign a DOM element to el.");
+        logError(comp, "el is empty. Please assign a DOM element to el.");
         return;
       }
       if (config.el === null) {
-        if (comp.debug) logError(comp, "The element you assigned to el is not present.");
+        logError(comp, "The element you assigned to el is not present.");
         return;
       }
       comp.el = config.el;
-      comp.renderEngine = config.renderEngine ? config.renderEngine : "plain";
+      comp.renderEngine = config.renderEngine ? config.renderEngine : "Idiomorph";
       if (config.template) {
         comp.template = config.template.content;
       } else {

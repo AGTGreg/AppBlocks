@@ -1,6 +1,6 @@
 {
   "name": "appblocks",
-  "version": "1.4.0",
+  "version": "2.0.0",
   "description": "A lightweight javascript library for building micro apps for the front-end.",
   "main": "dist/appblocks.cjs.js",
   "module": "dist/appblocks.esm.js",
@@ -21,7 +21,8 @@
     "appblocks",
     "microapps",
     "frontend",
-    "interface"
+    "interface",
+    "HTML"
   ],
   "author": "Grigoris Chatzinikolaou",
   "license": "MIT",

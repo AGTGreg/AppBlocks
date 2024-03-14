@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Events test</title>
+  </head>
+  <body>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4"></div>
+            <div id="app" class="col-md-4">
+
+            </div>
+            <div class="col-md-4"></div>
+        </div>
+    </div>
+
+    <template id="appTemplate">
+        <span c-if="data.seen">Now you see me</span>
+        <span c-ifnot="data.seen">Now you don't</span>
+        <button id="message-toggler">Toggle message</button>
+    </template>
+
+    <script src="../dist/appblocks.umd.js"></script>
+    <script>
+        var app = new AppBlock({
+
+            el: document.getElementById('app'),
+            template: document.getElementById('appTemplate'),
+
+            data: {
+                seen: true
+            },
+
+            methods: {
+                toggleMessage(thisApp) {
+                thisApp.setData({
+                    seen: !this.Parent.data.seen
+                });
+                }
+            },
+
+            events: {
+                'mouseup #message-toggler': function(e) {
+                    this.Parent.methods.toggleMessage(this.Parent);
+                },
+                'mousedown #message-toggler': function(e) {
+                    this.Parent.methods.toggleMessage(this.Parent);
+                }
+            }
+
+        })
+    </script>
+</body>
+</html>

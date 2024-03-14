@@ -32,14 +32,14 @@ Accessing our data is straightforward. We can access our data from our templates
 ```
 
 
-We can also access array and object elements with square brackets notation (handy if you want to access data 
+We can also access array and object elements with square brackets notation (handy if you want to access data
 dynamically in the template):
 ```js
 var app = new AppBlock({
   ...
   data: {
     anArray: [1, 2, 3],
-    anotherArray: [{"name": "Greg"}, {"name": "Emma"}, {"name": "Theodor"}]
+    anotherArray: [{"name": "Greg"}, {"name": "Emma"}, {"name": "Theodore"}, {"name": "Eugenia"}]
     anObject: {"name": "Greg"}
   }
   ...
@@ -55,8 +55,8 @@ var app = new AppBlock({
 From within our App we access the data object via our app's instance. Methods, for example take an optional argument
 which is our App's instance:
 ```js
-someMethod(myApp) {
-  myApp.data;
+someMethod(appInstance) {
+  appInstance.data;
 }
 ```
 or you can access it using `this.Parent`:
@@ -76,9 +76,9 @@ We have two choices when it comes to updating our data:
 `setData(newData, replaceData=false)`
 
 This method tells AppBlocks to update our data and then re-render our interface to reflect the changes we made.
-It also takes the optional parameter `replaceData`. By default this is set to `false` so AppBlocks will only update 
-the parts of the data specify, keeping everything else intact. If we set this to `true` then AppBlocks will
-replace all of our old data with the new Data. 
+It also takes the optional parameter `replaceData`. By default this is set to `false` so AppBlocks will only update
+the parts of the data you specify, keeping everything else intact. If we set this to `true` then AppBlocks will
+replace all of our old data with the new Data.
 
 Here's how we would call `setData` from our methods:
 ```js

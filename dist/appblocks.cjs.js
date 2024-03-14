@@ -7,7 +7,9 @@ require('core-js/modules/es.object.to-string.js');
 require('core-js/modules/web.dom-collections.for-each.js');
 require('core-js/modules/es.array.includes.js');
 require('core-js/modules/es.array.slice.js');
+require('core-js/modules/es.regexp.constructor.js');
 require('core-js/modules/es.regexp.exec.js');
+require('core-js/modules/es.regexp.to-string.js');
 require('core-js/modules/es.string.includes.js');
 require('core-js/modules/es.string.match.js');
 require('core-js/modules/es.string.replace.js');
@@ -701,25 +703,13 @@ var getPlaceholderVal = function getPlaceholderVal(comp, placeholder, pointers) 
 var updateAttributePlaceholders = function updateAttributePlaceholders(comp, node, pointers) {
   var attrs = node.attributes;
   for (var i = 0; i < attrs.length; i++) {
-    var attrValue = attrs[i].value;
-    var match = void 0;
-    var _loop = function _loop() {
-      var fullMatch = match[0];
-      var _fullMatch$match = fullMatch.match(/{([^|}]+)(\|[^}]+)?}/),
-        _fullMatch$match2 = _slicedToArray(_fullMatch$match, 3),
-        propName = _fullMatch$match2[1],
-        filters = _fullMatch$match2[2];
-      var filterList = filters ? filters.split('|').slice(1) : [];
-      var placeholderVal = getPlaceholderVal(comp, propName, pointers);
-      filterList.forEach(function (filter) {
-        placeholderVal = applyCustomFilter(comp, placeholderVal, filter);
-      });
-      attrValue = attrValue.replace(fullMatch, placeholderVal);
-    };
-    while ((match = /{([^}]+)}/.exec(attrValue)) !== null) {
-      _loop();
+    if (/{([^}]+)}/.test(attrs[i].value)) {
+      var props = attrs[i].value.match(/{([^}]+)}/g);
+      for (var p = 0; p < props.length; p++) {
+        var re = new RegExp(props[p], 'g');
+        attrs[i].value = attrs[i].value.replace(re, getPlaceholderVal(comp, props[p], pointers));
+      }
     }
-    attrs[i].value = attrValue;
   }
 };
 var updateTextNodePlaceholders = function updateTextNodePlaceholders(comp, nodeTree, pointers) {
@@ -731,12 +721,12 @@ var updateTextNodePlaceholders = function updateTextNodePlaceholders(comp, nodeT
   nodesToProcess.forEach(function (node) {
     var nodeVal = node.nodeValue;
     var match;
-    var _loop2 = function _loop2() {
+    var _loop = function _loop() {
       var fullMatch = match[0];
-      var _fullMatch$match3 = fullMatch.match(/{([^|}]+)(\|[^}]+)?}/),
-        _fullMatch$match4 = _slicedToArray(_fullMatch$match3, 3),
-        propName = _fullMatch$match4[1],
-        filters = _fullMatch$match4[2];
+      var _fullMatch$match = fullMatch.match(/{([^|}]+)(\|[^}]+)?}/),
+        _fullMatch$match2 = _slicedToArray(_fullMatch$match, 3),
+        propName = _fullMatch$match2[1],
+        filters = _fullMatch$match2[2];
       var filterList = filters ? filters.split('|').slice(1) : [];
       var placeholderVal = getPlaceholderVal(comp, propName, pointers);
       filterList.forEach(function (filter) {
@@ -758,7 +748,7 @@ var updateTextNodePlaceholders = function updateTextNodePlaceholders(comp, nodeT
       }
     };
     while ((match = /{([^}]+)}/.exec(nodeVal)) !== null) {
-      if (_loop2()) break;
+      if (_loop()) break;
     }
     if (node.parentNode) {
       node.nodeValue = nodeVal;

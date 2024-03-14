@@ -1,12 +1,8 @@
 # Introduction
 
-AppBlocks is a tiny, fast and lightweight javascript library for building micro apps. It is designed to be used primarily as a script tag to enhance web pages with micro applications.
-
-AppBlocks started as a personal challenge project and later evolved into the go to library for me and my team that was used on an everyday basis to quickly enhance websites with small and self-contained apps.
+AppBlocks is a tiny, fast and lightweight javascript library for building micro apps. It is designed to be used primarily as a script tag to enhance web pages with self-contained micro applications.
 
 The goal of AppBlocks is to be a small library that provides all the necessary ingredients to develop micro apps in websites while being ridiculously easy to integrate in any project, practical and small.
-
-All the knowledge needed to master AppBlocks and start building front-end applications is here in a 10-15 minute read.
 
 Read about the [AppBlocks use case](whyappblocks.md).
 
@@ -37,54 +33,39 @@ npm install appblocks
 
 ## Getting started
 
-In order to create an app with AppBlocks, the first thing we need to do, is to create an element with an appropriate id.
-
-To make things more interesting lets also add a placeholder that will output some data. Placeholders are enclosed in curly braces `{}`:
+Lets start with an empty HTML page:
 
 ```html
-<div id="app">
-  {data.message}
-</div>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>My first AppBlocks app</title>
+  </head>
+  <body>
+    <!-- Load AppBlocks. -->
+    <script src="https://cdn.jsdelivr.net/npm/appblocks@2.0.0/dist/appblocks.min.js"></script>
+    <script>
+      // This is where we will write our AppBlock code
+    </script>
+  </body>
+</html>
 ```
 
-Next, we need to create a new AppBlock instance for our element. You may also want to add some data:
-
-```js
-var app = new AppBlock({
-  el: document.getElementById('app'),
-  data: {
-    message: "Hello world!"
-  }
-});
-```
-
-> Hello world!
-
-We have created our very first app! We use placeholders enclosed in `{}` to display data.
-
-Lets test this by updating our data! Open up your browser's console and type: `app.setData({message: "Hi console!"})`. Now you should see that our element is automatically updated to display the new message.
-
-For more information on how we update our App's data see [The data object](data.md).
-
-We can also use placeholders in attributes:
+In order to create an app with AppBlocks, the first thing we need to do is to create an element where our app will be rendered and a `<template>` element that contains all of our app's contents. Inside the body and before the script tags add these elements:
 
 ```html
-<div id="app">
-  <p title="{data.message}">{data.message}</p>
-</div>
-```
-
-## Custom template
-
-A more efficient way for creating our Apps is to have all our content inside a template element and tell AppBlocks were to render it:
-
-```html
+<!-- This is the container where our app will be rendered. -->
 <div id="app"></div>
 
+<!-- This is where we put the contents of our app. -->
 <template id="appTemplate">
   <p title="{data.message}">{data.message}</p>
 </template>
 ```
+
+>To make things more interesting we add a placeholder that will output some data. Placeholders are enclosed in curly braces `{}`.
+
+If you load the page now, you'll notice that nothing is displayed. We need to initialize our app first. To do that add this inside the script tag at the bottom:
 
 ```js
 var app = new AppBlock({
@@ -95,15 +76,57 @@ var app = new AppBlock({
   }
 });
 ```
+Reload the page and see the message.
 
-So all of our app's contents live inside the template and it will be rendered in `<div id="app"></div>`.
+Great! **We have created our very first app!** Let's test this by updating our data! Open up your browser's console and type: `app.setData({message: "Hi console!"})`. Now you should see that our element is automatically updated to display the new message.
 
-This is the recommended way for creating our Apps in AppBlocks.
+> Updating the data directly in AppBlocks does not trigger it to render because that's not what we always want. If we want to update the data and see the changes immediately after that we can use the `appInstance.setData()` to pass in the new data. You can read more about this [here](data.md).
+
+**So these are the steps we took:**
+1. Load AppBlocks with a `<script>` tag.
+2. Create the elements for rendering our app.
+3. Initialize our app.
+
+**Here is the complete code:**
+```html
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>My first app</title>
+  </head>
+  <body>
+
+	  <!-- This is the container where our app will be rendered. -->
+    <div id="app"></div>
+
+    <!-- This is where we put the contents of our app. -->
+    <template id="appTemplate">
+      <p title="{data.message}">{data.message}</p>
+    </template>
+
+    <!-- Load AppBlocks. -->
+    <script src="https://cdn.jsdelivr.net/npm/appblocks@2.0.0/dist/appblocks.min.js"></script>
+    <!-- Initialize our app. -->
+    <script>
+      var app = new AppBlock({
+        el: document.getElementById('app'),
+        template: document.getElementById('appTemplate'),
+        data: {
+          message: "Hello world!"
+        }
+      });
+    </script>
+
+  </body>
+</html>
+```
+
+
+
+For more information on how we update our App's data see [The data object](data.md).
 
 
 ## Filters
-**`filterName(appInstance, value) { return value }`**
-
 In the example above we get the message directly from our data. But what if we want to edit it before we show it to the world? Lets say that we want to convert it to uppercase letters.
 
 This is were filters come in.
@@ -135,49 +158,9 @@ And this is how we use it in our template:
 </template>
 ```
 
-[More about Filters](filters.md)
+We can also chain multiple filters together and we can use filters in parameters.
 
-
-## Methods
-**`methodName(appInstance) {}`**
-
-The `methods` object is the right place to put all of our application's logic. From processing data to anything you would write a function for. This is a good way to keep our code DRY.
-
-We can call methods from placeholders, attributes and even directives (As you'll see later on).
-
-Lets add a method that returns whatever is in our `data.message` but in UpperCase. All methods in AppBlocks exist inside the methods object:
-
-```js
-var app = new AppBlock({
-
-  el: document.getElementById('app'),
-
-  data: {
-    message: 'Hello world!'
-  },
-
-  methods: {
-    message(app) {
-      return app.data.message.toUpperCase();
-    }
-  }
-
-})
-```
-
-Now we can call this method inside our element:
-
-```html
-<template id="appTemplate">
-  <p>{message}</p>
-</template>
-```
-
-> HELLO WORLD!
-
-Note that we don't need to type `methods.message` to access the method. In AppBlocks methods are first class citizens.
-
-[More about methods](methods.md)
+[Read more about Filters](filters.md)
 
 ## Conditional rendering
 
@@ -213,36 +196,14 @@ When `seen` is `true` our element is visible. If we set it to `false` our elemen
 </template>
 ```
 
-**As we mentioned earlier directives have access to our methods:**
-```js
-var app = new AppBlock({
-  ...
-  data: {
-    seen: true
-  },
-
-  methods: {
-    showSpan(thisApp) {
-      return thisApp.data.seen;
-    }
-  }
-})
-```
-
-```html
-<template id="appTemplate">
-  <span c-if="showSpan">Now you see me</span>
-</template>
-```
-
 ### c-ifnot
 
 This is the opposite of `c-if`. Think of it as writing if ... else:
 
 ```html
 <template id="appTemplate">
-  <span c-if="showSpan">Now you see me</span>
-  <span c-ifnot="showSpan">Seen is false</span>
+  <span c-if="data.seen">Now you see me</span>
+  <span c-ifnot="data.seen">Now you don't</span>
 </template>
 ```
 
@@ -285,7 +246,7 @@ var app = new AppBlock({
 ## Event handling
 **`"eventTrigger selector": function(event) {}`**
 
-AppBlocks makes it easy for us to handle events while keeping everything nice and clean. Following the same pattern with `filters`, `methods` and `directives`, `events` should go in the `events` object:
+AppBlocks makes it easy for us to handle events while keeping everything nice and clean. `events` are grouped in the `events` object:
 
 ```js
 var app = new AppBlock({
@@ -303,7 +264,8 @@ Let's create an app where the user can toggle an element with a click of a butto
 
 ```html
 <template id="appTemplate">
-  <p c-if="data.seen">Now you see me</p>
+  <span c-if="data.seen">Now you see me</span>
+  <span c-ifnot="data.seen">Now you don't</span>
   <button id="message-toggler">Toggle message</button>
 </template>
 ```
@@ -329,7 +291,15 @@ var app = new AppBlock({
 })
 ```
 
-If you plan to toggle the message from multiple elements, you could use `methods` to make things even cleaner and DRY:
+But what if you want to trigger the same functionality from multiple events? You could just add more events and copy and paste your functionality there. **But this is not a good approach.** Your code should be reusable and DRY. This is where the `methods` come in.
+
+
+## Methods
+The `methods` object is the right place to put all of our application's logic. From processing data to anything you would write a function for. This is a good way to keep our code DRY and reusable.
+
+We can call methods from placeholders, attributes and even directives.
+
+Continuing on from the `events` example, let's now change `seen` when the mouse button is Up and change it again when it is down:
 
 ```js
 var app = new AppBlock({
@@ -345,10 +315,10 @@ var app = new AppBlock({
   },
 
   events: {
-    'click #message-toggler': function(e) {
+    'mouseup #message-toggler': function(e) {
       this.Parent.methods.toggleMessage(this.Parent);
     },
-    'click #message-toggler-b': function(e) {
+    'mousedown #message-toggler': function(e) {
       this.Parent.methods.toggleMessage(this.Parent);
     }
   }
@@ -356,6 +326,10 @@ var app = new AppBlock({
 })
 ```
 
+This might not seem like much to the untrained eye but believe me, when your apps become bigger and more complex, this pattern will make your life much easier ;)
+
+There is more to methods.
+[Read more about methods here.](methods.md)
 
 ## Requests
 

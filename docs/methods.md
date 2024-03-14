@@ -1,5 +1,7 @@
 # Methods
 
+**`methodName(appInstance) {}`**
+
 The methods object is the right place to put all of our application's logic. From processing data to anything you would
 write a function for, you put it inside `methods`.
 
@@ -19,13 +21,13 @@ instance in this parameter when it calls our methods, so we can have access to i
 Take a look at the example bellow and see how we access our App's data:
 ```js
 var app = new AppBlock({
-  
+
   el: document.getElementById('app'),
 
   data: {
     message: 'Hello world!'
   },
-  
+
   methods: {
     message(thisApp) {
       return thisApp.data.message.toUpperCase();
@@ -61,9 +63,81 @@ methods: {
 }
 ```
 
+## Calling methods from inside our app:
+```js
+var app = new AppBlock({
+
+  ...
+
+  methods: {
+    toggleMessage(thisApp) {
+      thisApp.setData({
+        seen: !this.Parent.data.seen
+      });
+    }
+  },
+
+  events: {
+    'mouseup #message-toggler': function(e) {
+      this.Parent.methods.toggleMessage(this.Parent);
+    },
+    'mousedown #message-toggler': function(e) {
+      this.Parent.methods.toggleMessage(this.Parent);
+    }
+  }
+
+})
+```
+
+This calls a method from `events` but you can call methods from other methods.
+
+Another use case for methods is to call them from another app:
+
+```js
+var appA = new AppBlock({
+  ...
+  methods: {
+    methodA(thisApp) { return "Hello for appA!"; }
+  },
+  ...
+});
+
+var appB = new AppBlock({
+  ...
+  methods: {
+    callA(thisApp) { appA.methods.methodA(appA); }
+  },
+  ...
+});
+```
+
+
+## Calling methods from directives:
+```js
+var app = new AppBlock({
+  ...
+  data: {
+    seen: true
+  },
+
+  methods: {
+    showSpan(thisApp) {
+      return thisApp.data.seen;
+    }
+  }
+})
+```
+
+```html
+<template id="appTemplate">
+  <span c-if="showSpan">Now you see me</span>
+</template>
+```
+
+
 ## Build-in methods
 
-AppBlocks offers some handy build-in methods to make your life easier. You can override these methods inside the 
+AppBlocks offers some handy build-in methods to make your life easier. You can override these methods inside the
 methods object or call them from within your templates or App.
 
 ### `beforeRender(appInstance)`
@@ -78,7 +152,7 @@ methods: {
 ```
 
 ### `afterRender(appInstance)`
-This method is called righ after render is finished. Use it to place any code that needs to be executed after each
+This method is called right after render has finished. Use it to place any code that needs to be executed after each
 render.
 ```js
 methods: {
@@ -89,10 +163,10 @@ methods: {
 ```
 
 ### `isLoading(appInstance)`
-This method returns the loading state of our App.
+This method returns the loading state of our App. It is meant to be used from the template when we make requests.
 
 ### `isSuccessfull(appInstance)`
-This method returns the success state of our App.
+This method returns the success state of our App. It is meant to be used from the template when we make requests.
 
 ### `hasError(appInstance)`
-This method returns the error state of our App.
+This method returns the error state of our App. It is meant to be used from the template when we make requests.

@@ -1,6 +1,6 @@
 (function (global, factory) {
-    typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('core-js/modules/es.array.for-each.js'), require('core-js/modules/es.function.name.js'), require('core-js/modules/es.object.assign.js'), require('core-js/modules/es.object.to-string.js'), require('core-js/modules/web.dom-collections.for-each.js'), require('core-js/modules/es.array.includes.js'), require('core-js/modules/es.array.slice.js'), require('core-js/modules/es.regexp.exec.js'), require('core-js/modules/es.string.includes.js'), require('core-js/modules/es.string.match.js'), require('core-js/modules/es.string.replace.js'), require('core-js/modules/es.array.concat.js'), require('core-js/modules/es.array.index-of.js'), require('core-js/modules/es.string.split.js'), require('core-js/modules/es.promise.js'), require('core-js/modules/es.promise.finally.js'), require('core-js/modules/web.timers.js')) :
-    typeof define === 'function' && define.amd ? define(['core-js/modules/es.array.for-each.js', 'core-js/modules/es.function.name.js', 'core-js/modules/es.object.assign.js', 'core-js/modules/es.object.to-string.js', 'core-js/modules/web.dom-collections.for-each.js', 'core-js/modules/es.array.includes.js', 'core-js/modules/es.array.slice.js', 'core-js/modules/es.regexp.exec.js', 'core-js/modules/es.string.includes.js', 'core-js/modules/es.string.match.js', 'core-js/modules/es.string.replace.js', 'core-js/modules/es.array.concat.js', 'core-js/modules/es.array.index-of.js', 'core-js/modules/es.string.split.js', 'core-js/modules/es.promise.js', 'core-js/modules/es.promise.finally.js', 'core-js/modules/web.timers.js'], factory) :
+    typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('core-js/modules/es.array.for-each.js'), require('core-js/modules/es.function.name.js'), require('core-js/modules/es.object.assign.js'), require('core-js/modules/es.object.to-string.js'), require('core-js/modules/web.dom-collections.for-each.js'), require('core-js/modules/es.array.includes.js'), require('core-js/modules/es.array.slice.js'), require('core-js/modules/es.regexp.constructor.js'), require('core-js/modules/es.regexp.exec.js'), require('core-js/modules/es.regexp.to-string.js'), require('core-js/modules/es.string.includes.js'), require('core-js/modules/es.string.match.js'), require('core-js/modules/es.string.replace.js'), require('core-js/modules/es.array.concat.js'), require('core-js/modules/es.array.index-of.js'), require('core-js/modules/es.string.split.js'), require('core-js/modules/es.promise.js'), require('core-js/modules/es.promise.finally.js'), require('core-js/modules/web.timers.js')) :
+    typeof define === 'function' && define.amd ? define(['core-js/modules/es.array.for-each.js', 'core-js/modules/es.function.name.js', 'core-js/modules/es.object.assign.js', 'core-js/modules/es.object.to-string.js', 'core-js/modules/web.dom-collections.for-each.js', 'core-js/modules/es.array.includes.js', 'core-js/modules/es.array.slice.js', 'core-js/modules/es.regexp.constructor.js', 'core-js/modules/es.regexp.exec.js', 'core-js/modules/es.regexp.to-string.js', 'core-js/modules/es.string.includes.js', 'core-js/modules/es.string.match.js', 'core-js/modules/es.string.replace.js', 'core-js/modules/es.array.concat.js', 'core-js/modules/es.array.index-of.js', 'core-js/modules/es.string.split.js', 'core-js/modules/es.promise.js', 'core-js/modules/es.promise.finally.js', 'core-js/modules/web.timers.js'], factory) :
     (global = typeof globalThis !== 'undefined' ? globalThis : global || self, global.AppBlock = factory());
 })(this, (function () { 'use strict';
 
@@ -687,25 +687,13 @@
     var updateAttributePlaceholders = function updateAttributePlaceholders(comp, node, pointers) {
       var attrs = node.attributes;
       for (var i = 0; i < attrs.length; i++) {
-        var attrValue = attrs[i].value;
-        var match = void 0;
-        var _loop = function _loop() {
-          var fullMatch = match[0];
-          var _fullMatch$match = fullMatch.match(/{([^|}]+)(\|[^}]+)?}/),
-            _fullMatch$match2 = _slicedToArray(_fullMatch$match, 3),
-            propName = _fullMatch$match2[1],
-            filters = _fullMatch$match2[2];
-          var filterList = filters ? filters.split('|').slice(1) : [];
-          var placeholderVal = getPlaceholderVal(comp, propName, pointers);
-          filterList.forEach(function (filter) {
-            placeholderVal = applyCustomFilter(comp, placeholderVal, filter);
-          });
-          attrValue = attrValue.replace(fullMatch, placeholderVal);
-        };
-        while ((match = /{([^}]+)}/.exec(attrValue)) !== null) {
-          _loop();
+        if (/{([^}]+)}/.test(attrs[i].value)) {
+          var props = attrs[i].value.match(/{([^}]+)}/g);
+          for (var p = 0; p < props.length; p++) {
+            var re = new RegExp(props[p], 'g');
+            attrs[i].value = attrs[i].value.replace(re, getPlaceholderVal(comp, props[p], pointers));
+          }
         }
-        attrs[i].value = attrValue;
       }
     };
     var updateTextNodePlaceholders = function updateTextNodePlaceholders(comp, nodeTree, pointers) {
@@ -717,12 +705,12 @@
       nodesToProcess.forEach(function (node) {
         var nodeVal = node.nodeValue;
         var match;
-        var _loop2 = function _loop2() {
+        var _loop = function _loop() {
           var fullMatch = match[0];
-          var _fullMatch$match3 = fullMatch.match(/{([^|}]+)(\|[^}]+)?}/),
-            _fullMatch$match4 = _slicedToArray(_fullMatch$match3, 3),
-            propName = _fullMatch$match4[1],
-            filters = _fullMatch$match4[2];
+          var _fullMatch$match = fullMatch.match(/{([^|}]+)(\|[^}]+)?}/),
+            _fullMatch$match2 = _slicedToArray(_fullMatch$match, 3),
+            propName = _fullMatch$match2[1],
+            filters = _fullMatch$match2[2];
           var filterList = filters ? filters.split('|').slice(1) : [];
           var placeholderVal = getPlaceholderVal(comp, propName, pointers);
           filterList.forEach(function (filter) {
@@ -744,7 +732,7 @@
           }
         };
         while ((match = /{([^}]+)}/.exec(nodeVal)) !== null) {
-          if (_loop2()) break;
+          if (_loop()) break;
         }
         if (node.parentNode) {
           node.nodeValue = nodeVal;

@@ -33,11 +33,11 @@ You can assign a unique name to your app so that all errors comming from it will
 
 
 ## `renderEngine: string`
-You can choose which engine is used to render your app. You have 2 choices:
-- `plain`: This is a very simple way of rendering the app. Appblocks will create a DOM tree in memory and then replace your DOM with that in one go. This is very simple and fast. However the state of you preexisting elements resets because in reallity they are replaced with the new DOM.
-- `Idiomorph`: This uses the [Idiomorph](https://github.com/bigskysoftware/idiomorph) engine to find the differences bettween the real DOM and the DOM that appblocks has in memory and update it with only what's different. It is slower than `plain` but all of your previous element retain their state since they are not beeing replaced (if they don't have to be updated).
+You can choose which engine to used to render your app. You have 2 choices:
+- `plain`: This is a very simple way of rendering the app. Appblocks will create a DOM tree in memory and then replace your existing DOM with the new one in one go. This is very simple and fast. However the state of your pre-existing elements resets because in reality they are replaced with the new DOM.
+- `Idiomorph`: This uses the [Idiomorph](https://github.com/bigskysoftware/idiomorph) engine to find the differences between the real DOM and the DOM that appblocks has in memory and update it with only what's different. It is slower than plain but all of your previous elements retain their state since they are not being replaced (if they don't have to be updated).
 
-`Idiomorph` is the default renderEngine since it covers the most common use cases and is what someone might expect to happen when they update their DOM.
+`Idiomorph` is the default renderEngine since it covers the most common use cases and it is what someone might expect to happen when they update their DOM.
 
 
 ## `data: object`
@@ -53,6 +53,13 @@ data: {
   name: "bike"
 }
 ```
+
+## `setData: function`
+Use this function to update or replace our data and trigger a render immediately after.
+
+**Syntax:**
+
+`setData(newData, replaceData=false)`
 
 ## `filters: object`
 This is where our filters go.

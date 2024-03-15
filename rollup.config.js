@@ -14,14 +14,16 @@ export default [
 		output: {
 			name: 'AppBlock',
 			file: pkg.browser,
-			format: 'umd'
+			format: 'umd',
+			sourcemap: true
 		},
 		plugins: [
-			resolve(),
 			commonjs(),
+			resolve({browser: true}),
 			cleanup(),
 			babel({
-				exclude: 'node_modules/**'
+				exclude: 'node_modules/**',
+				babelHelpers: "bundled"
 			})
 		]
   },
@@ -30,17 +32,21 @@ export default [
   {
     input: 'src/index.js',
     output: {
-      name: 'AppBlock',
-      file: pkg.minified,
-      format: 'iife',
+		name: 'AppBlock',
+		file: pkg.minified,
+		format: 'umd',
+		sourcemap: true
     },
 		plugins: [
-			resolve(),
-			terser(),
+			commonjs(),
+			resolve({browser: true}),
+			cleanup(),
 			babel({
-				exclude: 'node_modules/**'
+				exclude: 'node_modules/**',
+				babelHelpers: "bundled"
 			}),
-			filesize()
+			terser(),
+			// filesize()
 		]
 	},
 
@@ -56,7 +62,8 @@ export default [
 			commonjs(),
 			cleanup(),
 			babel({
-				exclude: 'node_modules/**'
+				exclude: 'node_modules/**',
+				babelHelpers: "bundled"
 			})
 		]
 	}

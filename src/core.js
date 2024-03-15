@@ -1,6 +1,6 @@
 'use strict';
 
-const Idiomorph = require('idiomorph/dist/idiomorph.cjs');
+import {Idiomorph} from 'idiomorph/dist/idiomorph.esm';
 import {updateTextNodePlaceholders} from './placeholders';
 import {directives} from './directives';
 import {filters} from './filters';

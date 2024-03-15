@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.0.1
+- **FIX:** Fixed unresolved dependencies and mixed imports.
+
 ## 2.0.0
 - **Rendering:** Add support for [Idiomorph](https://github.com/bigskysoftware/idiomorph) as a render engine.
 - **Rendering:** Add `renderEngine` parameter so now we can choose which rendering engine to use. This parameter accepts 'plain' or 'Idiomorph`. Default is 'Idiomorph'

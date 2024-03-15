@@ -24,29 +24,29 @@ export const fetchRequest = function(comp, url, options, callbacks, delay) {
       .then(response => response.json())
       .then(data => {
         if (data.error) {
-          app.state.error = true;
+          comp.state.error = true;
           if (callbacks && callbacks['error'] instanceof Function) {
             callbacks['error'](data);
           }
         } else {
-          app.state.success = true;
+          comp.state.success = true;
           if (callbacks && callbacks['success'] instanceof Function) {
             callbacks['success'](data);
           }
         }
       })
       .catch(error => {
-        app.state.error = true;
+        comp.state.error = true;
         if (callbacks && callbacks['error'] instanceof Function) {
           callbacks['error'](error);
         }
       })
       .finally(() => {
-        app.state.loading = false;
+        comp.state.loading = false;
         if (callbacks && callbacks['finally'] instanceof Function) {
           callbacks['finally']();
         }
-        app.render();
+        comp.render();
       });
     }, delayRequest);
   });

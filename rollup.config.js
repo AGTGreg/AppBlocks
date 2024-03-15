@@ -4,7 +4,6 @@ import resolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
 import cleanup from 'rollup-plugin-cleanup';
 import babel from '@rollup/plugin-babel';
-import filesize from 'rollup-plugin-filesize';
 
 
 export default [
@@ -46,7 +45,6 @@ export default [
 				babelHelpers: "bundled"
 			}),
 			terser(),
-			// filesize()
 		]
 	},
 

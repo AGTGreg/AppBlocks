@@ -21,7 +21,7 @@ Download and include with a script tag in your document's head:
 or you can use the **CDN version**:
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/appblocks@2.0.0/dist/appblocks.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/appblocks@2.0.1/dist/appblocks.min.js"></script>
 ```
 
 or you can install it via **npm**:
@@ -43,7 +43,7 @@ Lets start with an empty HTML page:
   </head>
   <body>
     <!-- Load AppBlocks. -->
-    <script src="https://cdn.jsdelivr.net/npm/appblocks@2.0.0/dist/appblocks.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/appblocks@2.0.1/dist/appblocks.min.js"></script>
     <script>
       // This is where we will write our AppBlock code
     </script>
@@ -105,7 +105,7 @@ Great! **We have created our very first app!** Let's test this by updating our d
     </template>
 
     <!-- Load AppBlocks. -->
-    <script src="https://cdn.jsdelivr.net/npm/appblocks@2.0.0/dist/appblocks.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/appblocks@2.0.1/dist/appblocks.min.js"></script>
     <!-- Initialize our app. -->
     <script>
       var app = new AppBlock({

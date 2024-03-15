@@ -31,7 +31,7 @@ Here is a complete example of a "Hello world" app.
     </template>
 
     <!-- Load AppBlocks. -->
-    <script src="https://cdn.jsdelivr.net/npm/appblocks@2.0.1/dist/appblocks.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/appblocks@2.0.2/dist/appblocks.min.js"></script>
     <!-- Initialize our app. -->
     <script>
       var app = new AppBlock({

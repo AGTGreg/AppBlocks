@@ -1,6 +1,6 @@
 {
   "name": "appblocks",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "A lightweight javascript library for building micro apps for the front-end.",
   "main": "dist/appblocks.cjs.js",
   "module": "dist/appblocks.esm.js",

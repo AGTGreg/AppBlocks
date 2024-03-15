@@ -3314,27 +3314,27 @@ var fetchRequest = function fetchRequest(comp, url, options, callbacks, delay) {
         return response.json();
       }).then(function (data) {
         if (data.error) {
-          app.state.error = true;
+          comp.state.error = true;
           if (callbacks && callbacks['error'] instanceof Function) {
             callbacks['error'](data);
           }
         } else {
-          app.state.success = true;
+          comp.state.success = true;
           if (callbacks && callbacks['success'] instanceof Function) {
             callbacks['success'](data);
           }
         }
       })["catch"](function (error) {
-        app.state.error = true;
+        comp.state.error = true;
         if (callbacks && callbacks['error'] instanceof Function) {
           callbacks['error'](error);
         }
       })["finally"](function () {
-        app.state.loading = false;
+        comp.state.loading = false;
         if (callbacks && callbacks['finally'] instanceof Function) {
           callbacks['finally']();
         }
-        app.render();
+        comp.render();
       });
     }, delayRequest);
   });

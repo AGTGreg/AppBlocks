@@ -3397,7 +3397,6 @@ function AppBlock(config) {
     var comp = this;
     if (comp.methods.beforeRender instanceof Function) comp.methods.beforeRender(comp);
     var tmpDOM = this.prepareTmpDom();
-    console.time(comp.renderEngine + " render time");
     if (comp.renderEngine === 'Idiomorph') {
       comp.idiomorphRender(tmpDOM);
     } else if (comp.renderEngine === 'plain') {
@@ -3405,7 +3404,6 @@ function AppBlock(config) {
     } else {
       logError(comp, "".concat(comp.renderEngine, " renderEngine does not exist."));
     }
-    console.timeEnd(comp.renderEngine + " render time");
     if (comp.methods.afterRender instanceof Function) comp.methods.afterRender(comp);
     if (callback instanceof Function) callback();
   };

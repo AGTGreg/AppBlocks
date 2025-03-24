@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.0.3
+- Removed render time logging.
+
 ## 2.0.1
 - **FIX:** Fixed unresolved dependencies and mixed imports.
 

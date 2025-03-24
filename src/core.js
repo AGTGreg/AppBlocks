@@ -59,9 +59,6 @@ export function AppBlock(config) {
 
     let tmpDOM = this.prepareTmpDom();
 
-    // Start timing
-    console.time(comp.renderEngine + " render time");
-
     if (comp.renderEngine === 'Idiomorph') {
       comp.idiomorphRender(tmpDOM);
     } else if (comp.renderEngine === 'plain') {
@@ -69,9 +66,6 @@ export function AppBlock(config) {
     } else {
       logError(comp, `${comp.renderEngine} renderEngine does not exist.`);
     }
-
-    // End timing
-    console.timeEnd(comp.renderEngine + " render time");
 
     if (comp.methods.afterRender instanceof Function) comp.methods.afterRender(comp);
     if (callback instanceof Function) callback();

@@ -1,3 +1,13 @@
 playground/
 node_modules/
 package-lock.json
+dist/
+build/
+coverage/
+.env*
+.DS_Store
+.vscode/
+.idea/
+/.nyc_output/
+/.cache/
+build-cjs/

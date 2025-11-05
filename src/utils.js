@@ -59,6 +59,31 @@ export const helpers = {
   }
 };
 
+// Small, commonly-used helpers for object inspection and manipulation
+export const hasOwn = function(obj, key) {
+  return Object.prototype.hasOwnProperty.call(obj, key);
+};
+
+export const isObject = function(value) {
+  return value !== null && typeof value === 'object' && !Array.isArray(value);
+};
+
+export const deepClone = function(value) {
+  if (Array.isArray(value)) {
+    return value.map(v => deepClone(v));
+  }
+  if (isObject(value)) {
+    const out = {};
+    for (const k in value) {
+      if (Object.prototype.hasOwnProperty.call(value, k)) {
+        out[k] = deepClone(value[k]);
+      }
+    }
+    return out;
+  }
+  return value;
+};
+
 
 // Private functions ===================================================================================================
 // Try to get the value of an object.

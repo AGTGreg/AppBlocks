@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.0.4
+- Comprehensive testing
+- **Enhancement:** Add `hasOwn`, `isObject` and `deepClone` utils.
+
 ## 2.0.3
 - Removed render time logging.
 

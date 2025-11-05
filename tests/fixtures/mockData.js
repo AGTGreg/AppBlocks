@@ -100,3 +100,129 @@ export const createMockDirective = (resolver = v => Boolean(v)) => {
     return Boolean(resolver);
   };
 };
+
+/**
+ * Creates a configured AppBlock instance with provided data
+ * @param {Object} data - Data object to populate AppBlock
+ * @param {Object} overrides - Optional config overrides
+ */
+export const createMockAppBlockWithData = (data = {}, overrides = {}) => {
+  return createMockAppBlockConfig({ data, ...overrides });
+};
+
+/**
+ * Creates an element with child nodes
+ */
+export const createMockElementWithChildren = (count = 3, config = {}) => {
+  const parent = createMockElement();
+  for (let i = 0; i < count; i++) {
+    const child = document.createElement('div');
+    child.className = 'child';
+    child.setAttribute('data-index', String(i));
+    child.textContent = `Child ${i + 1}`;
+    parent.appendChild(child);
+  }
+  return parent;
+};
+
+/**
+ * Creates an element with a directive attribute
+ */
+export const createMockElementWithDirective = (directiveName = 'c-if', directiveValue = 'data.show') => {
+  const el = createMockElement();
+  el.setAttribute(directiveName, directiveValue);
+  return el;
+};
+
+/**
+ * Creates an element with placeholder text content
+ */
+export const createMockElementWithPlaceholder = (placeholder = '{data.message}') => {
+  const el = createMockElement();
+  el.textContent = placeholder;
+  return el;
+};
+
+/**
+ * Template helpers
+ */
+export const createTemplateWithCIf = (condition = 'data.show', content = 'Content') => {
+  return createMockTemplate(`<div c-if="${condition}">${content}</div>`);
+};
+
+export const createTemplateWithCFor = (loopVar = 'item in items', itemContent = '{item}') => {
+  return createMockTemplate(`<div c-for="${loopVar}">${itemContent}</div>`);
+};
+
+export const createTemplateWithPlaceholders = (placeholders = ['{data.message}']) => {
+  const content = placeholders.map(p => `<span>${p}</span>`).join('');
+  return createMockTemplate(`<div>${content}</div>`);
+};
+
+/**
+ * Data factories
+ */
+export const createMockArrayData = (length = 3, factory = i => ({ id: i, name: `Item ${i + 1}` })) => {
+  return Array.from({ length }, (_, i) => factory(i));
+};
+
+export const createMockNestedData = (depth = 3) => {
+  let obj = { value: 'leaf' };
+  for (let i = 0; i < depth; i++) obj = { nested: obj };
+  return obj;
+};
+
+export const createMockFalsyData = () => ({
+  undefinedVal: undefined,
+  nullVal: null,
+  falseVal: false,
+  zero: 0,
+  emptyString: '',
+  emptyArray: [],
+  emptyObject: {}
+});
+
+/**
+ * Custom extension factories
+ */
+export const createMockCustomDirective = (returnValue = true) => {
+  return jest.fn((appInstance, node, pointers) => returnValue);
+};
+
+export const createMockCustomFilter = (transform = v => v) => {
+  return jest.fn((appInstance, value) => transform(value));
+};
+
+export const createMockCustomMethod = (returnValue) => {
+  return jest.fn(() => returnValue);
+};
+
+/**
+ * Request mocking helpers
+ */
+export const createMockFetchSuccess = (data = {}) => {
+  return Promise.resolve({ ok: true, status: 200, json: () => Promise.resolve(data) });
+};
+
+export const createMockFetchError = (status = 500, message = 'Server error') => {
+  return Promise.resolve({ ok: false, status, statusText: message });
+};
+
+export const setupFetchMock = (response) => {
+  global.fetch = jest.fn(() => {
+    if (response instanceof Promise) return response;
+    return createMockFetchSuccess(response);
+  });
+  return global.fetch;
+};
+
+/**
+ * Console spies
+ */
+export const createConsoleSpy = (method = 'error') => {
+  return jest.spyOn(console, method).mockImplementation(() => {});
+};
+
+export const restoreConsoleSpy = (spy) => {
+  if (spy && spy.mockRestore) spy.mockRestore();
+};

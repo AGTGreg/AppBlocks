@@ -108,3 +108,86 @@ var app = new AppBlock({
 **Result:**
 
 A `p` element (or any HTML we specify) will be inserted at the beginning of the element we specified.
+
+
+## hasOwn(obj, key)
+
+Checks if an object has a specific property (using `Object.prototype.hasOwnProperty`). This utility safely checks for owned properties without issues with null/undefined prototype chains.
+
+**Syntax:**
+
+`hasOwn(obj, key)`
+
+**Example:**
+
+```js
+import { hasOwn } from 'appblocks';
+
+const data = { name: 'John', age: 30 };
+if (hasOwn(data, 'name')) {
+  console.log('name property exists');
+}
+```
+
+**Result:**
+
+Returns `true` if the object has the property, `false` otherwise.
+
+
+## isObject(value)
+
+Determines if a value is a plain object (not an array, not null, and not a primitive type).
+
+**Syntax:**
+
+`isObject(value)`
+
+**Example:**
+
+```js
+import { isObject } from 'appblocks';
+
+console.log(isObject({ a: 1 }));        // true
+console.log(isObject([1, 2, 3]));       // false
+console.log(isObject(null));            // false
+console.log(isObject('string'));        // false
+console.log(isObject(42));              // false
+```
+
+**Result:**
+
+Returns `true` if the value is a plain object, `false` otherwise.
+
+
+## deepClone(value)
+
+Creates a deep copy of a value, including nested objects and arrays. This utility recursively clones all levels of nested structures.
+
+**Syntax:**
+
+`deepClone(value)`
+
+**Example:**
+
+```js
+import { deepClone } from 'appblocks';
+
+const original = {
+  name: 'John',
+  address: {
+    city: 'New York',
+    coordinates: [40.7128, -74.0060]
+  }
+};
+
+const clone = deepClone(original);
+clone.address.city = 'Boston';  // Does not affect original
+
+console.log(original.address.city);  // 'New York'
+console.log(clone.address.city);     // 'Boston'
+```
+
+**Result:**
+
+Returns a complete deep copy of the input value. Handles objects, arrays, and primitives correctly. Circular references are not handled (will cause infinite recursion).
+````

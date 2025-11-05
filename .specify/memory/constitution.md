@@ -1,14 +1,14 @@
 <!--
 Sync Impact Report:
-- Version change: 1.0.0 → 1.1.0
-- Principles modified: Test-First Development (added testing guidelines)
-- Added sections: Testing Guidelines
+- Version change: 1.1.0 → 1.2.0
+- Principles modified: Documentation (expanded requirements)
+- Added sections: Enhanced documentation update requirements
 - Templates requiring updates:
-  ✅ plan-template.md (reviewed - compatible with testing principles)
-  ✅ spec-template.md (reviewed - compatible with user story approach)
-  ✅ tasks-template.md (reviewed - compatible with milestone testing)
-- Follow-up TODOs: None
-- Rationale: MINOR version bump - added new testing guidance section that materially expands test-first principle
+  ✅ plan-template.md (reviewed - compatible)
+  ✅ spec-template.md (reviewed - compatible)
+  ✅ tasks-template.md (reviewed - compatible)
+- Follow-up TODOs: Ensure all future features include documentation updates in tasks
+- Rationale: MINOR version bump - expanded documentation requirements to mandate updates for all feature changes
 -->
 
 # AppBlocks Constitution
@@ -79,11 +79,15 @@ After completing each milestone:
 
 ## Documentation
 
-**Test Documentation Requirements**:
+**Documentation Requirements**:
 - Documentation MUST be maintained in `docs/`
-- MUST keep the documentation up to date for any changes do or new features/modules we add
-- MUST provide examples showing how to use the new features
+- Every time a feature is added, updated, or removed, the documentation MUST be updated to reflect the changes
+- Every time a feature is added, updated, or removed, the Changelog located at `docs/changelog.md` MUST be updated to reflect the changes
+- Documentation updates MUST happen as part of the same implementation phase, not deferred
+- MUST provide clear examples showing how to use new or modified features
 - New features/modules MUST be linked in project documentation (`_sidebar.md`)
+- Removed features MUST be clearly marked as deprecated or removed from documentation
+- Updated features MUST have changelog entries explaining what changed and why
 
 ## Testing Guidelines
 
@@ -152,4 +156,4 @@ This constitution supersedes all other development practices and guidelines.
 - Deviations MUST be explicitly justified and documented
 - Templates in `.specify/templates/` guide feature development per these principles
 
-**Version**: 1.1.0 | **Ratified**: 2025-11-03 | **Last Amended**: 2025-11-04
+**Version**: 1.2.0 | **Ratified**: 2025-11-03 | **Last Amended**: 2025-11-05

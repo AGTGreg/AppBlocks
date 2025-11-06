@@ -3,6 +3,7 @@
 Auto-generated from all feature plans. Last updated: 2025-11-04
 
 ## Active Technologies
+- JavaScript (ES6+) with Babel transpilation + Jest (testing), JSDOM (DOM simulation), Idiomorph (DOM morphing), Rollup (bundling) (003-template-enhancements)
 
 - JavaScript (ES6+) - matches existing AppBlocks codebase + Jest (testing framework), JSDOM (DOM simulation), Babel (for ES6+ support in tests) (001-test-framework)
 
@@ -73,6 +74,7 @@ npm test && npm run lint
 JavaScript (ES6+) - matches existing AppBlocks codebase: Follow standard conventions
 
 ## Recent Changes
+- 003-template-enhancements: Added JavaScript (ES6+) with Babel transpilation + Jest (testing), JSDOM (DOM simulation), Idiomorph (DOM morphing), Rollup (bundling)
 
 - 001-test-framework: Added JavaScript (ES6+) - matches existing AppBlocks codebase + Jest (testing framework), JSDOM (DOM simulation), Babel (for ES6+ support in tests)
 

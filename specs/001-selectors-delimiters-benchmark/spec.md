@@ -1,8 +1,8 @@
 # Feature Specification: Selectors, Delimiters, Benchmark
 
-**Feature Branch**: `001-selectors-delimiters-benchmark`  
-**Created**: 2025-11-06  
-**Status**: Draft  
+**Feature Branch**: `001-selectors-delimiters-benchmark`
+**Created**: 2025-11-06
+**Status**: Draft
 **Input**: Event selectors support descendant combinators (spaces). Custom placeholder delimiters configurable as an array [open, close] with default ['{', '}']. Add a simple performance benchmark that measures afterRender - beforeRender over 10 runs and reports the mean for comparison across changes.
 
 ## User Scenarios & Testing *(mandatory)*
@@ -75,16 +75,16 @@ Custom placeholder delimiters
 - **FR-012**: The default MUST remain `['{', '}']` for backward compatibility.
 - **FR-013**: Filter separator `|` MUST remain supported and unambiguous with custom delimiters.
 - **FR-014**: An invalid delimiters value (not an array of two non-empty strings) MUST be rejected and MUST fall back to the default with a developer-facing error message.
-- **FR-015**: The configuration key name for setting delimiters is [NEEDS CLARIFICATION: Should the public key be `delimiters` or `placeholderDelimiters`?].
+ - **FR-015**: The configuration key name for setting delimiters MUST be `delimiters`.
 
 Performance benchmark
 - **FR-020**: Provide a benchmark scenario that renders an AppBlock containing: two placeholders (one data property and one method call), one `c-if` directive, one `c-for` directive over a small collection, and at least two filters applied in the template.
 - **FR-021**: The benchmark MUST compute per-run time as `afterRenderTimestamp - beforeRenderTimestamp` and MUST collect exactly 10 samples.
 - **FR-022**: The benchmark MUST return the mean of the 10 samples (in milliseconds) and the array of individual samples.
 - **FR-023**: The benchmark runner MUST provide a comparison report when given a previous baseline, showing absolute and percentage change.
-- **FR-024**: The benchmark execution environment is [NEEDS CLARIFICATION: Should this run in Node with a simulated DOM (e.g., headless) or in a real browser?].
+ - **FR-024**: The benchmark MUST execute in Node using a headless DOM (e.g., JSDOM) to enable fast, repeatable, CI-friendly runs.
 - **FR-025**: Benchmark runs MUST be deterministic with regard to the scenario (fixed data sizes, fixed template). Variability due to environment SHOULD be acknowledged in the report.
- - **FR-026**: Baseline persistence is [NEEDS CLARIFICATION: Where should we store and read the baseline for comparisons (e.g., committed file in repo, local file under `benchmarks/`, or external storage)?].
+ - **FR-026**: Baselines MUST be stored and read from a local, gitignored file at `.benchmarks/baseline.json`.
 
 ### Key Entities *(include if feature involves data)*
 

@@ -13,7 +13,7 @@
 
 ## Requirement Completeness
 
-- [ ] No [NEEDS CLARIFICATION] markers remain
+ - [x] No [NEEDS CLARIFICATION] markers remain
 - [x] Requirements are testable and unambiguous
 - [x] Success criteria are measurable
 - [x] Success criteria are technology-agnostic (no implementation details)
@@ -31,14 +31,9 @@
 
 ## Validation Results
 
-- No [NEEDS CLARIFICATION] markers remain: FAIL
-  - Spec contains the following markers:
-    - FR-015: "Should the public key be `delimiters` or `placeholderDelimiters`?"
-    - FR-024: "Should this run in Node with a simulated DOM (headless) or in a real browser?"
-    - FR-026: "Where should we store and read the baseline for comparisons?"
-
-- All other checklist items: PASS
+- No [NEEDS CLARIFICATION] markers remain: PASS
+- All checklist items: PASS
 
 ## Notes
 
-- Resolve the three clarifications above via `/speckit.clarify` before planning. After resolution, re-run this checklist and mark the remaining item as complete.
+- Spec is ready for the next phase: `/speckit.plan`.

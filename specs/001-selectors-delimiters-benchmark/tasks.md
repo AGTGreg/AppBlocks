@@ -1,8 +1,8 @@
 # Tasks: Selectors, Delimiters, Benchmark
 
-**Branch**: 001-selectors-delimiters-benchmark  
-**Spec**: specs/001-selectors-delimiters-benchmark/spec.md  
-**Plan**: specs/001-selectors-delimiters-benchmark/plan.md  
+**Branch**: 001-selectors-delimiters-benchmark
+**Spec**: specs/001-selectors-delimiters-benchmark/spec.md
+**Plan**: specs/001-selectors-delimiters-benchmark/plan.md
 **Generated**: 2025-11-06
 
 ## Phase 1: Setup
@@ -33,6 +33,8 @@ Independent Test Criteria: All tests in `events.selectors-with-spaces.test.js` p
 - [ ] T011 [P] [US1] Add delegated listener using `e.target.closest(selector)` logic in `src/core.js`
 - [ ] T012 [US1] Update existing events docs in `docs/api.md` with descendant selector examples
 - [ ] T013 [US1] Add edge case test for multiple spaces and attribute selector in `tests/core/events.selectors-with-spaces.test.js`
+ - [ ] T013A [P] [US1] Add legacy simple selector test (`'click .child'`) in `tests/core/events.selectors-with-spaces.test.js` (assert unchanged behavior)
+ - [ ] T013B [US1] Add backward compatibility note to events section in `docs/api.md`
 
 ## Phase 4: User Story 2 - Choose placeholder delimiters (P2)
 
@@ -43,6 +45,8 @@ Independent Test Criteria: Delimiter tests pass for default `{}` and custom `[[ 
 - [ ] T015 [US2] Refactor regex in `src/placeholders.js` to dynamic based on `comp.delimiters`
 - [ ] T016 [P] [US2] Add attribute placeholder handling for custom delimiters in `src/placeholders.js`
 - [ ] T017 [US2] Extend tests for nested properties & filters in `tests/placeholders/delimiters.test.js`
+ - [ ] T017A [P] [US2] Add failing tests for invalid delimiters (empty strings, single-element array, non-string entries) in `tests/placeholders/delimiters.test.js`
+ - [ ] T017B [US2] Implement validation + fallback + error logging for invalid delimiters in `src/core.js`
 - [ ] T018 [US2] Update docs placeholder section in `docs/api.md` describing `delimiters` array and fallback behavior
 
 ## Phase 5: User Story 3 - Measure rendering performance (P3)
@@ -50,10 +54,12 @@ Independent Test Criteria: Delimiter tests pass for default `{}` and custom `[[ 
 Story Goal: Provide repeatable benchmark producing 10 samples, mean, and comparison report vs baseline.
 Independent Test Criteria: Benchmark test validates sample count, mean numeric, optional baseline comparison string.
 
-- [ ] T019 [US3] Implement benchmark scenario template builder in `scripts/benchmark.js`
+- [ ] T019 [US3] Implement benchmark scenario template builder in `scripts/benchmark.js` (include: 2 placeholders, 1 c-if, 1 c-for, ≥2 filters)
+ - [ ] T019A [P] [US3] Add assertions in `tests/benchmark/render-benchmark.test.js` verifying scenario includes c-if, c-for, and filtered placeholders
 - [ ] T020 [US3] Add timing capture (beforeRender/afterRender) into benchmark runner
-- [ ] T021 [US3] Baseline read/write logic to `.benchmarks/baseline.json` in `scripts/benchmark.js`
+- [ ] T021 [US3] Baseline read/write logic to `.benchmarks/baseline.json` in `scripts/benchmark.js` (compute absolute & % delta when baseline present)
 - [ ] T022 [US3] Outlier detection (mark >200% median deviation) and include note in report
+ - [ ] T022A [P] [US3] Extend benchmark test to assert report contains absolute delta and percentage delta patterns
 - [ ] T023 [P] [US3] Integrate soft regression warning (>10% mean increase) in `scripts/benchmark.js`
 - [ ] T024 [US3] Extend benchmark test `tests/benchmark/render-benchmark.test.js` to cover regression warning path
 - [ ] T025 [US3] Add usage docs for benchmark in `docs/api.md` or dedicated doc section
@@ -98,4 +104,4 @@ Each story phase produces passing tests for its feature area; phases are indepen
 ## Notes
 
 - Ensure initial tests fail before implementing functionality (Constitution: Test-First Development)
-- Keep placeholder regex efficient; monitor impact with benchmark before and after FR-010..FR-016 implementation.
+- Keep placeholder regex efficient; monitor impact with benchmark before and after FR-010..FR-015 (delimiter-related) implementation.

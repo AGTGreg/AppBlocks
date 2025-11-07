@@ -17,14 +17,14 @@ Primary technical approach:
 
 ## Technical Context
 
-**Language/Version**: JavaScript (ES6+) as per existing repo (Node runtime for benchmark tooling).  
-**Primary Dependencies**: Idiomorph (already used for rendering diffing), Jest (existing tests), JSDOM (test env), No new runtime deps planned (aim to avoid added bundle size).  
-**Storage**: N/A (baseline stored as local JSON file `.benchmarks/baseline.json`, gitignored).  
-**Testing**: Jest with JSDOM; new tests under `tests/core/events` (extended), `tests/placeholders` (delimiter variants), and `tests/benchmark` (timing harness).  
-**Target Platform**: Browser (library consumers) + Node (benchmark execution).  
-**Project Type**: Single small JS library (monorepo style not required).  
-**Performance Goals**: Maintain or improve current render time; benchmark provides reference mean (initial target: no >10% regression after changes).  
-**Constraints**: Minimize regex overhead, avoid increasing build size significantly (>1% growth flagged); event delegation must not introduce O(n * m) scanning per event (use closest and limited query).  
+**Language/Version**: JavaScript (ES6+) as per existing repo (Node runtime for benchmark tooling).
+**Primary Dependencies**: Idiomorph (already used for rendering diffing), Jest (existing tests), JSDOM (test env), No new runtime deps planned (aim to avoid added bundle size).
+**Storage**: N/A (baseline stored as local JSON file `.benchmarks/baseline.json`, gitignored).
+**Testing**: Jest with JSDOM; new tests under `tests/core/events` (extended), `tests/placeholders` (delimiter variants), and `tests/benchmark` (timing harness).
+**Target Platform**: Browser (library consumers) + Node (benchmark execution).
+**Project Type**: Single small JS library (monorepo style not required).
+**Performance Goals**: Maintain or improve current render time; benchmark provides reference mean (initial target: no >10% regression after changes).
+**Constraints**: Minimize regex overhead, avoid increasing build size significantly (>1% growth flagged); event delegation must not introduce O(n * m) scanning per event (use closest and limited query).
 **Scale/Scope**: Typical DOM subtree sizes (<5k nodes) for event delegation; placeholder parsing per render kept linear in text length.
 
 ## Constitution Check

@@ -1,6 +1,6 @@
 # Research & Decisions: Selectors, Delimiters, Benchmark
 
-**Date**: 2025-11-06  
+**Date**: 2025-11-06
 **Scope**: Event delegation with descendant selectors, configurable placeholder delimiters, performance benchmark harness.
 
 ## Decisions

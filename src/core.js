@@ -156,22 +156,50 @@ export function AppBlock(config) {
       comp.filters = filters;
       if (config.filters instanceof Object) Object.assign(comp.filters, config.filters);
 
+      // Placeholder delimiters configuration. Expect an array of two non-empty strings.
+      const defaultDelimiters = ['{', '}'];
+      if (Array.isArray(config.delimiters) && config.delimiters.length === 2 && typeof config.delimiters[0] === 'string' && typeof config.delimiters[1] === 'string' && config.delimiters[0].length > 0 && config.delimiters[1].length > 0) {
+        comp.delimiters = config.delimiters;
+      } else {
+        if (config.delimiters !== undefined) {
+          // Developer provided an invalid configuration — log and fallback to default
+          logError(comp, 'Invalid `delimiters` config provided. Falling back to default [`{`,`}`].');
+        }
+        comp.delimiters = defaultDelimiters;
+      }
+
       // Event handling ------------------------------------------------------------------------------------------------
       comp.events = {};
       if (config.events instanceof Object) {
         Object.assign(comp.events, config.events)
         // Add event listeners to :el for each event
         for (const ev in comp.events) {
-          // Events are in this form (event element) so split at space to get the eventName and the element to attach
-          // the event on.
-          const eParts = ev.split(' ');
-          const eventName = eParts[0];
-          const eventElement = eParts[1];
+          // Events are in this form "<eventName> <cssSelector>" where the selector may contain spaces.
+          // Split only on the first space so the remainder is treated as a full selector string.
+          const firstSpace = ev.indexOf(' ');
+          if (firstSpace === -1) continue; // invalid key
+          const eventName = ev.slice(0, firstSpace);
+          const eventSelector = ev.slice(firstSpace + 1).trim();
 
           comp.el.addEventListener(eventName, function(e) {
-            comp.el.querySelectorAll(eventElement).forEach(el => {
-              if (e.srcElement === el) comp.events[ev](e);
-            });
+            const target = e.target || e.srcElement;
+            // Use closest to test whether the event originated from within a matching element.
+            // Ensure the matched element is inside this AppBlock's root.
+            let matched = null;
+            try {
+              if (target && target.closest) matched = target.closest(eventSelector);
+            } catch (err) {
+              // If the selector is invalid, skip handling to avoid breaking the app.
+              matched = null;
+            }
+            if (matched && comp.el.contains(matched)) {
+              try {
+                comp.events[ev](e, matched);
+              } catch (err) {
+                // swallow handler errors to avoid breaking other handlers
+                logError(comp, err && err.message ? err.message : String(err));
+              }
+            }
           });
         }
       }

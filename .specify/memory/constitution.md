@@ -24,6 +24,7 @@ AppBlocks MUST remain a small, fast, and lightweight JavaScript library.
 - Dependencies MUST be minimized; prefer vanilla JavaScript solutions
 - Build output MUST be monitored; significant size increases require explicit approval
 - Each feature MUST have a clear, specific purpose that aligns with micro app development
+- Code must follow the DRY principle. If a piece of code is used more than once, we write it in `helpers.js`.
 
 **Rationale**: The project's core value proposition is being "ridiculously easy to integrate" and "small" - bloat destroys this advantage.
 

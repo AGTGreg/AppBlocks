@@ -193,6 +193,31 @@ When `seen` is `true` our element is visible. If we set it to `false` our elemen
 ```html
 <template id="appTemplate">
   <span c-if="data.seen == true">Now you see me</span>
+  <span c-if="data.age >= 18">You are an adult</span>
+  <span c-if="data.score > 50 && data.attempts > 0">Keep trying!</span>
+</template>
+```
+
+You can also call methods from `c-if`. AppBlocks automatically passes the app instance as the first parameter:
+
+```js
+var app = new AppBlock({
+  ...
+  data: {
+    userAge: 25
+  },
+  methods: {
+    isAdult(thisApp, age) {
+      return age >= 18;
+    }
+  }
+  ...
+})
+```
+
+```html
+<template id="appTemplate">
+  <span c-if="isAdult(data.userAge)">You are an adult</span>
 </template>
 ```
 

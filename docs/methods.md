@@ -113,6 +113,10 @@ var appB = new AppBlock({
 
 
 ## Calling methods from directives:
+
+Methods can be called from directives like `c-if` and `c-ifnot`. When you call a method from a directive, AppBlocks automatically passes the app instance as the first parameter, so you don't need to provide it in the template.
+
+### Simple flag example:
 ```js
 var app = new AppBlock({
   ...
@@ -131,6 +135,77 @@ var app = new AppBlock({
 ```html
 <template id="appTemplate">
   <span c-if="showSpan">Now you see me</span>
+</template>
+```
+
+### Methods with parameters:
+
+When your method takes additional parameters beyond the app instance, you can pass them directly in the directive expression:
+
+```js
+var app = new AppBlock({
+  ...
+  data: {
+    userAge: 25,
+    minAge: 18
+  },
+
+  methods: {
+    isOldEnough(thisApp, age, minimum) {
+      return age >= minimum;
+    },
+
+    isLarger(thisApp, a, b) {
+      return a > b;
+    }
+  }
+})
+```
+
+```html
+<template id="appTemplate">
+  <span c-if="isOldEnough(data.userAge, data.minAge)">You can proceed</span>
+  <span c-if="isLarger(data.userAge, 21)">You can drink in the US</span>
+</template>
+```
+
+**Note:** The app instance is automatically passed as the first parameter to methods when called from `c-if`, `c-ifnot`, or expression contexts. You define the method with `methodName(thisApp, ...otherParams)` but call it in templates as `methodName(param1, param2)`.
+
+### Complex expressions:
+
+You can also use methods in complex boolean expressions:
+
+```js
+var app = new AppBlock({
+  ...
+  data: {
+    score: 85,
+    attempts: 2
+  },
+
+  methods: {
+    isPassing(thisApp, score) {
+      return score >= 60;
+    },
+
+    hasAttemptsLeft(thisApp, attempts) {
+      return attempts > 0;
+    }
+  }
+})
+```
+
+```html
+<template id="appTemplate">
+  <span c-if="isPassing(data.score) && hasAttemptsLeft(data.attempts)">
+    Congratulations! You passed!
+  </span>
+  <span c-if="!isPassing(data.score) && hasAttemptsLeft(data.attempts)">
+    Try again!
+  </span>
+  <span c-ifnot="hasAttemptsLeft(data.attempts)">
+    No attempts remaining.
+  </span>
 </template>
 ```
 

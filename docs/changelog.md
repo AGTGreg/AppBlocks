@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.1.0
+- **New:** Event delegation supports complex CSS selectors including descendant combinators (e.g. `'click .list li .delete'`). Handlers receive `(event, matchedElement)`.
+- **New:** Configurable placeholder delimiters via the `delimiters: [open, close]` config option. Filters continue to work inside custom delimiters.
+- **New:** Lightweight benchmark runner (`scripts/benchmark.js`) to collect render timing samples, compute mean/median, detect outliers, and compare against a local baseline in `.benchmarks/baseline.json`.
+- **Enhancement:** Placeholder parsing refactored to support dynamic delimiters and preserve filters and `asHTML` behavior.
+- **Testing:** Added tests for selector delegation, custom delimiters, and benchmark results; full test-suite coverage added for new features.
+
 ## 2.0.4
 - Comprehensive testing
 - **Enhancement:** Add `hasOwn`, `isObject` and `deepClone` utils.

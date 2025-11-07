@@ -338,3 +338,25 @@ A key concept in AppBlocks, is to cover the most common use cases of a front-end
 With AppBlocks you can use `fetch` or [Axios](https://github.com/axios/axios) to make requests. AppBlocks wraps these APIs and takes care of our app's state and rendering for us.
 
 You can read all about making requests [here](requests.md).
+
+## Benchmarking (developer)
+
+AppBlocks includes a small benchmark helper (`scripts/benchmark.js`) you can use in Node/JSDOM to collect render timing samples and compare against a local baseline.
+
+Quick example (Node):
+
+```js
+const { runBenchmark } = require('../scripts/benchmark');
+
+async function scenario() {
+  // create AppBlock with template/data and let it render
+}
+
+(async () => {
+  const result = await runBenchmark(scenario, 10);
+  console.log(result.report);
+  // Example output: "Mean 2.15ms (+4.5% vs baseline 2.06ms); outliers: 0/10"
+})();
+```
+
+Baseline file: `.benchmarks/baseline.json` (created automatically on first run, gitignored).

@@ -76,6 +76,23 @@ And we can use it in our templates like so:
 
 You can read more about it [here](filters.md).
 
+## `delimiters: [string, string]`
+
+Customize the placeholder delimiters that AppBlocks uses to identify template placeholders. By default AppBlocks uses curly braces `{` and `}`. To change that behaviour provide an array of two non-empty strings: the opening and closing delimiters.
+
+Syntax:
+`delimiters: [openDelimiter, closeDelimiter]`
+
+Example (use `[[` and `]]` as delimiters):
+
+```js
+delimiters: ['[[', ']]']
+```
+
+Notes:
+- Filters (the `|` pipe) continue to operate inside placeholders regardless of the chosen delimiters: e.g. `[[data.name|upper]]`.
+- Invalid or malformed `delimiters` (non-array, wrong length, non-string entries, or empty strings) are ignored and AppBlocks falls back to the default `['{','}']`. An error is logged to aid debugging.
+
 ## methods: object
 All logic in our app goes here. It is an object that contains all the methods/functions in our app.
 
@@ -108,6 +125,22 @@ An object were you store all your custom directives you can use in your template
 ## events: object
 This is where you assign all the events in your app. You can read more about it
 [here](README.md?id=event-handling):
+
+### Format
+
+Event keys follow the format `"<eventName> <cssSelector>"` where the selector may contain spaces and descendant combinators. AppBlocks splits the string on the first space: everything before the first space is treated as the event name and everything after is treated as the full CSS selector. This enables complex selectors such as descendant selectors or attribute selectors.
+
+Example using a descendant selector:
+
+```js
+events: {
+  'click .todo-list li .delete': (e, matchedEl) => { /* ... */ }
+}
+```
+
+Notes:
+- Delegation is implemented using a single listener attached to the component root and `Element.closest()` is used on the event target to find the matching element. The handler is invoked with `(event, matchedElement)`.
+- Backward compatibility: keys without spaces or simple selectors continue to work. The first space is always used to split the event name from the selector; the remainder (including additional spaces) is considered the selector string.
 
 
 ## fetchRequest

@@ -11,8 +11,8 @@ const getPlaceholderVal = function(comp, placeholder, pointers) {
   if ( typeof pointers === 'object' && pointers !== null ) {
 
   }
-
-  const placeholderName = placeholder.replace(/{|}/g , '');
+  // placeholder is the inner content (without delimiters), may contain property path and filters already removed
+  const placeholderName = placeholder;
   let propKeys = placeholderName.split('.');
   let result = getProp(comp, propKeys, pointers);
   // Return empty text instead of undefined.
@@ -23,27 +23,27 @@ const getPlaceholderVal = function(comp, placeholder, pointers) {
 // Replaces all placeholders in all attributes in a node.
 export const updateAttributePlaceholders = function(comp, node, pointers) {
   const attrs = node.attributes;
+  const delimiters = Array.isArray(comp.delimiters) && comp.delimiters.length === 2 ? comp.delimiters : ['{', '}'];
+  const escapeRegExp = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const open = escapeRegExp(delimiters[0]);
+  const close = escapeRegExp(delimiters[1]);
+  const regex = new RegExp(open + '([\\s\\S]*?)' + close, 'g');
+
   for (let i = 0; i < attrs.length; i++) {
     let attrValue = attrs[i].value;
-    let match;
-
-    // Use a while loop to find all placeholders in the current attribute value
-    while ((match = /{([^}]+)}/.exec(attrValue)) !== null) {
-      const fullMatch = match[0];
-      // This regex captures the propName and any filters separated by |
-      const [, propName, filters] = fullMatch.match(/{([^|}]+)(\|[^}]+)?}/);
-      const filterList = filters ? filters.split('|').slice(1) : [];
+    attrValue = attrValue.replace(regex, (fullMatch, inner) => {
+      const parts = inner.split('|').map(p => p.trim()).filter(Boolean);
+      const propName = parts.shift();
+      const filterList = parts;
 
       let placeholderVal = getPlaceholderVal(comp, propName, pointers);
 
-      // Process each filter
       filterList.forEach(filter => {
-        // Apply the filter based on its name
         placeholderVal = applyCustomFilter(comp, placeholderVal, filter);
       });
 
-      attrValue = attrValue.replace(fullMatch, placeholderVal);
-    }
+      return placeholderVal;
+    });
 
     attrs[i].value = attrValue;
   }
@@ -60,48 +60,47 @@ export const updateTextNodePlaceholders = function(comp, nodeTree, pointers) {
     nodesToProcess.push(textWalker.currentNode);
   }
 
+  // Build delimiter-aware regex
+  const delimiters = Array.isArray(comp.delimiters) && comp.delimiters.length === 2 ? comp.delimiters : ['{', '}'];
+  const escapeRegExp = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const open = escapeRegExp(delimiters[0]);
+  const close = escapeRegExp(delimiters[1]);
+  const regex = new RegExp(open + '([\\s\\S]*?)' + close, 'g');
+
   nodesToProcess.forEach((node) => {
     let nodeVal = node.nodeValue;
-    let match;
+    let hasReplacedWithHTML = false;
 
-    // Use a while loop to find all placeholders in the current node value
-    while ((match = /{([^}]+)}/.exec(nodeVal)) !== null) {
-      const fullMatch = match[0];
-      // This regex captures the propName and any filters separated by |
-      const [, propName, filters] = fullMatch.match(/{([^|}]+)(\|[^}]+)?}/);
-      const filterList = filters ? filters.split('|').slice(1) : [];
+    nodeVal = nodeVal.replace(regex, (fullMatch, inner) => {
+
+      const parts = inner.split('|').map(p => p.trim()).filter(Boolean);
+      const propName = parts.shift();
+      const filterList = parts;
 
       let placeholderVal = getPlaceholderVal(comp, propName, pointers);
 
-      // Process each filter
       filterList.forEach(filter => {
-        // Example: Apply the filter based on its name.
-        switch (filter) {
-          case 'asHTML':
-            // For asHTML, we'll handle it separately outside this loop since this is a corner case and has to be
-            // hardcoded.
-            break;
-          default:
-            // Handles other filters, e.g., applying a custom function
-            placeholderVal = applyCustomFilter(comp, placeholderVal, filter);
-            break;
+        if (filter === 'asHTML') {
+          // Mark and handle below
+        } else {
+          placeholderVal = applyCustomFilter(comp, placeholderVal, filter);
         }
       });
 
       if (filterList.includes('asHTML')) {
-        // Create a document fragment from the HTML
+        // Replace the node with HTML fragment
         const docFrag = document.createRange().createContextualFragment(placeholderVal);
         node.parentNode.insertBefore(docFrag, node);
         node.parentNode.removeChild(node);
-        break; // Exit the loop since the node has been replaced
-      } else {
-        // Replace text as before
-        nodeVal = nodeVal.replace(fullMatch, placeholderVal);
+        hasReplacedWithHTML = true;
+        return '';
       }
-    }
+
+      return placeholderVal;
+    });
 
     // Update the node value only if it hasn't been replaced by HTML
-    if (node.parentNode) {
+    if (!hasReplacedWithHTML && node.parentNode) {
       node.nodeValue = nodeVal;
     }
   });

@@ -106,3 +106,15 @@ function buildScenarioTemplate() {
 }
 
 module.exports.buildScenarioTemplate = buildScenarioTemplate;
+
+// Build a scenario template with 20 conditional directives for performance testing
+function buildConditionalScenarioTemplate() {
+  let html = '<div>';
+  for (let i = 0; i < 20; i++) {
+    html += `<div c-if="data.show${i}">{data.value${i}}</div>`;
+  }
+  html += '</div>';
+  return html;
+}
+
+module.exports.buildConditionalScenarioTemplate = buildConditionalScenarioTemplate;

@@ -1,6 +1,7 @@
 # Changelog
 
 ## 2.1.0
+- **Enchancement:** `c-if` and `c-ifnot` directives now support JavaScript expressions for complex conditional logic. Expressions have access to `data` and methods; built-ins like `Math` can be enabled via `config.allowBuiltins`. Dangerous constructs (assignments, function calls, etc.) are automatically blocked for security.
 - **New:** Event delegation supports complex CSS selectors including descendant combinators (e.g. `'click .list li .delete'`). Handlers receive `(event, matchedElement)`.
 - **New:** Configurable placeholder delimiters via the `delimiters: [open, close]` config option. Filters continue to work inside custom delimiters.
 - **New:** Lightweight benchmark runner (`scripts/benchmark.js`) to collect render timing samples, compute mean/median, detect outliers, and compare against a local baseline in `.benchmarks/baseline.json`.

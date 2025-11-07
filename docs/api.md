@@ -100,7 +100,9 @@ All logic in our app goes here. It is an object that contains all the methods/fu
 
 A method is defined like so:
 
-`methodName(appInstance) {}`
+`methodName(appInstance, ...params) {}`
+
+The first parameter is always the app instance, which is automatically passed by AppBlocks when the method is called from templates (e.g., in `c-if` directives). Additional parameters can be passed explicitly in the template.
 
 **Example:**
 ```js
@@ -108,7 +110,16 @@ methods: {
   add(app, a, b) {
     return a + b;
   },
+  isAdult(app, age) {
+    return age >= 18;
+  }
 }
+```
+
+When calling from templates:
+```html
+<span c-if="isAdult(data.userAge)">Adult content</span>
+<p>{add(5, 3)}</p>
 ```
 
 You can read more about it [here](methods.md).

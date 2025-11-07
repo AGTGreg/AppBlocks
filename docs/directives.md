@@ -53,6 +53,39 @@ var app = new AppBlock({
 </template>
 ```
 
+**Methods with parameters:**
+
+When calling methods from `c-if`, AppBlocks automatically passes the app instance as the first parameter. You define your methods to receive the instance, then any additional parameters:
+
+```js
+var app = new AppBlock({
+  ...
+  data: {
+    userAge: 25,
+    minimumAge: 18
+  },
+
+  methods: {
+    // Define with app instance as first param
+    isOldEnough(thisApp, age, minimum) {
+      return age >= minimum;
+    },
+
+    isInRange(thisApp, value, min, max) {
+      return value >= min && value <= max;
+    }
+  }
+})
+```
+
+```html
+<template id="appTemplate">
+  <!-- Call without passing the app instance -->
+  <span c-if="isOldEnough(data.userAge, data.minimumAge)">You can proceed</span>
+  <span c-if="isInRange(data.userAge, 18, 65)">Working age</span>
+</template>
+```
+
 ## c-ifnot
 
 This is the opposite of `c-if`. Think of it as writing if ... else:
@@ -155,3 +188,36 @@ The result will be:
 > Hi there Greg!
 
 > Note that we have to return `true` in order for our element to show up. Otherwise AppBlocks would have discarded it.
+
+## Expression Support in c-if and c-ifnot
+
+`c-if` and `c-ifnot` support full JavaScript expressions for complex conditional logic:
+
+```html
+<template id="appTemplate">
+  <span c-if="data.messages.length >= 10">You have many messages</span>
+  <span c-if="hasUser(data.messages) && data.isLoggedIn">Welcome back!</span>
+  <span c-ifnot="data.messages.length >= 10">Keep the conversation going</span>
+</template>
+```
+
+Expressions evaluate with access to `data` and instance methods. Results follow JavaScript truthiness rules.
+
+**Important:** When calling methods from expressions, AppBlocks automatically injects the app instance as the first parameter. Define methods with `methodName(thisApp, ...params)` but call them in templates as `methodName(param1, param2)`.
+
+### Enabling Built-ins
+
+Built-ins like `Math` are blocked by default for security. Enable them in config:
+
+```js
+var app = new AppBlock({
+  data: { value: 42 },
+  config: { allowBuiltins: ['Math'] }
+})
+```
+
+```html
+<span c-if="Math.max(data.value, 10) > 40">Big number</span>
+```
+
+> Dangerous constructs (assignments, function declarations, etc.) are automatically blocked with a warning.

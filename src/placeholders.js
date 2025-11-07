@@ -3,6 +3,7 @@
 
 import {getProp} from './utils';
 import {applyCustomFilter} from './filters';
+import {buildDelimiterRegex} from './helpers';
 
 
 // Returns the value of a placeholder.
@@ -23,11 +24,7 @@ const getPlaceholderVal = function(comp, placeholder, pointers) {
 // Replaces all placeholders in all attributes in a node.
 export const updateAttributePlaceholders = function(comp, node, pointers) {
   const attrs = node.attributes;
-  const delimiters = Array.isArray(comp.delimiters) && comp.delimiters.length === 2 ? comp.delimiters : ['{', '}'];
-  const escapeRegExp = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const open = escapeRegExp(delimiters[0]);
-  const close = escapeRegExp(delimiters[1]);
-  const regex = new RegExp(open + '([\\s\\S]*?)' + close, 'g');
+  const regex = buildDelimiterRegex(comp.delimiters);
 
   for (let i = 0; i < attrs.length; i++) {
     let attrValue = attrs[i].value;
@@ -61,11 +58,7 @@ export const updateTextNodePlaceholders = function(comp, nodeTree, pointers) {
   }
 
   // Build delimiter-aware regex
-  const delimiters = Array.isArray(comp.delimiters) && comp.delimiters.length === 2 ? comp.delimiters : ['{', '}'];
-  const escapeRegExp = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const open = escapeRegExp(delimiters[0]);
-  const close = escapeRegExp(delimiters[1]);
-  const regex = new RegExp(open + '([\\s\\S]*?)' + close, 'g');
+  const regex = buildDelimiterRegex(comp.delimiters);
 
   nodesToProcess.forEach((node) => {
     let nodeVal = node.nodeValue;

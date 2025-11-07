@@ -84,6 +84,30 @@ export const deepClone = function(value) {
   return value;
 };
 
+// Expression safety utilities for c-if / c-ifnot directives
+export const isBlockedExpression = function(expr) {
+  // Block dangerous tokens and constructs
+  const blockedPatterns = [
+    /\bconstructor\b/,
+    /\b__proto__\b/,
+    /\beval\b/,
+    /\bFunction\b/,
+    /(?<![=!<>])=(?![=])/ , // assignment not part of == === != !==
+    /\+\+|--/,
+    /\bnew\b/,
+    /\bfunction\b/,
+    /\bclass\b/,
+    /=>/,
+    /\bimport\b/,
+    /\bawait\b/,
+    /\byield\b/,
+    /\btry\b|\bcatch\b|\bfinally\b/,
+    /\bdelete\b/
+  ];
+
+  return blockedPatterns.some(pattern => pattern.test(expr));
+};
+
 
 // Private functions ===================================================================================================
 // Try to get the value of an object.

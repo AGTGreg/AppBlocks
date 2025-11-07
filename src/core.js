@@ -156,6 +156,12 @@ export function AppBlock(config) {
       comp.filters = filters;
       if (config.filters instanceof Object) Object.assign(comp.filters, config.filters);
 
+      // Expression evaluation built-ins allow-list. Expect an array of strings (default: empty, no built-ins allowed).
+      comp.allowBuiltins = [];
+      if (Array.isArray(config.allowBuiltins)) {
+        comp.allowBuiltins = config.allowBuiltins;
+      }
+
       // Placeholder delimiters configuration. Expect an array of two non-empty strings.
       const defaultDelimiters = ['{', '}'];
       if (Array.isArray(config.delimiters) && config.delimiters.length === 2 && typeof config.delimiters[0] === 'string' && typeof config.delimiters[1] === 'string' && config.delimiters[0].length > 0 && config.delimiters[1].length > 0) {

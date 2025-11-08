@@ -3,7 +3,7 @@
 
 import {getProp} from './utils';
 import {applyCustomFilter} from './filters';
-import {buildDelimiterRegex} from './helpers';
+import {buildDelimiterRegex, evaluateTemplateExpression} from './helpers';
 
 
 // Returns the value of a placeholder.
@@ -22,24 +22,14 @@ const getPlaceholderVal = function(comp, placeholder, pointers) {
 };
 
 // Replaces all placeholders in all attributes in a node.
-export const updateAttributePlaceholders = function(comp, node, pointers) {
+export const updateAttributePlaceholders = function(comp, node, pointers, cache) {
   const attrs = node.attributes;
   const regex = buildDelimiterRegex(comp.delimiters);
 
   for (let i = 0; i < attrs.length; i++) {
     let attrValue = attrs[i].value;
     attrValue = attrValue.replace(regex, (fullMatch, inner) => {
-      const parts = inner.split('|').map(p => p.trim()).filter(Boolean);
-      const propName = parts.shift();
-      const filterList = parts;
-
-      let placeholderVal = getPlaceholderVal(comp, propName, pointers);
-
-      filterList.forEach(filter => {
-        placeholderVal = applyCustomFilter(comp, placeholderVal, filter);
-      });
-
-      return placeholderVal;
+      return evaluateTemplateExpression(comp, pointers, node, inner, cache);
     });
 
     attrs[i].value = attrValue;
@@ -47,7 +37,7 @@ export const updateAttributePlaceholders = function(comp, node, pointers) {
 };
 
 // Updates all the text nodes that contain placeholders `{}` and applies filters (if any).
-export const updateTextNodePlaceholders = function(comp, nodeTree, pointers) {
+export const updateTextNodePlaceholders = function(comp, nodeTree, pointers, cache) {
   const textWalker = document.createTreeWalker(
     nodeTree, NodeFilter.SHOW_TEXT, null, false
   );
@@ -70,15 +60,21 @@ export const updateTextNodePlaceholders = function(comp, nodeTree, pointers) {
       const propName = parts.shift();
       const filterList = parts;
 
-      let placeholderVal = getPlaceholderVal(comp, propName, pointers);
+      let placeholderVal;
 
-      filterList.forEach(filter => {
-        if (filter === 'asHTML') {
-          // Mark and handle below
-        } else {
-          placeholderVal = applyCustomFilter(comp, placeholderVal, filter);
-        }
-      });
+      if (filterList.includes('asHTML')) {
+        placeholderVal = getPlaceholderVal(comp, propName, pointers);
+
+        filterList.forEach(filter => {
+          if (filter === 'asHTML') {
+            hasReplacedWithHTML = true;
+          } else {
+            placeholderVal = applyCustomFilter(comp, placeholderVal, filter);
+          }
+        });
+      } else {
+        placeholderVal = evaluateTemplateExpression(comp, pointers, node, inner, cache);
+      }
 
       if (filterList.includes('asHTML')) {
         // Replace the node with HTML fragment

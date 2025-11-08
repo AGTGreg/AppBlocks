@@ -7,6 +7,7 @@ Auto-generated from all feature plans. Last updated: 2025-11-04
 - N/A (baseline stored as local JSON file `.benchmarks/baseline.json`, gitignored). (001-selectors-delimiters-benchmark)
 - JavaScript (ES6+) per existing repo + None new (reuse existing codebase; avoid added bundle size per constitution) (001-c-if-expressions)
 - N/A (in-memory evaluation only) (001-c-if-expressions)
+- JavaScript (ES6+) + None new (reuse existing code; Idiomorph already used elsewhere) (001-method-calls)
 
 - JavaScript (ES6+) - matches existing AppBlocks codebase + Jest (testing framework), JSDOM (DOM simulation), Babel (for ES6+ support in tests) (001-test-framework)
 
@@ -77,10 +78,10 @@ npm test && npm run lint
 JavaScript (ES6+) - matches existing AppBlocks codebase: Follow standard conventions
 
 ## Recent Changes
+- 001-method-calls: Added JavaScript (ES6+) + None new (reuse existing code; Idiomorph already used elsewhere)
 - 001-c-if-expressions: Added JavaScript (ES6+) per existing repo + None new (reuse existing codebase; avoid added bundle size per constitution)
 - 001-selectors-delimiters-benchmark: Added JavaScript (ES6+) as per existing repo (Node runtime for benchmark tooling). + Idiomorph (already used for rendering diffing), Jest (existing tests), JSDOM (test env), No new runtime deps planned (aim to avoid added bundle size).
 
-- 001-test-framework: Added JavaScript (ES6+) - matches existing AppBlocks codebase + Jest (testing framework), JSDOM (DOM simulation), Babel (for ES6+ support in tests)
 
 <!-- MANUAL ADDITIONS START -->
 <!-- MANUAL ADDITIONS END -->

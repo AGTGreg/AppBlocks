@@ -46,13 +46,18 @@ export function AppBlock(config) {
   // data, and content gets updated.
   this.prepareTmpDom = function() {
     const comp = this;
+    const cache = new Map(); // Per-render ephemeral cache
     let tmpDOM = comp.template.cloneNode(true);
-    processNode(comp, tmpDOM);
-    updateTextNodePlaceholders(comp, tmpDOM);
-    return tmpDOM;
+
+    // Wrap in a div to handle directives on root elements
+    const wrapper = document.createElement('div');
+    wrapper.appendChild(tmpDOM);
+
+    processNode(comp, wrapper, cache);
+    updateTextNodePlaceholders(comp, wrapper, null, cache);
+
+    return wrapper;
   }
-
-
   this.render = function(callback) {
     const comp = this;
     if (comp.methods.beforeRender instanceof Function) comp.methods.beforeRender(comp);

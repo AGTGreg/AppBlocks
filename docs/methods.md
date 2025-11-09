@@ -268,17 +268,17 @@ var app = new AppBlock({
     lastName: 'Doe',
     items: [10, 20, 30]
   },
-  
+
   methods: {
     formatName(app, first, last) {
       return first + ' ' + last;
     },
-    
+
     calculateTotal(app, items) {
       return items.reduce((a, b) => a + b, 0);
     }
   },
-  
+
   filters: {
     currency(app, value) {
       return '$' + value.toFixed(2);

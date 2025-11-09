@@ -1,7 +1,7 @@
 /**
  * Benchmark tests for method calls feature
  * Tests: nested method parsing, filter application, cache consistency, deep nesting
- * 
+ *
  * These benchmarks verify that method call overhead remains <5% vs baseline
  */
 
@@ -16,7 +16,7 @@ describe('Benchmark: Method calls', () => {
     const scenario = () => {
       const template = document.createElement('template');
       template.innerHTML = buildMethodCallScenarioTemplate();
-      
+
       const config = createMockAppBlockConfig({
         template,
         data: {
@@ -46,7 +46,7 @@ describe('Benchmark: Method calls', () => {
           trim: (app, val) => String(val).trim()
         }
       });
-      
+
       const app = new AppBlock(config);
       return app;
     };
@@ -65,7 +65,7 @@ describe('Benchmark: Method calls', () => {
     const scenario = () => {
       const template = document.createElement('template');
       template.innerHTML = buildDeepNestingScenarioTemplate();
-      
+
       const config = createMockAppBlockConfig({
         template,
         data: {
@@ -89,7 +89,7 @@ describe('Benchmark: Method calls', () => {
           }
         }
       });
-      
+
       const app = new AppBlock(config);
       return app;
     };

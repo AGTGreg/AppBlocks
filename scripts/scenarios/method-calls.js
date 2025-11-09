@@ -1,7 +1,7 @@
 /**
  * Benchmark scenario: Method calls with nested expressions and filters
  * Tests: nested method parsing, filter application, cache consistency
- * 
+ *
  * Expected overhead: <5% vs baseline
  */
 
@@ -42,10 +42,10 @@ const customFilters = {
 async function scenario(iteration) {
   const path = require('path');
   const AppBlock = require(path.resolve(__dirname, '../../dist/appblocks.cjs.js'));
-  
+
   const template = document.createElement('template');
   template.innerHTML = buildMethodCallScenarioTemplate();
-  
+
   const config = {
     template,
     data: {
@@ -58,9 +58,9 @@ async function scenario(iteration) {
     methods: customMethods,
     filters: customFilters
   };
-  
+
   const app = new AppBlock(config);
-  
+
   // Trigger render
   return app;
 }

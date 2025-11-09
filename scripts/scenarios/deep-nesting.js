@@ -1,7 +1,7 @@
 /**
  * Benchmark scenario: Deep nesting (≥5 levels)
  * Tests: recursive argument parsing, nested parenthesis handling, call stack depth
- * 
+ *
  * Expected overhead: Should remain <5% despite deep nesting
  */
 
@@ -42,10 +42,10 @@ const customMethods = {
 async function scenario(iteration) {
   const path = require('path');
   const AppBlock = require(path.resolve(__dirname, '../../dist/appblocks.cjs.js'));
-  
+
   const template = document.createElement('template');
   template.innerHTML = buildDeepNestingScenarioTemplate();
-  
+
   const config = {
     template,
     data: {
@@ -53,9 +53,9 @@ async function scenario(iteration) {
     },
     methods: customMethods
   };
-  
+
   const app = new AppBlock(config);
-  
+
   // Trigger render
   return app;
 }

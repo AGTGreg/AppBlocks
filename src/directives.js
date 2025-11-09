@@ -4,7 +4,7 @@ import {getProp, isBlockedExpression} from './utils';
 import {processNode} from './processing';
 import {updateAttributePlaceholders, updateTextNodePlaceholders} from './placeholders';
 import { logError } from './logger';
-import { createExpressionContext, handleLegacyOperators } from './helpers';
+import { createExpressionContext, handleLegacyOperators, evaluateTemplateExpression } from './helpers';
 
 
 // Expression evaluation cache and utilities
@@ -57,7 +57,7 @@ function evaluateToBoolean(expr, ctx, allowBuiltins, logWarning) {
 // If and For directives
 export const directives = {
 
-  'c-if': function(comp, node, pointers) {
+  'c-if': function(comp, node, pointers, cache) {
     let attr = node.getAttribute('c-if');
     if (!attr) return true; // no attribute, keep
 
@@ -95,7 +95,7 @@ export const directives = {
   },
 
   // Calls c-if directive and reverses the result.
-  'c-ifnot': function(comp, node, pointers) {
+  'c-ifnot': function(comp, node, pointers, cache) {
     let attr = node.getAttribute('c-ifnot');
     if (!attr) return true;
 
@@ -134,17 +134,17 @@ export const directives = {
     }
   },
 
-  'c-for': function(comp, node, pointers) {
+  'c-for': function(comp, node, pointers, cache) {
     const attr = node.getAttribute('c-for');
 
     let stParts = attr.split(' in ');
     let pointer = stParts[0];
-    const objectKeys = stParts[1].split('.');
+    const iterableExpr = stParts[1];
     if (pointers === undefined) pointers = {};
 
-    let iterable = getProp(comp, objectKeys, pointers);
+    let iterable = evaluateTemplateExpression(comp, pointers, node, iterableExpr, cache);
 
-    if (iterable) {
+    if (iterable && (Array.isArray(iterable) || typeof iterable[Symbol.iterator] === 'function')) {
       node.removeAttribute('c-for');
       const parentNode = node.parentNode;
 
@@ -154,9 +154,9 @@ export const directives = {
         pointers[pointer] = item;
 
         const newNode = node.cloneNode(true);
-        processNode(comp, newNode, pointers);
-        updateAttributePlaceholders(comp, newNode, pointers);
-        updateTextNodePlaceholders(comp, newNode, pointers);
+        processNode(comp, newNode, pointers, cache);
+        updateAttributePlaceholders(comp, newNode, pointers, cache);
+        updateTextNodePlaceholders(comp, newNode, pointers, cache);
 
         // Reset the pointer.
         stParts = attr.split(' in ');
@@ -167,6 +167,9 @@ export const directives = {
       return true;
 
     } else {
+      if (iterable !== undefined && iterable !== null) {
+        logError(comp, `[method-call-error] ${iterableExpr} : Result is not iterable`);
+      }
       return false;
     }
 

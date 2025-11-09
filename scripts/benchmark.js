@@ -118,3 +118,33 @@ function buildConditionalScenarioTemplate() {
 }
 
 module.exports.buildConditionalScenarioTemplate = buildConditionalScenarioTemplate;
+
+// Build a scenario template with method calls in placeholders (nested, filtered, whitespace)
+function buildMethodCallScenarioTemplate() {
+  // Realistic method call pattern: nested method call with filters and whitespace
+  // This tests: nested argument parsing, filter chaining, whitespace tolerance
+  return `
+  <div>
+    <div>{transformMethod( rangeMethod( 1, 5 ) )|upperCase}</div>
+    <div>{calculateSum( data.x, data.y )|minusOne}</div>
+    <ul>
+      <li c-for="item in rangeMethod(data.start, data.end)">{item|trim}</li>
+    </ul>
+  </div>`;
+}
+
+module.exports.buildMethodCallScenarioTemplate = buildMethodCallScenarioTemplate;
+
+// Build a scenario template with deeply nested method calls (≥5 levels)
+// Tests recursive argument parsing and call stacking
+function buildDeepNestingScenarioTemplate() {
+  // Pattern: methodA(methodB(methodC(methodD(methodE(data.prop)))))
+  // Tests nested parenthesis parsing and call stack depth
+  return `
+  <div>
+    <div>{methodA(methodB(methodC(methodD(methodE(data.value)))))}</div>
+    <div>{methodA(methodB(methodC(methodD(methodE(data.value)))))}</div>
+  </div>`;
+}
+
+module.exports.buildDeepNestingScenarioTemplate = buildDeepNestingScenarioTemplate;

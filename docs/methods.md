@@ -245,3 +245,74 @@ This method returns the success state of our App. It is meant to be used from th
 
 ### `hasError(appInstance)`
 This method returns the error state of our App. It is meant to be used from the template when we make requests.
+
+## Calling Methods in Templates
+
+You can invoke custom methods directly in placeholders and directives, with implicit app instance injection.
+
+### Method Calls in Placeholders
+
+```html
+<template id="appTemplate">
+  <div>
+    <p>{formatName(data.firstName, data.lastName)}</p>
+    <p>{calculateTotal(data.items)|currency}</p>
+  </div>
+</template>
+```
+
+```js
+var app = new AppBlock({
+  data: {
+    firstName: 'John',
+    lastName: 'Doe',
+    items: [10, 20, 30]
+  },
+  
+  methods: {
+    formatName(app, first, last) {
+      return first + ' ' + last;
+    },
+    
+    calculateTotal(app, items) {
+      return items.reduce((a, b) => a + b, 0);
+    }
+  },
+  
+  filters: {
+    currency(app, value) {
+      return '$' + value.toFixed(2);
+    }
+  }
+})
+```
+
+The app instance is automatically injected as the first parameter, so you don't need to pass it explicitly.
+
+### Method Calls with Filters
+
+You can chain filters after method calls:
+
+```html
+<span>{getMessage()|uppercase|trim}</span>
+```
+
+### Method Calls in c-for
+
+Use methods to generate iterables in `c-for`:
+
+```html
+<ul c-for="item in getFilteredItems(data.category)">
+  <li>{item.name}</li>
+</ul>
+```
+
+### Nested Method Calls
+
+Method calls can be nested, and they are evaluated only once per render for efficiency:
+
+```html
+<span>{processResult(getDataMethod(data.id))}</span>
+```
+
+````

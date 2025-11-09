@@ -129,6 +129,41 @@ var app = new AppBlock({
 > - Tomatoes
 > - Orange juice
 
+### Method Calls in c-for
+
+You can call methods to generate the iterable. The app instance is injected as the first parameter:
+
+```js
+var app = new AppBlock({
+  ...
+  data: {
+    start: 1,
+    end: 5
+  },
+  methods: {
+    getRange: function(app, start, end) {
+      return Array.from({length: end - start + 1}, (_, i) => start + i);
+    }
+  },
+  ...
+})
+```
+
+```html
+<template id="appTemplate">
+  <ul>
+    <li c-for="n in getRange(data.start, data.end)">
+      {n}
+    </li>
+  </ul>
+</template>
+```
+> - 1
+> - 2
+> - 3
+> - 4
+> - 5
+
 
 ## Making your own directives
 **`directiveName: function(appInstance, node, pointers) { return bool; }`**

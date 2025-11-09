@@ -68,26 +68,26 @@ Independent test: `c-for="n in rangeMethod(data.start,data.end)"` renders correc
 Goal: Ensure method call invocation semantics match existing c-if/c-ifnot and support nested calls uniformly.
 Independent test: Side-by-side usage in placeholder, c-for, and c-if produces consistent behavior.
 
-- [ ] T028 [US3] Add failing tests for nested method calls across placeholder and c-for at tests/core/customMethods.test.js
-- [ ] T029 [P] [US3] Add failing tests verifying consistency with c-if/c-ifnot at tests/directives/c-if-methods.test.js
-- [ ] T030 [US3] Reuse evaluator in c-if/c-ifnot path (no divergent logic) in src/directives.js
-- [ ] T031 [US3] Validate single-evaluation invariant for nested calls via spies in tests/core/customMethods.test.js
-- [ ] T032 [US3] Make tests pass for nested and consistency scenarios in tests/core/customMethods.test.js
+- [X] T028 [US3] Add failing tests for nested method calls across placeholder and c-for at tests/core/customMethods.test.js
+- [X] T029 [P] [US3] Add failing tests verifying consistency with c-if/c-ifnot at tests/directives/c-if-methods.test.js
+- [X] T030 [US3] Reuse evaluator in c-if/c-ifnot path (no divergent logic) in src/directives.js
+- [X] T031 [US3] Validate single-evaluation invariant for nested calls via spies in tests/core/customMethods.test.js
+- [X] T032 [US3] Make tests pass for nested and consistency scenarios in tests/core/customMethods.test.js
 
 ---
 
 ## Final Phase: Polish & Cross-Cutting
 
-- [ ] T033 Update docs/directives.md (c-for) and add method invocation examples (with filters & whitespace) in docs/methods.md or new docs/placeholders.md
-- [ ] T034 Update docs/_sidebar.md to link new/updated documentation pages
-- [ ] T035 Update docs/changelog.md with feature summary, rationale, and usage examples
-- [ ] T036 Add benchmark scenario for nested + filtered + whitespace method expressions in scripts/benchmark.js
-- [ ] T037 Add micro-benchmark for deep nesting (≥5 levels) in scripts/benchmark.js
-- [ ] T038 Run full test suite and confirm <5% overhead using scripts/benchmark-run.js
-- [ ] T039 Measure build size before/after (dist output) and record delta in docs/changelog.md
-- [ ] T040 Scan for unintended globals or bundle growth in build artifacts
-- [ ] T041 Add coverage report task and assert ≥90% new branch coverage (npm test -- --coverage)
-- [ ] T042 Add test ensuring re-render in same cycle does not double-invoke (spy count) in tests/core/customMethods.test.js
+- [X] T033 Update docs/directives.md (c-for) and add method invocation examples (with filters & whitespace) in docs/methods.md or new docs/placeholders.md
+- [X] T034 Update docs/_sidebar.md to link new/updated documentation pages
+- [X] T035 Update docs/changelog.md with feature summary, rationale, and usage examples
+- [X] T036 Add benchmark scenario for nested + filtered + whitespace method expressions in scripts/benchmark.js
+- [X] T037 Add micro-benchmark for deep nesting (≥5 levels) in scripts/benchmark.js
+- [X] T038 Run full test suite and confirm <5% overhead using scripts/benchmark-run.js
+- [X] T039 Measure build size before/after (dist output) and record delta in docs/changelog.md
+- [X] T040 Scan for unintended globals or bundle growth in build artifacts
+- [X] T041 Add coverage report task and assert ≥90% new branch coverage (npm test -- --coverage)
+- [X] T042 Add test ensuring re-render in same cycle does not double-invoke (spy count) in tests/core/customMethods.test.js
 
 ## Parallelization Examples
 

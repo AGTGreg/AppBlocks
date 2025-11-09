@@ -1,20 +1,20 @@
 # Changelog
 
-## 2.2.0 (Unreleased)
+## 2.1.0 (Unreleased)
 - **New:** Method calls with parameters in placeholders and directives. Call app methods directly in templates with implicit app instance injection: `{sumMethod(data.a, data.b)}` or `c-for="item in getItems()"`.
 - **New:** Method call result caching (per-render ephemeral) to prevent duplicate evaluations in the same render cycle.
+- **New:** Object iteration in `c-for` directive. Iterate over plain JavaScript objects using dual-pointer syntax: `c-for="key, value in data.myObject"` or single-pointer for values only: `c-for="value in data.myObject"`. Works with both data properties and method calls. Uses `Object.entries()` for iteration (own enumerable properties only).
 - **Enhancement:** Nested method calls supported; arguments are evaluated recursively before invocation.
 - **Enhancement:** Method results can be filtered: `{getValue()|uppercase|trim}`.
 - **Enhancement:** Non-iterable results in `c-for` method calls log error and skip iteration gracefully.
 - **Performance:** Method call feature adds <2KB to minified build (66KB total minified, 25KB gzipped). Benchmark tests confirm <5% rendering overhead for typical use cases.
-
-## 2.1.0
-- **Enchancement:** `c-if` and `c-ifnot` directives now support JavaScript expressions for complex conditional logic. Expressions have access to `data` and methods; built-ins like `Math` can be enabled via `config.allowBuiltins`. Dangerous constructs (assignments, function calls, etc.) are automatically blocked for security.
+- **Performance:** Object iteration adds ~40 lines of code with negligible runtime overhead due to optimized type detection priority (arrays first, then iterables, then objects).
+- **Enhancement:** `c-if` and `c-ifnot` directives now support JavaScript expressions for complex conditional logic. Expressions have access to `data` and methods; built-ins like `Math` can be enabled via `config.allowBuiltins`. Dangerous constructs (assignments, function calls, etc.) are automatically blocked for security.
 - **New:** Event delegation supports complex CSS selectors including descendant combinators (e.g. `'click .list li .delete'`). Handlers receive `(event, matchedElement)`.
 - **New:** Configurable placeholder delimiters via the `delimiters: [open, close]` config option. Filters continue to work inside custom delimiters.
 - **New:** Lightweight benchmark runner (`scripts/benchmark.js`) to collect render timing samples, compute mean/median, detect outliers, and compare against a local baseline in `.benchmarks/baseline.json`.
 - **Enhancement:** Placeholder parsing refactored to support dynamic delimiters and preserve filters and `asHTML` behavior.
-- **Testing:** Added tests for selector delegation, custom delimiters, and benchmark results; full test-suite coverage added for new features.
+- **Testing:** Added comprehensive tests for object iteration (19 test cases), selector delegation, custom delimiters, and benchmark results; full test-suite coverage added for new features.
 
 ## 2.0.4
 - Comprehensive testing

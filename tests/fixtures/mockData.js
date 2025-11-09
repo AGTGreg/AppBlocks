@@ -183,6 +183,28 @@ export const createMockFalsyData = () => ({
 });
 
 /**
+ * Creates mock object data for testing c-for object iteration
+ * @param {Object} obj - Object to use as data (default: simple key-value object)
+ */
+export const createMockObjectData = (obj = null) => {
+  if (obj !== null) return obj;
+  return {
+    key1: 'value1',
+    key2: 'value2',
+    key3: 'value3'
+  };
+};
+
+/**
+ * Creates mock nested object data
+ */
+export const createMockNestedObjectData = () => ({
+  user1: { name: 'Alice', age: 30 },
+  user2: { name: 'Bob', age: 25 },
+  user3: { name: 'Carol', age: 35 }
+});
+
+/**
  * Custom extension factories
  */
 export const createMockCustomDirective = (returnValue = true) => {

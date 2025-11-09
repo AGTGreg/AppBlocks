@@ -137,36 +137,100 @@ export const directives = {
   'c-for': function(comp, node, pointers, cache) {
     const attr = node.getAttribute('c-for');
 
-    let stParts = attr.split(' in ');
-    let pointer = stParts[0];
-    const iterableExpr = stParts[1];
+    const parts = attr.split(' in ');
+    const leftSide = parts[0].trim();
+    const iterableExpr = parts[1].trim();
     if (pointers === undefined) pointers = {};
+
+    // Parse pointer declaration - detect single vs dual pointer
+    const isDualPointer = leftSide.includes(',');
+    let keyPointer, valuePointer;
+
+    if (isDualPointer) {
+      const pointerParts = leftSide.split(',').map(p => p.trim());
+      keyPointer = pointerParts[0];
+      valuePointer = pointerParts[1];
+    } else {
+      valuePointer = leftSide;
+    }
 
     let iterable = evaluateTemplateExpression(comp, pointers, node, iterableExpr, cache);
 
-    if (iterable && (Array.isArray(iterable) || typeof iterable[Symbol.iterator] === 'function')) {
+    // Type detection: Arrays (highest priority)
+    if (Array.isArray(iterable)) {
       node.removeAttribute('c-for');
       const parentNode = node.parentNode;
 
       for (let i=0; i<iterable.length; i++) {
         const item = iterable[i];
-        // Add a pointer for the current item.
-        pointers[pointer] = item;
+        // For arrays, use valuePointer (second pointer in dual syntax, or only pointer)
+        pointers[valuePointer] = item;
 
         const newNode = node.cloneNode(true);
         processNode(comp, newNode, pointers, cache);
         updateAttributePlaceholders(comp, newNode, pointers, cache);
         updateTextNodePlaceholders(comp, newNode, pointers, cache);
 
-        // Reset the pointer.
-        stParts = attr.split(' in ');
-        pointer = stParts[0];
         parentNode.appendChild(newNode);
-      };
+      }
       node.remove();
       return true;
+    }
 
-    } else {
+    // Type detection: Iterables (Map, Set, etc.)
+    else if (iterable && typeof iterable[Symbol.iterator] === 'function') {
+      node.removeAttribute('c-for');
+      const parentNode = node.parentNode;
+
+      const arr = Array.from(iterable);
+      for (let i=0; i<arr.length; i++) {
+        const item = arr[i];
+        pointers[valuePointer] = item;
+
+        const newNode = node.cloneNode(true);
+        processNode(comp, newNode, pointers, cache);
+        updateAttributePlaceholders(comp, newNode, pointers, cache);
+        updateTextNodePlaceholders(comp, newNode, pointers, cache);
+
+        parentNode.appendChild(newNode);
+      }
+      node.remove();
+      return true;
+    }
+
+    // Type detection: Plain Objects (NEW)
+    else if (iterable && typeof iterable === 'object' && iterable !== null) {
+      node.removeAttribute('c-for');
+      const parentNode = node.parentNode;
+
+      const entries = Object.entries(iterable);
+
+      for (let i = 0; i < entries.length; i++) {
+        const [key, value] = entries[i];
+
+        // Assign based on pointer count
+        if (isDualPointer) {
+          pointers[keyPointer] = key;
+          pointers[valuePointer] = value;
+        } else {
+          // Single pointer with object gets value only
+          pointers[valuePointer] = value;
+        }
+
+        const newNode = node.cloneNode(true);
+        processNode(comp, newNode, pointers, cache);
+        updateAttributePlaceholders(comp, newNode, pointers, cache);
+        updateTextNodePlaceholders(comp, newNode, pointers, cache);
+
+        parentNode.appendChild(newNode);
+      }
+
+      node.remove();
+      return true;
+    }
+
+    // Not iterable
+    else {
       if (iterable !== undefined && iterable !== null) {
         logError(comp, `[method-call-error] ${iterableExpr} : Result is not iterable`);
       }

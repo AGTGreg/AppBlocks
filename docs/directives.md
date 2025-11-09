@@ -102,7 +102,9 @@ Only one of the span elements can be visible depending on the value of `seen`.
 
 ## c-for
 
-We can use the `c-for` directive to display data from arrays:
+We can use the `c-for` directive to display data from arrays and objects:
+
+### Iterating Over Arrays
 
 ```js
 var app = new AppBlock({
@@ -129,9 +131,92 @@ var app = new AppBlock({
 > - Tomatoes
 > - Orange juice
 
+### Iterating Over Objects
+
+You can iterate over plain JavaScript objects using dual-pointer syntax `key, value in object`:
+
+```js
+var app = new AppBlock({
+  ...
+  data: {
+    settings: {
+      theme: 'dark',
+      language: 'en',
+      notifications: true
+    }
+  },
+  ...
+})
+```
+
+```html
+<template id="appTemplate">
+  <ul>
+    <li c-for="key, value in data.settings">
+      <strong>{key}:</strong> {value}
+    </li>
+  </ul>
+</template>
+```
+> - **theme:** dark
+> - **language:** en
+> - **notifications:** true
+
+**Single pointer with objects**: If you only need the values (not the keys), use single pointer syntax:
+
+```html
+<li c-for="value in data.settings">{value}</li>
+```
+> - dark
+> - en
+> - true
+
+### Nested Iteration
+
+You can nest `c-for` directives to iterate over complex data structures:
+
+```js
+var app = new AppBlock({
+  ...
+  data: {
+    catalog: {
+      Electronics: [
+        { name: 'Laptop', price: 999 },
+        { name: 'Mouse', price: 25 }
+      ],
+      Books: [
+        { name: 'JavaScript Guide', price: 35 }
+      ]
+    }
+  },
+  ...
+})
+```
+
+```html
+<template id="appTemplate">
+  <div c-for="category, products in data.catalog">
+    <h2>{category}</h2>
+    <ul>
+      <li c-for="product in products">
+        {product.name} - ${product.price}
+      </li>
+    </ul>
+  </div>
+</template>
+```
+> **Electronics**
+> - Laptop - $999
+> - Mouse - $25
+>
+> **Books**
+> - JavaScript Guide - $35
+
 ### Method Calls in c-for
 
-You can call methods to generate the iterable. The app instance is injected as the first parameter:
+You can call methods to generate iterables (arrays or objects). The app instance is injected as the first parameter:
+
+**Array from method:**
 
 ```js
 var app = new AppBlock({
@@ -163,6 +248,35 @@ var app = new AppBlock({
 > - 3
 > - 4
 > - 5
+
+**Object from method:**
+
+```js
+var app = new AppBlock({
+  ...
+  methods: {
+    getConfig: function(app) {
+      return {
+        apiUrl: 'https://api.example.com',
+        timeout: 5000,
+        retries: 3
+      };
+    }
+  },
+  ...
+})
+```
+
+```html
+<template id="appTemplate">
+  <div c-for="setting, value in getConfig()">
+    {setting}: {value}
+  </div>
+</template>
+```
+> apiUrl: https://api.example.com
+> timeout: 5000
+> retries: 3
 
 
 ## Making your own directives

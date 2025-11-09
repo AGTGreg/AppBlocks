@@ -17,13 +17,13 @@ Parallel opportunities exist within each phase where marked [P].
 - [X] T001 Ensure current branch checked out (001-method-calls)
 - [X] T002 Verify test runner works (npm test) and baseline is green
 - [X] T003 Create placeholder tests directory if needed at tests/placeholders/
-- [ ] T004 Run lint to ensure clean baseline (npm run lint)
+- [X] T004 Run lint to ensure clean baseline (npm run lint)
 
 ## Phase 2: Foundational (Shared Evaluator & Wiring)
 
 - [X] T005 Create shared evaluator stub in src/helpers.js (evaluateTemplateExpression(app, scope, node, expr, cache))
-- [ ] T006 Wire a per-render cache context in src/processing.js and pass to evaluator calls
-- [ ] T007 Integrate logger usage pattern for evaluator errors in src/logger.js (reuse existing exports; format `[method-call-error] <expression> : <message>`)
+- [X] T006 Wire a per-render cache context in src/processing.js and pass to evaluator calls
+- [X] T007 Integrate logger usage pattern for evaluator errors in src/logger.js (reuse existing exports; format `[method-call-error] <expression> : <message>`)
 
 ---
 

@@ -1048,7 +1048,7 @@ var arraySlice = functionUncurryThis([].slice);
 
 var HAS_SPECIES_SUPPORT$2 = arrayMethodHasSpeciesSupport('slice');
 var SPECIES$5 = wellKnownSymbol('species');
-var $Array$1 = Array;
+var $Array$2 = Array;
 var max$1 = Math.max;
 _export({ target: 'Array', proto: true, forced: !HAS_SPECIES_SUPPORT$2 }, {
   slice: function slice(start, end) {
@@ -1059,17 +1059,17 @@ _export({ target: 'Array', proto: true, forced: !HAS_SPECIES_SUPPORT$2 }, {
     var Constructor, result, n;
     if (isArray(O)) {
       Constructor = O.constructor;
-      if (isConstructor(Constructor) && (Constructor === $Array$1 || isArray(Constructor.prototype))) {
+      if (isConstructor(Constructor) && (Constructor === $Array$2 || isArray(Constructor.prototype))) {
         Constructor = undefined;
       } else if (isObject(Constructor)) {
         Constructor = Constructor[SPECIES$5];
         if (Constructor === null) Constructor = undefined;
       }
-      if (Constructor === $Array$1 || Constructor === undefined) {
+      if (Constructor === $Array$2 || Constructor === undefined) {
         return arraySlice(O, k, fin);
       }
     }
-    result = new (Constructor === undefined ? $Array$1 : Constructor)(max$1(fin - k, 0));
+    result = new (Constructor === undefined ? $Array$2 : Constructor)(max$1(fin - k, 0));
     for (n = 0; k < fin; k++, n++) if (k in O) createProperty(result, n, O[k]);
     result.length = n;
     return result;
@@ -2455,17 +2455,17 @@ function _unsupportedIterableToArray(r, a) {
 }
 
 var SPECIES$3 = wellKnownSymbol('species');
-var $Array = Array;
+var $Array$1 = Array;
 var arraySpeciesConstructor = function (originalArray) {
   var C;
   if (isArray(originalArray)) {
     C = originalArray.constructor;
-    if (isConstructor(C) && (C === $Array || isArray(C.prototype))) C = undefined;
+    if (isConstructor(C) && (C === $Array$1 || isArray(C.prototype))) C = undefined;
     else if (isObject(C)) {
       C = C[SPECIES$3];
       if (C === null) C = undefined;
     }
-  } return C === undefined ? $Array : C;
+  } return C === undefined ? $Array$1 : C;
 };
 
 var arraySpeciesCreate = function (originalArray, length) {
@@ -3748,6 +3748,52 @@ var wellKnownSymbolDefine = function (NAME) {
 
 wellKnownSymbolDefine('iterator');
 
+var callWithSafeIterationClosing = function (iterator, fn, value, ENTRIES) {
+  try {
+    return ENTRIES ? fn(anObject(value)[0], value[1]) : fn(value);
+  } catch (error) {
+    iteratorClose(iterator, 'throw', error);
+  }
+};
+
+var $Array = Array;
+var arrayFrom = function from(arrayLike ) {
+  var O = toObject(arrayLike);
+  var IS_CONSTRUCTOR = isConstructor(this);
+  var argumentsLength = arguments.length;
+  var mapfn = argumentsLength > 1 ? arguments[1] : undefined;
+  var mapping = mapfn !== undefined;
+  if (mapping) mapfn = functionBindContext(mapfn, argumentsLength > 2 ? arguments[2] : undefined);
+  var iteratorMethod = getIteratorMethod(O);
+  var index = 0;
+  var length, result, step, iterator, next, value;
+  if (iteratorMethod && !(this === $Array && isArrayIteratorMethod(iteratorMethod))) {
+    result = IS_CONSTRUCTOR ? new this() : [];
+    iterator = getIterator(O, iteratorMethod);
+    next = iterator.next;
+    for (;!(step = functionCall(next, iterator)).done; index++) {
+      value = mapping ? callWithSafeIterationClosing(iterator, mapfn, [step.value, index], true) : step.value;
+      createProperty(result, index, value);
+    }
+  } else {
+    length = lengthOfArrayLike(O);
+    result = IS_CONSTRUCTOR ? new this(length) : $Array(length);
+    for (;length > index; index++) {
+      value = mapping ? mapfn(O[index], index) : O[index];
+      createProperty(result, index, value);
+    }
+  }
+  result.length = index;
+  return result;
+};
+
+var INCORRECT_ITERATION = !checkCorrectnessOfIteration(function (iterable) {
+  Array.from(iterable);
+});
+_export({ target: 'Array', stat: true, forced: INCORRECT_ITERATION }, {
+  from: arrayFrom
+});
+
 var nativeJoin = functionUncurryThis([].join);
 var ES3_STRINGS = indexedObject !== Object;
 var FORCED = ES3_STRINGS || !arrayMethodIsStrict('join', ',');
@@ -3901,24 +3947,70 @@ var directives = {
   },
   'c-for': function cFor(comp, node, pointers, cache) {
     var attr = node.getAttribute('c-for');
-    var stParts = attr.split(' in ');
-    var pointer = stParts[0];
-    var iterableExpr = stParts[1];
+    var parts = attr.split(' in ');
+    var leftSide = parts[0].trim();
+    var iterableExpr = parts[1].trim();
     if (pointers === undefined) pointers = {};
+    var isDualPointer = leftSide.includes(',');
+    var keyPointer, valuePointer;
+    if (isDualPointer) {
+      var pointerParts = leftSide.split(',').map(function (p) {
+        return p.trim();
+      });
+      keyPointer = pointerParts[0];
+      valuePointer = pointerParts[1];
+    } else {
+      valuePointer = leftSide;
+    }
     var iterable = evaluateTemplateExpression(comp, pointers, node, iterableExpr, cache);
-    if (iterable && (Array.isArray(iterable) || typeof iterable[Symbol.iterator] === 'function')) {
+    if (Array.isArray(iterable)) {
       node.removeAttribute('c-for');
       var parentNode = node.parentNode;
       for (var i = 0; i < iterable.length; i++) {
         var item = iterable[i];
-        pointers[pointer] = item;
+        pointers[valuePointer] = item;
         var newNode = node.cloneNode(true);
         _processNode(comp, newNode, pointers, cache);
         updateAttributePlaceholders(comp, newNode, pointers, cache);
         updateTextNodePlaceholders(comp, newNode, pointers, cache);
-        stParts = attr.split(' in ');
-        pointer = stParts[0];
         parentNode.appendChild(newNode);
+      }
+      node.remove();
+      return true;
+    } else if (iterable && typeof iterable[Symbol.iterator] === 'function') {
+      node.removeAttribute('c-for');
+      var _parentNode = node.parentNode;
+      var arr = Array.from(iterable);
+      for (var _i = 0; _i < arr.length; _i++) {
+        var _item = arr[_i];
+        pointers[valuePointer] = _item;
+        var _newNode = node.cloneNode(true);
+        _processNode(comp, _newNode, pointers, cache);
+        updateAttributePlaceholders(comp, _newNode, pointers, cache);
+        updateTextNodePlaceholders(comp, _newNode, pointers, cache);
+        _parentNode.appendChild(_newNode);
+      }
+      node.remove();
+      return true;
+    } else if (iterable && _typeof(iterable) === 'object' && iterable !== null) {
+      node.removeAttribute('c-for');
+      var _parentNode2 = node.parentNode;
+      var entries = Object.entries(iterable);
+      for (var _i2 = 0; _i2 < entries.length; _i2++) {
+        var _entries$_i = _slicedToArray(entries[_i2], 2),
+          key = _entries$_i[0],
+          value = _entries$_i[1];
+        if (isDualPointer) {
+          pointers[keyPointer] = key;
+          pointers[valuePointer] = value;
+        } else {
+          pointers[valuePointer] = value;
+        }
+        var _newNode2 = node.cloneNode(true);
+        _processNode(comp, _newNode2, pointers, cache);
+        updateAttributePlaceholders(comp, _newNode2, pointers, cache);
+        updateTextNodePlaceholders(comp, _newNode2, pointers, cache);
+        _parentNode2.appendChild(_newNode2);
       }
       node.remove();
       return true;

@@ -60,37 +60,14 @@ export const directives = {
   'c-if': function(comp, node, pointers, cache) {
     let attr = node.getAttribute('c-if');
     if (!attr) return true; // no attribute, keep
-
-    // Check if it's a simple property access without operators (backward compatibility)
-    const hasOperators = /[\(\)\+\-\*\/%!<>&\|\?\:]/.test(attr) || attr.includes('==') || attr.includes('===') || attr.includes('!=') || attr.includes('!==') || attr.includes('>') || attr.includes('<') || attr.includes('>=') || attr.includes('<=') || attr.includes('&&') || attr.includes('||') || attr.includes('!');
-
-    if (!hasOperators) {
-      // Use legacy logic for simple flags
-      let result = getProp(comp, attr.split('.'), pointers);
-      if (result === undefined) {
-        // Handle operators in legacy way
-        result = handleLegacyOperators(comp, attr, pointers);
-        if (result === undefined) {
-          return false;
-        }
-      }
-      const falseValues = [undefined, null, false, 0, ''];
-      if (falseValues.indexOf(result) > -1) {
-        return false;
-      } else {
-        node.removeAttribute('c-if');
-        return true;
-      }
+    // Use new expression evaluator
+    const ctx = createExpressionContext(comp);
+    const decision = evaluateToBoolean(attr, ctx, ctx.allowBuiltins, ctx.logWarning);
+    if (!decision) {
+      return false;
     } else {
-      // Use new expression evaluator
-      const ctx = createExpressionContext(comp);
-      const decision = evaluateToBoolean(attr, ctx, ctx.allowBuiltins, ctx.logWarning);
-      if (!decision) {
-        return false;
-      } else {
-        node.removeAttribute('c-if');
-        return true;
-      }
+      node.removeAttribute('c-if');
+      return true;
     }
   },
 
@@ -98,39 +75,14 @@ export const directives = {
   'c-ifnot': function(comp, node, pointers, cache) {
     let attr = node.getAttribute('c-ifnot');
     if (!attr) return true;
-
-    // Similar logic to c-if but invert
-    const hasOperators = /[\(\)\+\-\*\/%!<>&\|\?\:]/.test(attr) || attr.includes('==') || attr.includes('===') || attr.includes('!=') || attr.includes('!==') || attr.includes('>') || attr.includes('<') || attr.includes('>=') || attr.includes('<=') || attr.includes('&&') || attr.includes('||') || attr.includes('!');
-
-    if (!hasOperators) {
-      // Legacy
-      let result = getProp(comp, attr.split('.'), pointers);
-      if (result === undefined) {
-        result = handleLegacyOperators(comp, attr, pointers);
-        if (result === undefined) {
-          // For c-ifnot, undefined from error means keep node (invert of false)
-          node.removeAttribute('c-ifnot');
-          return true;
-        }
-      }
-      const falseValues = [undefined, null, false, 0, ''];
-      const isFalse = falseValues.indexOf(result) > -1;
-      if (isFalse) {
-        node.removeAttribute('c-ifnot');
-        return true; // invert: was false, now true (keep)
-      } else {
-        return false; // invert: was true, now false (remove)
-      }
-    } else {
-      // Expression
-      const ctx = createExpressionContext(comp);
-      const decision = evaluateToBoolean(attr, ctx, ctx.allowBuiltins, ctx.logWarning);
-      if (!decision) { // was false, invert to true
-        node.removeAttribute('c-ifnot');
-        return true;
-      } else { // was true, invert to false
-        return false;
-      }
+    // Expression
+    const ctx = createExpressionContext(comp);
+    const decision = evaluateToBoolean(attr, ctx, ctx.allowBuiltins, ctx.logWarning);
+    if (!decision) { // was false, invert to true
+      node.removeAttribute('c-ifnot');
+      return true;
+    } else { // was true, invert to false
+      return false;
     }
   },
 

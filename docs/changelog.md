@@ -15,6 +15,7 @@
 - **New:** Lightweight benchmark runner (`scripts/benchmark.js`) to collect render timing samples, compute mean/median, detect outliers, and compare against a local baseline in `.benchmarks/baseline.json`.
 - **Enhancement:** Placeholder parsing refactored to support dynamic delimiters and preserve filters and `asHTML` behavior.
 - **Testing:** Added comprehensive tests for object iteration (19 test cases), selector delegation, custom delimiters, and benchmark results; full test-suite coverage added for new features.
+- **Enhancement:** Upgraded dependencies.
 
 ## 2.0.4
 - Comprehensive testing

@@ -5617,26 +5617,6 @@ function buildDelimiterRegex(delimiters) {
   var close = escapeRegExp(validDelimiters[1]);
   return new RegExp(open + '([\\s\\S]*?)' + close, 'g');
 }
-function handleLegacyOperators(comp, attr, pointers) {
-  var operators = [' == ', ' === ', ' !== ', ' != ', ' > ', ' < ', ' >= ', ' <= '];
-  var validTypes = ['boolean', 'number', 'undefined'];
-  for (var i = 0; i < operators.length; i++) {
-    if (attr.includes(operators[i])) {
-      var condition = attr;
-      var cParts = condition.split(operators[i]);
-      var condLeft = getProp(comp, cParts[0].split('.'), pointers);
-      if (!validTypes.includes(String(_typeof(condLeft)))) {
-        logError(comp, "".concat(cParts[0], " cannot be evaluated because it is not a boolean nor a number."));
-        return undefined;
-      } else {
-        condition = condition.replace(cParts[0], condLeft);
-        var evaluate = eval;
-        return evaluate(condition);
-      }
-    }
-  }
-  return undefined;
-}
 function evaluateTemplateExpression(app, scope, node, expr, cache) {
   if (!node._appBlockNodeId) {
     node._appBlockNodeId = ++nodeIdCounter;
@@ -6084,63 +6064,25 @@ var directives = {
   'c-if': function cIf(comp, node, pointers, cache) {
     var attr = node.getAttribute('c-if');
     if (!attr) return true;
-    var hasOperators = /[\(\)\+\-\*\/%!<>&\|\?\:]/.test(attr) || attr.includes('==') || attr.includes('===') || attr.includes('!=') || attr.includes('!==') || attr.includes('>') || attr.includes('<') || attr.includes('>=') || attr.includes('<=') || attr.includes('&&') || attr.includes('||') || attr.includes('!');
-    if (!hasOperators) {
-      var result = getProp(comp, attr.split('.'), pointers);
-      if (result === undefined) {
-        result = handleLegacyOperators(comp, attr, pointers);
-        if (result === undefined) {
-          return false;
-        }
-      }
-      var falseValues = [undefined, null, false, 0, ''];
-      if (falseValues.indexOf(result) > -1) {
-        return false;
-      } else {
-        node.removeAttribute('c-if');
-        return true;
-      }
+    var ctx = createExpressionContext(comp);
+    var decision = evaluateToBoolean(attr, ctx, ctx.allowBuiltins, ctx.logWarning);
+    if (!decision) {
+      return false;
     } else {
-      var ctx = createExpressionContext(comp);
-      var decision = evaluateToBoolean(attr, ctx, ctx.allowBuiltins, ctx.logWarning);
-      if (!decision) {
-        return false;
-      } else {
-        node.removeAttribute('c-if');
-        return true;
-      }
+      node.removeAttribute('c-if');
+      return true;
     }
   },
   'c-ifnot': function cIfnot(comp, node, pointers, cache) {
     var attr = node.getAttribute('c-ifnot');
     if (!attr) return true;
-    var hasOperators = /[\(\)\+\-\*\/%!<>&\|\?\:]/.test(attr) || attr.includes('==') || attr.includes('===') || attr.includes('!=') || attr.includes('!==') || attr.includes('>') || attr.includes('<') || attr.includes('>=') || attr.includes('<=') || attr.includes('&&') || attr.includes('||') || attr.includes('!');
-    if (!hasOperators) {
-      var result = getProp(comp, attr.split('.'), pointers);
-      if (result === undefined) {
-        result = handleLegacyOperators(comp, attr, pointers);
-        if (result === undefined) {
-          node.removeAttribute('c-ifnot');
-          return true;
-        }
-      }
-      var falseValues = [undefined, null, false, 0, ''];
-      var isFalse = falseValues.indexOf(result) > -1;
-      if (isFalse) {
-        node.removeAttribute('c-ifnot');
-        return true;
-      } else {
-        return false;
-      }
+    var ctx = createExpressionContext(comp);
+    var decision = evaluateToBoolean(attr, ctx, ctx.allowBuiltins, ctx.logWarning);
+    if (!decision) {
+      node.removeAttribute('c-ifnot');
+      return true;
     } else {
-      var ctx = createExpressionContext(comp);
-      var decision = evaluateToBoolean(attr, ctx, ctx.allowBuiltins, ctx.logWarning);
-      if (!decision) {
-        node.removeAttribute('c-ifnot');
-        return true;
-      } else {
-        return false;
-      }
+      return false;
     }
   },
   'c-for': function cFor(comp, node, pointers, cache) {

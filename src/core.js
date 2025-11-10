@@ -1,6 +1,6 @@
 'use strict';
 
-import {Idiomorph} from 'idiomorph/dist/idiomorph.esm';
+import {Idiomorph} from 'idiomorph/dist/idiomorph.esm.js';
 import {updateTextNodePlaceholders} from './placeholders';
 import {directives} from './directives';
 import {filters} from './filters';

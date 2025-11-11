@@ -4,7 +4,7 @@ import {getProp, isBlockedExpression} from './utils';
 import {processNode} from './processing';
 import {updateAttributePlaceholders, updateTextNodePlaceholders} from './placeholders';
 import { logError } from './logger';
-import { createExpressionContext, handleLegacyOperators, evaluateTemplateExpression } from './helpers';
+import { createExpressionContext, evaluateTemplateExpression } from './helpers';
 
 
 // Expression evaluation cache and utilities

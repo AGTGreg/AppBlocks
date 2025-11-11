@@ -11,17 +11,20 @@
     "doc": "docs"
   },
   "scripts": {
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage",
-    "test:core": "jest tests/core",
-    "test:directives": "jest tests/directives",
-    "test:filters": "jest tests/filters",
-    "test:utils": "jest tests/utils",
-    "test:processing": "jest tests/processing",
-    "test:requests": "jest tests/requests",
+    "test": "npm run build:test && jest",
+    "test:watch": "npm run build:test && jest --watch",
+    "test:coverage": "npm run build:test && jest --coverage",
+    "test:core": "npm run build:test && jest tests/core",
+    "test:directives": "npm run build:test && jest tests/directives",
+    "test:filters": "npm run build:test && jest tests/filters",
+    "test:utils": "npm run build:test && jest tests/utils",
+    "test:processing": "npm run build:test && jest tests/processing",
+    "test:requests": "npm run build:test && jest tests/requests",
     "build": "rollup --config",
-    "pretest": "npx babel src --out-dir build-cjs --extensions \".js\" --copy-files"
+    "prebuild": "npm run clean:build",
+    "build:test": "npm run clean:build && npx babel src --out-dir build-cjs --extensions \".js\" --copy-files && npm run coverage:ignore-helpers",
+    "clean:build": "rm -rf build-cjs",
+    "coverage:ignore-helpers": "node scripts/add-coverage-ignores.cjs"
   },
   "repository": {
     "type": "git",

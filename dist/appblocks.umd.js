@@ -5421,138 +5421,6 @@
 
 	requireEs_string_endsWith();
 
-	var es_string_split = {};
-
-	var aConstructor;
-	var hasRequiredAConstructor;
-	function requireAConstructor () {
-		if (hasRequiredAConstructor) return aConstructor;
-		hasRequiredAConstructor = 1;
-		var isConstructor = requireIsConstructor();
-		var tryToString = requireTryToString();
-		var $TypeError = TypeError;
-		aConstructor = function (argument) {
-		  if (isConstructor(argument)) return argument;
-		  throw new $TypeError(tryToString(argument) + ' is not a constructor');
-		};
-		return aConstructor;
-	}
-
-	var speciesConstructor;
-	var hasRequiredSpeciesConstructor;
-	function requireSpeciesConstructor () {
-		if (hasRequiredSpeciesConstructor) return speciesConstructor;
-		hasRequiredSpeciesConstructor = 1;
-		var anObject = requireAnObject();
-		var aConstructor = requireAConstructor();
-		var isNullOrUndefined = requireIsNullOrUndefined();
-		var wellKnownSymbol = requireWellKnownSymbol();
-		var SPECIES = wellKnownSymbol('species');
-		speciesConstructor = function (O, defaultConstructor) {
-		  var C = anObject(O).constructor;
-		  var S;
-		  return C === undefined || isNullOrUndefined(S = anObject(C)[SPECIES]) ? defaultConstructor : aConstructor(S);
-		};
-		return speciesConstructor;
-	}
-
-	var hasRequiredEs_string_split;
-	function requireEs_string_split () {
-		if (hasRequiredEs_string_split) return es_string_split;
-		hasRequiredEs_string_split = 1;
-		var call = requireFunctionCall();
-		var uncurryThis = requireFunctionUncurryThis();
-		var fixRegExpWellKnownSymbolLogic = requireFixRegexpWellKnownSymbolLogic();
-		var anObject = requireAnObject();
-		var isObject = requireIsObject();
-		var requireObjectCoercible = requireRequireObjectCoercible();
-		var speciesConstructor = requireSpeciesConstructor();
-		var advanceStringIndex = requireAdvanceStringIndex();
-		var toLength = requireToLength();
-		var toString = requireToString();
-		var getMethod = requireGetMethod();
-		var regExpExec = requireRegexpExecAbstract();
-		var stickyHelpers = requireRegexpStickyHelpers();
-		var fails = requireFails();
-		var UNSUPPORTED_Y = stickyHelpers.UNSUPPORTED_Y;
-		var MAX_UINT32 = 0xFFFFFFFF;
-		var min = Math.min;
-		var push = uncurryThis([].push);
-		var stringSlice = uncurryThis(''.slice);
-		var SPLIT_WORKS_WITH_OVERWRITTEN_EXEC = !fails(function () {
-		  var re = /(?:)/;
-		  var originalExec = re.exec;
-		  re.exec = function () { return originalExec.apply(this, arguments); };
-		  var result = 'ab'.split(re);
-		  return result.length !== 2 || result[0] !== 'a' || result[1] !== 'b';
-		});
-		var BUGGY = 'abbc'.split(/(b)*/)[1] === 'c' ||
-		  'test'.split(/(?:)/, -1).length !== 4 ||
-		  'ab'.split(/(?:ab)*/).length !== 2 ||
-		  '.'.split(/(.?)(.?)/).length !== 4 ||
-		  '.'.split(/()()/).length > 1 ||
-		  ''.split(/.?/).length;
-		fixRegExpWellKnownSymbolLogic('split', function (SPLIT, nativeSplit, maybeCallNative) {
-		  var internalSplit = '0'.split(undefined, 0).length ? function (separator, limit) {
-		    return separator === undefined && limit === 0 ? [] : call(nativeSplit, this, separator, limit);
-		  } : nativeSplit;
-		  return [
-		    function split(separator, limit) {
-		      var O = requireObjectCoercible(this);
-		      var splitter = isObject(separator) ? getMethod(separator, SPLIT) : undefined;
-		      return splitter
-		        ? call(splitter, separator, O, limit)
-		        : call(internalSplit, toString(O), separator, limit);
-		    },
-		    function (string, limit) {
-		      var rx = anObject(this);
-		      var S = toString(string);
-		      if (!BUGGY) {
-		        var res = maybeCallNative(internalSplit, rx, S, limit, internalSplit !== nativeSplit);
-		        if (res.done) return res.value;
-		      }
-		      var C = speciesConstructor(rx, RegExp);
-		      var unicodeMatching = rx.unicode;
-		      var flags = (rx.ignoreCase ? 'i' : '') +
-		                  (rx.multiline ? 'm' : '') +
-		                  (rx.unicode ? 'u' : '') +
-		                  (UNSUPPORTED_Y ? 'g' : 'y');
-		      var splitter = new C(UNSUPPORTED_Y ? '^(?:' + rx.source + ')' : rx, flags);
-		      var lim = limit === undefined ? MAX_UINT32 : limit >>> 0;
-		      if (lim === 0) return [];
-		      if (S.length === 0) return regExpExec(splitter, S) === null ? [S] : [];
-		      var p = 0;
-		      var q = 0;
-		      var A = [];
-		      while (q < S.length) {
-		        splitter.lastIndex = UNSUPPORTED_Y ? 0 : q;
-		        var z = regExpExec(splitter, UNSUPPORTED_Y ? stringSlice(S, q) : S);
-		        var e;
-		        if (
-		          z === null ||
-		          (e = min(toLength(splitter.lastIndex + (UNSUPPORTED_Y ? q : 0)), S.length)) === p
-		        ) {
-		          q = advanceStringIndex(S, q, unicodeMatching);
-		        } else {
-		          push(A, stringSlice(S, p, q));
-		          if (A.length === lim) return A;
-		          for (var i = 1; i <= z.length - 1; i++) {
-		            push(A, z[i]);
-		            if (A.length === lim) return A;
-		          }
-		          q = p = e;
-		        }
-		      }
-		      push(A, stringSlice(S, p));
-		      return A;
-		    }
-		  ];
-		}, BUGGY || !SPLIT_WORKS_WITH_OVERWRITTEN_EXEC, UNSUPPORTED_Y);
-		return es_string_split;
-	}
-
-	requireEs_string_split();
-
 	var es_string_startsWith = {};
 
 	var hasRequiredEs_string_startsWith;
@@ -6228,6 +6096,39 @@
 		var ENVIRONMENT = requireEnvironment();
 		environmentIsNode = ENVIRONMENT === 'NODE';
 		return environmentIsNode;
+	}
+
+	var aConstructor;
+	var hasRequiredAConstructor;
+	function requireAConstructor () {
+		if (hasRequiredAConstructor) return aConstructor;
+		hasRequiredAConstructor = 1;
+		var isConstructor = requireIsConstructor();
+		var tryToString = requireTryToString();
+		var $TypeError = TypeError;
+		aConstructor = function (argument) {
+		  if (isConstructor(argument)) return argument;
+		  throw new $TypeError(tryToString(argument) + ' is not a constructor');
+		};
+		return aConstructor;
+	}
+
+	var speciesConstructor;
+	var hasRequiredSpeciesConstructor;
+	function requireSpeciesConstructor () {
+		if (hasRequiredSpeciesConstructor) return speciesConstructor;
+		hasRequiredSpeciesConstructor = 1;
+		var anObject = requireAnObject();
+		var aConstructor = requireAConstructor();
+		var isNullOrUndefined = requireIsNullOrUndefined();
+		var wellKnownSymbol = requireWellKnownSymbol();
+		var SPECIES = wellKnownSymbol('species');
+		speciesConstructor = function (O, defaultConstructor) {
+		  var C = anObject(O).constructor;
+		  var S;
+		  return C === undefined || isNullOrUndefined(S = anObject(C)[SPECIES]) ? defaultConstructor : aConstructor(S);
+		};
+		return speciesConstructor;
 	}
 
 	var validateArgumentsLength;

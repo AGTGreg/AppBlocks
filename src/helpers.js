@@ -73,39 +73,6 @@ export function buildDelimiterRegex(delimiters) {
 }
 
 /**
- * Handles legacy operator evaluation for c-if/c-ifnot directives.
- * This maintains backward compatibility for simple comparison operations.
- *
- * @param {Object} comp - The AppBlock component instance
- * @param {string} attr - The attribute value to evaluate
- * @param {Object} pointers - Pointer context for c-for loops
- * @returns {*} The evaluated result or undefined
- */
-export function handleLegacyOperators(comp, attr, pointers) {
-  const operators = [' == ', ' === ', ' !== ', ' != ', ' > ', ' < ', ' >= ', ' <= '];
-  const validTypes = ['boolean', 'number', 'undefined'];
-
-  for (let i = 0; i < operators.length; i++) {
-    if (attr.includes(operators[i])) {
-      let condition = attr;
-      const cParts = condition.split(operators[i]);
-      const condLeft = getProp(comp, cParts[0].split('.'), pointers);
-
-      if (!validTypes.includes(String(typeof(condLeft)))) {
-        logError(comp, `${cParts[0]} cannot be evaluated because it is not a boolean nor a number.`);
-        return undefined;
-      } else {
-        condition = condition.replace(cParts[0], condLeft);
-        var evaluate = eval;
-        return evaluate(condition);
-      }
-    }
-  }
-
-  return undefined;
-}
-
-/**
  * Evaluates a template expression that may include method calls with parameters.
  * Supports filter chains and caches results per-render.
  *

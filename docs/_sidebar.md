@@ -1,25 +1,23 @@
-- GUIDE
+- **GETTING STARTED**
 
 - [Introduction](README.md)
+- [Why AppBlocks?](whyappblocks.md)
 
-- [The Data object](data.md)
+- **CORE CONCEPTS**
 
+- [Data Management](data.md)
 - [Filters](filters.md)
-
-- [Methods](methods.md)
-
 - [Directives](directives.md)
+- [Methods](methods.md)
+- [HTTP Requests](requests.md)
 
-- [Requests](requests.md)
+- **REFERENCE**
 
+- [API Reference](api.md)
 - [Utilities](utils.md)
 
-- [API](api.md)
+- **ADVANCED**
 
-- MISC
-
-- [Why use AppBlocks](whyappblocks.md)
-
+- [Testing Guide](testing.md)
+- [Benchmark](benchmark.md)
 - [Changelog](changelog.md)
-
- - [Testing Guide](testing.md)

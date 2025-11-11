@@ -1,8 +1,8 @@
 # Why use AppBlocks?
 
-Most modern front-end libraries/frameworks such as Vue, React and Angular are well-suited for building complex, scalable
-and maintainable applications if you know how to use them. There is no doubt these are battle tested, production-ready
-libraries/frameworks.
+AppBlocks is designed for seamless integration into existing front-end projects, making it easy to add reactivity and interactivity without a full rewrite or complex setup. Whether you want to enhance static pages, incrementally modernize legacy systems, or quickly prototype features, AppBlocks lets you work directly with the real DOM for straightforward, efficient updates.
+
+By manipulating the real DOM rather than relying on virtual or shadow DOM abstractions, AppBlocks ensures your changes are immediately accessible to browser tools, assistive technologies, and existing scripts. This approach keeps your workflow simple, your stylesheets effective, and your site naturally compatible with SEO and analytics tools.
 
 So you probably want to know where AppBlocks shines and how it can help you in developing your front-end more efficiently.
 
@@ -22,6 +22,26 @@ So you probably want to know where AppBlocks shines and how it can help you in d
 
 - **Embeddable Widgets:** For creating widgets that can be easily embedded into existing pages or platforms, such as dashboards, without needing to worry about framework compatibility.
 
-- **SEO-Focused Projects:** Since it's designed to enhance web pages rather than control the entire front-end, it's likely to be more search engine friendly out of the box for pages that require minimal interactivity. That is also the main reason why AppBlocks update real DOM trees instead of using a virtual DOM.
+- **SEO-Focused Projects:** Since it's designed to enhance web pages rather than control the entire front-end, it's likely to be more search engine friendly out of the box for pages that require some extra interactivity. That is also one of the reasons why AppBlocks update real DOM trees instead of using a virtual DOM.
 
 - **Performance-Sensitive Applications:** In scenarios where every kilobyte matters, AppBlocks' lightweight nature means faster load times, which is crucial for performance-sensitive environments like mobile web.
+
+## Real DOM vs Shadow DOM/Virtual DOM
+
+AppBlocks manipulates the real DOM directly (with intelligent diffing via Idiomorph), which provides several advantages:
+
+- **Direct Accessibility:** Real DOM elements are immediately accessible to browser DevTools, screen readers, and assistive technologies without special handling. Shadow DOM can create barriers for accessibility tools and debugging.
+
+- **Third-Party Integration:** Works seamlessly with jQuery, legacy scripts, analytics tools, and browser extensions that expect standard DOM structures.
+
+- **CSS Simplicity:** Global stylesheets and existing CSS just works. No need to pierce shadow boundaries or duplicate styles. Your existing design system applies naturally.
+
+- **SEO and Crawlers:** Search engines and web scrapers can access content directly. Shadow DOM can complicate content discovery for crawlers and social media preview generators.
+
+- **DevTools Familiarity:** Standard browser inspect tools work without special Shadow DOM inspection modes. Debugging is straightforward with familiar workflows.
+
+- **Event Propagation:** Events bubble naturally through the DOM tree without crossing shadow boundaries. Simpler event handling and delegation patterns.
+
+- **Lower Overhead:** No abstraction layer means less memory usage and processing. Virtual DOM requires maintaining a copy of the DOM tree in memory, while Shadow DOM adds rendering complexity.
+
+- **Progressive Enhancement:** Enhances existing HTML naturally. The real DOM you author is the DOM that renders, making it easier to start with semantic HTML and layer on interactivity.

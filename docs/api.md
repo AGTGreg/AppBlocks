@@ -1,168 +1,706 @@
-# API
+# API Reference
 
-## `el: Node`
-Assign a DOM element were the App will live. This element might contain the template of your app or be an empty
-container.
+Complete reference for AppBlocks configuration options, methods, and APIs.
 
-**Syntax:**
-`AppBlock.el: node`
+## Table of Contents
 
-**Example:**
+- [Configuration Options](#configuration-options)
+- [Instance Methods](#instance-methods)
+- [Built-in Methods](#built-in-methods)
+- [State Properties](#state-properties)
+- [Utilities](#utilities)
+
+---
+
+## Configuration Options
+
+Options passed to `new AppBlock(config)`:
+
+### el
+
+**Type:** `HTMLElement` (required)
+
+The DOM element where the AppBlock will render.
 
 ```js
-el: document.getElementById('my-app')
+el: document.getElementById('app')
 ```
 
+### template
 
-## `template: Node`
-Assign a template element that contains all the markup of your app. This is optional but highly recomented.
-Alternatively you could place all your app's markup in el skip the `template`.
+**Type:** `HTMLTemplateElement` (optional)
 
-**Syntax:**
-`AppBlock.template: node`
-
-**Example:**
+A `<template>` element containing the app's markup. If not provided, AppBlocks uses the content of `el`.
 
 ```js
-template: document.getElementById('my-app-template')
+template: document.getElementById('appTemplate')
 ```
 
+**Alternative:** Use `el` content directly:
+```js
+// No template provided - uses content from el
+var app = new AppBlock({
+  el: document.getElementById('app')
+  // AppBlocks will use existing content in #app
+});
+```
 
-## `name: string`
-You can assign a unique name to your app so that all errors comming from it will curry that name and make your life easier.
+### data
 
+**Type:** `Object` (optional, default: `{}`)
 
-## `renderEngine: string`
-You can choose which engine to used to render your app. You have 2 choices:
-- `plain`: This is a very simple way of rendering the app. Appblocks will create a DOM tree in memory and then replace your existing DOM with the new one in one go. This is very simple and fast. However the state of your pre-existing elements resets because in reality they are replaced with the new DOM.
-- `Idiomorph`: This uses the [Idiomorph](https://github.com/bigskysoftware/idiomorph) engine to find the differences between the real DOM and the DOM that appblocks has in memory and update it with only what's different. It is slower than plain but all of your previous elements retain their state since they are not being replaced (if they don't have to be updated).
+The reactive data object for your application.
 
-`Idiomorph` is the default renderEngine since it covers the most common use cases and it is what someone might expect to happen when they update their DOM.
-
-
-## `data: object`
-The data of our App. It is a simple javascript object. You can read more about it [here](data.md).
-
-**Syntax:**
-`AppBlock.data: {}`
-
-**Example:**
 ```js
 data: {
-  price: 100,
-  name: "bike"
+  message: "Hello",
+  count: 0,
+  items: [],
+  user: {
+    name: "Alice",
+    email: "alice@example.com"
+  }
 }
 ```
 
-## `setData: function`
-Use this function to update or replace our data and trigger a render immediately after.
+[📖 Learn more about Data](data.md)
 
-**Syntax:**
+### methods
 
-`setData(newData, replaceData=false)`
+**Type:** `Object` (optional, default: `{}`)
 
-## `filters: object`
-This is where our filters go.
+Custom methods for your application logic.
 
-**Syntax:**
+**Signature:** `methodName(appInstance, ...params) {}`
 
-A filter is defined like so:
+```js
+methods: {
+  increment(app) {
+    app.setData({ count: app.data.count + 1 });
+  },
 
-`filterName(appInstance, value) { return value }`
+  greet(app, name) {
+    return "Hello, " + name + "!";
+  }
+}
+```
 
-And we can use it in our templates like so:
+[📖 Learn more about Methods](methods.md)
 
-`<p>{value|filterName}</p>`
+### filters
 
-You can read more about it [here](filters.md).
+**Type:** `Object` (optional, default: `{}`)
 
-## `delimiters: [string, string]`
+Custom filters for transforming data in templates.
 
-Customize the placeholder delimiters that AppBlocks uses to identify template placeholders. By default AppBlocks uses curly braces `{` and `}`. To change that behaviour provide an array of two non-empty strings: the opening and closing delimiters.
+**Signature:** `filterName(appInstance, value) { return transformedValue }`
 
-Syntax:
-`delimiters: [openDelimiter, closeDelimiter]`
+```js
+filters: {
+  uppercase(app, value) {
+    return value.toUpperCase();
+  },
 
-Example (use `[[` and `]]` as delimiters):
+  currency(app, value) {
+    return '$' + parseFloat(value).toFixed(2);
+  }
+}
+```
+
+[📖 Learn more about Filters](filters.md)
+
+### directives
+
+**Type:** `Object` (optional, default: `{}`)
+
+Custom directives for controlling element rendering.
+
+**Signature:** `directiveName(appInstance, node, pointers) { return boolean }`
+
+```js
+directives: {
+  'c-custom': function(app, node, pointers) {
+    // Custom logic
+    return true; // Show element
+  }
+}
+```
+
+[📖 Learn more about Directives](directives.md)
+
+### events
+
+**Type:** `Object` (optional, default: `{}`)
+
+Event listeners for user interactions.
+
+**Format:** `"eventName selector": function(event, matchedElement) {}`
+
+```js
+events: {
+  'click #submit-btn': function(e, element) {
+    this.Parent.setData({ submitted: true });
+  },
+
+  'input .search-field': function(e, element) {
+    this.Parent.setData({ query: element.value });
+  },
+
+  // Complex selectors with descendant combinators
+  'click .todo-list li .delete-btn': function(e, element) {
+    // Handle nested element clicks
+  }
+}
+```
+
+**Event Delegation:** AppBlocks uses event delegation. The event listener is attached to the root element (`el`) and uses `element.closest()` to match the selector. This supports complex selectors with spaces and descendant combinators.
+
+### name
+
+**Type:** `String` (optional, default: `"AppBlock"`)
+
+A unique name for the AppBlock instance, useful for debugging.
+
+```js
+name: "TodoApp"
+```
+
+Errors from this app will include the name: `[TodoApp] Error message`
+
+### renderEngine
+
+**Type:** `String` (optional, default: `"Idiomorph"`)
+
+The rendering strategy to use.
+
+**Options:**
+- `"Idiomorph"` - Smart DOM diffing (preserves element state)
+- `"plain"` - Full DOM replacement (faster but resets state)
+
+```js
+renderEngine: "Idiomorph" // Recommended
+```
+
+**Idiomorph (default):**
+- Uses [Idiomorph](https://github.com/bigskysoftware/idiomorph) for intelligent DOM diffing
+- Only updates changed elements
+- Preserves element state (focus, scroll position, form values)
+- Slightly slower but provides better UX
+
+**Plain:**
+- Replaces entire DOM tree
+- Faster rendering
+- Resets all element states
+- Use for static content or when state preservation isn't needed
+
+### delimiters
+
+**Type:** `Array<String>` (optional, default: `['{', '}']`)
+
+Custom placeholder delimiters for templates.
 
 ```js
 delimiters: ['[[', ']]']
 ```
 
-Notes:
-- Filters (the `|` pipe) continue to operate inside placeholders regardless of the chosen delimiters: e.g. `[[data.name|upper]]`.
-- Invalid or malformed `delimiters` (non-array, wrong length, non-string entries, or empty strings) are ignored and AppBlocks falls back to the default `['{','}']`. An error is logged to aid debugging.
+```html
+<template id="appTemplate">
+  <p>[[data.message]]</p>
+  <p>[[data.name|uppercase]]</p>
+</template>
+```
 
-## methods: object
-All logic in our app goes here. It is an object that contains all the methods/functions in our app.
+**Requirements:**
+- Must be an array of exactly 2 non-empty strings
+- First element is the opening delimiter
+- Second element is the closing delimiter
+- Invalid configurations fall back to default `['{', '}']` with a console error
 
-**Syntax:**
+### allowBuiltins
 
-A method is defined like so:
+**Type:** `Array<String>` (optional, default: `[]`)
 
-`methodName(appInstance, ...params) {}`
+Allow specific JavaScript built-in objects in expression evaluation (for `c-if`, `c-ifnot`, etc.).
 
-The first parameter is always the app instance, which is automatically passed by AppBlocks when the method is called from templates (e.g., in `c-if` directives). Additional parameters can be passed explicitly in the template.
+```js
+allowBuiltins: ['Math', 'Date']
+```
 
-**Example:**
+```html
+<template id="appTemplate">
+  <p c-if="Math.max(data.score, 50) > 60">High score!</p>
+  <p>{Math.round(data.value * 100) / 100}</p>
+</template>
+```
+
+**Security:** By default, built-ins are blocked to prevent unsafe code execution. Only enable trusted built-ins when needed.
+
+**Common built-ins:**
+- `Math` - Mathematical operations
+- `Date` - Date manipulation
+- `String`, `Number`, `Array`, `Object` - Type utilities
+
+---
+
+## Instance Methods
+
+Methods available on AppBlock instances (`app.methodName()`):
+
+### setData()
+
+Updates data and triggers automatic re-rendering.
+
+**Signature:** `setData(newData, replaceData = false)`
+
+**Parameters:**
+- `newData` (Object): Data to update
+- `replaceData` (Boolean): If `true`, replaces all data. Default: `false` (merges)
+
+```js
+// Partial update (merge)
+app.setData({ count: 5 });
+
+// Complete replacement
+app.setData({ count: 5 }, true);
+```
+
+[📖 Learn more about Data Updates](data.md#updating-data)
+
+### render()
+
+Manually triggers a re-render. Useful when updating data directly without `setData()`.
+
+**Signature:** `render(callback)`
+
+**Parameters:**
+- `callback` (Function, optional): Called after render completes
+
+```js
+// Direct data update
+app.data.count++;
+app.data.message = "Updated";
+
+// Manually render
+app.render(function() {
+  console.log('Render complete');
+});
+```
+
+### resetState()
+
+Resets request state flags (`isLoading`, `isSuccessful`, `hasError`).
+
+**Signature:** `resetState()`
+
+```js
+app.resetState();
+// All state flags are now false
+```
+
+Useful before making a new request to clear previous states.
+
+### fetchRequest()
+
+Makes an HTTP request using the Fetch API with automatic state management.
+
+**Signature:** `fetchRequest(url, options, callbacks, delay)`
+
+**Parameters:**
+- `url` (String): Request URL
+- `options` (Object): Fetch options (method, headers, body, etc.)
+- `callbacks` (Object): Success, error, and finally callbacks
+- `delay` (Number, optional): Delay in milliseconds
+
+```js
+app.fetchRequest(
+  'https://api.example.com/data',
+  {
+    method: 'GET',
+    headers: { 'Content-Type': 'application/json' }
+  },
+  {
+    success: function(data) {
+      app.setData({ items: data });
+    },
+    error: function(err) {
+      console.error(err);
+    },
+    finally: function() {
+      console.log('Request complete');
+    }
+  },
+  300 // 300ms delay
+);
+```
+
+[📖 Learn more about Requests](requests.md#fetchrequest)
+
+### axiosRequest()
+
+Makes an HTTP request using Axios with automatic state management.
+
+**Signature:** `axiosRequest(config, callbacks, delay)`
+
+**Requires:** Axios library must be loaded
+
+**Parameters:**
+- `config` (Object): Axios configuration
+- `callbacks` (Object): Success, error, and finally callbacks
+- `delay` (Number, optional): Delay in milliseconds
+
+```js
+app.axiosRequest(
+  {
+    url: 'https://api.example.com/data',
+    method: 'POST',
+    data: { name: 'John' }
+  },
+  {
+    success: function(response) {
+      app.setData({ result: response.data });
+    },
+    error: function(err) {
+      console.error(err);
+    }
+  }
+);
+```
+
+[📖 Learn more about Requests](requests.md#axiosrequest)
+
+---
+
+## Built-in Methods
+
+Methods automatically available in `app.methods`:
+
+### beforeRender()
+
+Called before each render. Override to run custom logic.
+
+**Signature:** `beforeRender(appInstance)`
+
 ```js
 methods: {
-  add(app, a, b) {
-    return a + b;
-  },
-  isAdult(app, age) {
-    return age >= 18;
+  beforeRender(app) {
+    console.log('About to render with data:', app.data);
   }
 }
 ```
 
-When calling from templates:
-```html
-<span c-if="isAdult(data.userAge)">Adult content</span>
-<p>{add(5, 3)}</p>
-```
+### afterRender()
 
-You can read more about it [here](methods.md).
+Called after each render completes. Override to run custom logic.
 
-
-## directives: object
-An object were you store all your custom directives you can use in your templates. You can read more about it
-[here](directives.md):
-
-**Syntax:**
-`AppBlock.directives: {}`
-
-
-## events: object
-This is where you assign all the events in your app. You can read more about it
-[here](README.md?id=event-handling):
-
-### Format
-
-Event keys follow the format `"<eventName> <cssSelector>"` where the selector may contain spaces and descendant combinators. AppBlocks splits the string on the first space: everything before the first space is treated as the event name and everything after is treated as the full CSS selector. This enables complex selectors such as descendant selectors or attribute selectors.
-
-Example using a descendant selector:
+**Signature:** `afterRender(appInstance)`
 
 ```js
-events: {
-  'click .todo-list li .delete': (e, matchedEl) => { /* ... */ }
+methods: {
+  afterRender(app) {
+    console.log('Render complete');
+    // Example: Initialize third-party plugins
+    initializeTooltips();
+  }
 }
 ```
 
-Notes:
-- Delegation is implemented using a single listener attached to the component root and `Element.closest()` is used on the event target to find the matching element. The handler is invoked with `(event, matchedElement)`.
-- Backward compatibility: keys without spaces or simple selectors continue to work. The first space is always used to split the event name from the selector; the remainder (including additional spaces) is considered the selector string.
+### isLoading()
 
+Returns `true` if a request is in progress.
 
-## fetchRequest
-Make a request with fetch.
-Read about it [here](requests.md).
+**Signature:** `isLoading(appInstance)` → `Boolean`
 
+```html
+<p c-if="isLoading()">Loading...</p>
+```
 
-## axiosRequest
-Make a request with Axios.
-Read about it [here](requests.md).
+### isSuccessful()
 
+Returns `true` if the last request succeeded.
 
-## utils
-A set of helper functions for DOM manipullation. [Read more](utils.md).
+**Signature:** `isSuccessful(appInstance)` → `Boolean`
+
+```html
+<div c-if="isSuccessful()">
+  Data loaded successfully!
+</div>
+```
+
+### hasError()
+
+Returns `true` if the last request failed.
+
+**Signature:** `hasError(appInstance)` → `Boolean`
+
+```html
+<div c-if="hasError()">
+  An error occurred. Please try again.
+</div>
+```
+
+---
+
+## State Properties
+
+Properties on the AppBlock instance:
+
+### data
+
+**Type:** `Object`
+
+The reactive data object.
+
+```js
+app.data.count; // Access
+app.data.count = 10; // Direct update (requires manual render)
+```
+
+### state
+
+**Type:** `Object`
+
+Internal state object with request status flags.
+
+```js
+app.state = {
+  loading: false,
+  success: false,
+  error: false
+}
+```
+
+**Access via methods:** Use `isLoading()`, `isSuccessful()`, `hasError()` in templates instead of accessing `state` directly.
+
+### el
+
+**Type:** `HTMLElement`
+
+The root DOM element of the AppBlock.
+
+```js
+app.el.classList.add('ready');
+```
+
+### template
+
+**Type:** `DocumentFragment`
+
+The template content.
+
+```js
+// Usually you don't access this directly
+console.log(app.template);
+```
+
+### methods
+
+**Type:** `Object`
+
+The methods object.
+
+```js
+// Call a method
+app.methods.myMethod(app, arg1, arg2);
+```
+
+### filters
+
+**Type:** `Object`
+
+The filters object.
+
+```js
+// Call a filter
+var result = app.filters.uppercase(app, 'hello');
+```
+
+### directives
+
+**Type:** `Object`
+
+The directives object.
+
+```js
+// Usually you don't access this directly
+console.log(app.directives);
+```
+
+### events
+
+**Type:** `Object`
+
+The events object.
+
+```js
+// Usually you don't access this directly
+console.log(app.events);
+```
+
+### name
+
+**Type:** `String`
+
+The name of the AppBlock instance.
+
+```js
+console.log(app.name); // "TodoApp"
+```
+
+### renderEngine
+
+**Type:** `String`
+
+The active render engine.
+
+```js
+console.log(app.renderEngine); // "Idiomorph" or "plain"
+```
+
+---
+
+## Utilities
+
+Helper functions available at `app.utils`:
+
+### getNode()
+
+Returns the first element matching a selector within the AppBlock.
+
+**Signature:** `getNode(selector)` → `Element | null`
+
+```js
+var button = app.utils.getNode('#submit-btn');
+```
+
+[📖 Learn more about Utilities](utils.md#getnode)
+
+### getNodes()
+
+Returns all elements matching a selector within the AppBlock.
+
+**Signature:** `getNodes(selector)` → `NodeList`
+
+```js
+var items = app.utils.getNodes('.list-item');
+```
+
+[📖 Learn more about Utilities](utils.md#getnodes)
+
+### appendIn()
+
+Inserts HTML at the end of an element.
+
+**Signature:** `appendIn(html, node)`
+
+```js
+app.utils.appendIn('<p>New content</p>', targetElement);
+```
+
+[📖 Learn more about Utilities](utils.md#appendin)
+
+### prependIn()
+
+Inserts HTML at the beginning of an element.
+
+**Signature:** `prependIn(html, node)`
+
+```js
+app.utils.prependIn('<p>New content</p>', targetElement);
+```
+
+[📖 Learn more about Utilities](utils.md#prependin)
+
+### hasOwn()
+
+Checks if an object has a specific own property.
+
+**Signature:** `hasOwn(obj, key)` → `Boolean`
+
+```js
+if (app.utils.hasOwn(data, 'name')) {
+  // Property exists
+}
+```
+
+[📖 Learn more about Utilities](utils.md#hasown)
+
+### isObject()
+
+Determines if a value is a plain object.
+
+**Signature:** `isObject(value)` → `Boolean`
+
+```js
+if (app.utils.isObject(data.user)) {
+  // Is an object
+}
+```
+
+[📖 Learn more about Utilities](utils.md#isobject)
+
+### deepClone()
+
+Creates a deep copy of a value.
+
+**Signature:** `deepClone(value)` → `Any`
+
+```js
+var copy = app.utils.deepClone(app.data.user);
+```
+
+[📖 Learn more about Utilities](utils.md#deepclone)
+
+---
+
+## Quick Reference
+
+### Creating an AppBlock
+
+```js
+var app = new AppBlock({
+  el: document.getElementById('app'),
+  template: document.getElementById('appTemplate'),
+  name: 'MyApp',
+  renderEngine: 'Idiomorph',
+  delimiters: ['{', '}'],
+  allowBuiltins: [],
+
+  data: { /* ... */ },
+  methods: { /* ... */ },
+  filters: { /* ... */ },
+  directives: { /* ... */ },
+  events: { /* ... */ }
+});
+```
+
+### Common Operations
+
+```js
+// Update data and re-render
+app.setData({ count: 5 });
+
+// Update data directly and manually render
+app.data.count = 5;
+app.render();
+
+// Make HTTP request
+app.fetchRequest(url, options, callbacks, delay);
+
+// Reset request state
+app.resetState();
+
+// Access utilities
+app.utils.getNode('#element');
+```
+
+---
+
+## See Also
+
+- [Getting Started](README.md)
+- [Data Management](data.md)
+- [Filters](filters.md)
+- [Directives](directives.md)
+- [Methods](methods.md)
+- [HTTP Requests](requests.md)
+- [Utilities](utils.md)

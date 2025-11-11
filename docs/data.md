@@ -201,10 +201,10 @@ var app = new AppBlock({
   },
 
   methods: {
-    // Access via app parameter
-    increment(app) {
-      var newCount = app.data.count + 1;
-      app.setData({ count: newCount });
+    // Access via app parameter (recommended)
+    increment(self) {
+      var newCount = self.data.count + 1;
+      self.setData({ count: newCount });
     },
 
     // Access via this.Parent
@@ -215,14 +215,6 @@ var app = new AppBlock({
       };
       var newHistory = this.Parent.data.history.concat(entry);
       this.Parent.setData({ history: newHistory });
-    },
-
-    // Both patterns work - choose what's clearest
-    reset(app) {
-      app.setData({
-        count: 0,
-        history: []
-      });
     }
   }
 });
@@ -234,15 +226,15 @@ var app = new AppBlock({
 
 ```js
 methods: {
-  addItem(app, newItem) {
-    var updated = app.data.items.concat(newItem);
-    app.setData({ items: updated });
+  addItem(self, newItem) {
+    var updated = self.data.items.concat(newItem);
+    self.setData({ items: updated });
   },
 
   // Or using spread operator
-  addItemSpread(app, newItem) {
-    app.setData({
-      items: [...app.data.items, newItem]
+  addItemSpread(self, newItem) {
+    self.setData({
+      items: [...self.data.items, newItem]
     });
   }
 }
@@ -252,18 +244,18 @@ methods: {
 
 ```js
 methods: {
-  removeItem(app, index) {
-    var updated = app.data.items.filter(function(item, i) {
+  removeItem(self, index) {
+    var updated = self.data.items.filter(function(item, i) {
       return i !== index;
     });
-    app.setData({ items: updated });
+    self.setData({ items: updated });
   },
 
-  removeById(app, id) {
-    var updated = app.data.items.filter(function(item) {
+  removeById(self, id) {
+    var updated = self.data.items.filter(function(item) {
       return item.id !== id;
     });
-    app.setData({ items: updated });
+    self.setData({ items: updated });
   }
 }
 ```
@@ -272,24 +264,24 @@ methods: {
 
 ```js
 methods: {
-  updateItem(app, index, newValue) {
-    var updated = app.data.items.map(function(item, i) {
+  updateItem(self, index, newValue) {
+    var updated = self.data.items.map(function(item, i) {
       if (i === index) {
         return newValue;
       }
       return item;
     });
-    app.setData({ items: updated });
+    self.setData({ items: updated });
   },
 
-  toggleComplete(app, id) {
-    var updated = app.data.items.map(function(item) {
+  toggleComplete(self, id) {
+    var updated = self.data.items.map(function(item) {
       if (item.id === id) {
         return { ...item, completed: !item.completed };
       }
       return item;
     });
-    app.setData({ items: updated });
+    self.setData({ items: updated });
   }
 }
 ```
@@ -311,25 +303,25 @@ var app = new AppBlock({
   },
 
   methods: {
-    updateTheme(app, newTheme) {
+    updateTheme(self, newTheme) {
       // Create new nested structure
       var updatedSettings = {
-        ...app.data.user.settings,
+        ...self.data.user.settings,
         theme: newTheme
       };
 
       var updatedUser = {
-        ...app.data.user,
+        ...self.data.user,
         settings: updatedSettings
       };
 
-      app.setData({ user: updatedUser });
+      self.setData({ user: updatedUser });
     },
 
     // Or update directly and render
-    toggleNotifications(app) {
-      app.data.user.settings.notifications = !app.data.user.settings.notifications;
-      app.render();
+    toggleNotifications(self) {
+      self.data.user.settings.notifications = !self.data.user.settings.notifications;
+      self.render();
     }
   }
 });
@@ -435,46 +427,46 @@ var app = new AppBlock({
   },
 
   methods: {
-    addTodo(app) {
-      if (!app.data.newTodoText.trim()) return;
+    addTodo(self) {
+      if (!self.data.newTodoText.trim()) return;
 
       var newTodo = {
         id: Date.now(),
-        text: app.data.newTodoText,
+        text: self.data.newTodoText,
         done: false
       };
 
-      app.setData({
-        todos: app.data.todos.concat(newTodo),
+      self.setData({
+        todos: self.data.todos.concat(newTodo),
         newTodoText: ''
       });
     },
 
-    toggleTodo(app, id) {
-      var updated = app.data.todos.map(function(todo) {
+    toggleTodo(self, id) {
+      var updated = self.data.todos.map(function(todo) {
         if (todo.id === id) {
           return { ...todo, done: !todo.done };
         }
         return todo;
       });
-      app.setData({ todos: updated });
+      self.setData({ todos: updated });
     },
 
-    removeTodo(app, id) {
-      var updated = app.data.todos.filter(function(todo) {
+    removeTodo(self, id) {
+      var updated = self.data.todos.filter(function(todo) {
         return todo.id !== id;
       });
-      app.setData({ todos: updated });
+      self.setData({ todos: updated });
     },
 
-    getFilteredTodos(app) {
-      if (app.data.filter === 'active') {
-        return app.data.todos.filter(function(todo) { return !todo.done; });
+    getFilteredTodos(self) {
+      if (self.data.filter === 'active') {
+        return self.data.todos.filter(function(todo) { return !todo.done; });
       }
-      if (app.data.filter === 'completed') {
-        return app.data.todos.filter(function(todo) { return todo.done; });
+      if (self.data.filter === 'completed') {
+        return self.data.todos.filter(function(todo) { return todo.done; });
       }
-      return app.data.todos;
+      return self.data.todos;
     }
   },
 

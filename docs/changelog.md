@@ -10,14 +10,14 @@
 - **Performance:** Method call feature adds <2KB to minified build (66KB total minified, 25KB gzipped). Benchmark tests confirm <5% rendering overhead for typical use cases.
 - **Performance:** Object iteration adds ~40 lines of code with negligible runtime overhead due to optimized type detection priority (arrays first, then iterables, then objects).
 - **Enhancement:** `c-if` and `c-ifnot` directives now support JavaScript expressions for complex conditional logic. Expressions have access to `data` and methods; built-ins like `Math` can be enabled via `config.allowBuiltins`. Dangerous constructs (assignments, function calls, etc.) are automatically blocked for security.
+- **FIX:** `c-if` and `c-ifnot` directives now properly access `c-for` pointer variables. Previously, using `c-if="item.done"` inside a `c-for="item in data.items"` loop would fail with "item is not defined". Now pointer variables are correctly available in conditional expressions.
 - **New:** Event delegation supports complex CSS selectors including descendant combinators (e.g. `'click .list li .delete'`). Handlers receive `(event, matchedElement)`.
 - **New:** Configurable placeholder delimiters via the `delimiters: [open, close]` config option. Filters continue to work inside custom delimiters.
 - **New:** Lightweight benchmark runner (`scripts/benchmark.js`) to collect render timing samples, compute mean/median, detect outliers, and compare against a local baseline in `.benchmarks/baseline.json`.
 - **Enhancement:** Placeholder parsing refactored to support dynamic delimiters and preserve filters and `asHTML` behavior.
-- **Testing:** Added comprehensive tests for object iteration (19 test cases), selector delegation, custom delimiters, and benchmark results; full test-suite coverage added for new features.
+- **Enhancement:** Global objects (Math, Date, Object, etc.) are now properly shadowed in expressions unless explicitly allowed via `allowBuiltins` configuration. Previously, these were accessible despite documentation stating they were blocked.
+- **Testing:** Added comprehensive tests for object iteration (19 test cases), selector delegation, custom delimiters, builtin security, and `c-if`/`c-ifnot` pointer access (6 test cases). Full test-suite coverage added for new features.
 - **Enhancement:** Upgraded dependencies.
-
-## 2.0.4
 - Comprehensive testing
 - **Enhancement:** Add `hasOwn`, `isObject` and `deepClone` utils.
 

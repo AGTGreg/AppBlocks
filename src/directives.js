@@ -10,8 +10,8 @@ import { createExpressionContext, handleLegacyOperators, evaluateTemplateExpress
 // Expression evaluation cache and utilities
 const expressionCache = new Map();
 
-function compileExpression(expr, methodNames, builtinNames) {
-  const cacheKey = expr + '|' + methodNames.join(',') + '|' + builtinNames.join(',');
+function compileExpression(expr, methodNames, builtinNames, pointerNames) {
+  const cacheKey = expr + '|' + methodNames.join(',') + '|' + builtinNames.join(',') + '|' + (pointerNames || []).join(',');
   if (expressionCache.has(cacheKey)) {
     return expressionCache.get(cacheKey);
   }
@@ -25,14 +25,15 @@ function compileExpression(expr, methodNames, builtinNames) {
   const disallowedGlobals = commonGlobals.filter(name => !builtinNames.includes(name));
   const shadowDefs = disallowedGlobals.map(g => `const ${g} = undefined;`).join('');
 
-  // Make methods and builtins available in scope
+  // Make methods, builtins, and pointers available in scope
   const scopeDefs = [
     ...methodNames.map(k => `const ${k} = methods.${k};`),
-    ...builtinNames.map(k => `const ${k} = builtins.${k};`)
+    ...builtinNames.map(k => `const ${k} = builtins.${k};`),
+    ...(pointerNames || []).map(k => `const ${k} = pointers.${k};`)
   ].join('');
 
   const body = `"use strict"; ${shadowDefs} ${scopeDefs} return (${expr});`;
-  const fn = new Function('data', 'methods', 'builtins', body);
+  const fn = new Function('data', 'methods', 'builtins', 'pointers', body);
   expressionCache.set(cacheKey, fn);
   return fn;
 }
@@ -49,7 +50,8 @@ function evaluateToBoolean(expr, ctx, allowBuiltins, logWarning) {
   try {
     const methodNames = Object.keys(ctx.methods);
     const builtinNames = allowBuiltins.filter(name => name in globalThis);
-    const fn = compileExpression(expr, methodNames, builtinNames);
+    const pointerNames = ctx.pointers ? Object.keys(ctx.pointers) : [];
+    const fn = compileExpression(expr, methodNames, builtinNames, pointerNames);
     const builtins = {};
     // Populate builtins object with allowed globals
     for (const name of builtinNames) {
@@ -57,7 +59,7 @@ function evaluateToBoolean(expr, ctx, allowBuiltins, logWarning) {
         builtins[name] = globalThis[name];
       }
     }
-    const result = fn.call(null, ctx.data, ctx.methods, builtins);
+    const result = fn.call(null, ctx.data, ctx.methods, builtins, ctx.pointers || {});
     return !!result; // truthiness
   } catch (err) {
     logWarning('Expression evaluation error: ' + err.message + ' in: ' + expr);
@@ -72,8 +74,8 @@ export const directives = {
   'c-if': function(comp, node, pointers, cache) {
     let attr = node.getAttribute('c-if');
     if (!attr) return true; // no attribute, keep
-    // Use new expression evaluator
-    const ctx = createExpressionContext(comp);
+    // Use new expression evaluator with pointers support
+    const ctx = createExpressionContext(comp, pointers);
     const decision = evaluateToBoolean(attr, ctx, ctx.allowBuiltins, ctx.logWarning);
     if (!decision) {
       return false;
@@ -87,8 +89,8 @@ export const directives = {
   'c-ifnot': function(comp, node, pointers, cache) {
     let attr = node.getAttribute('c-ifnot');
     if (!attr) return true;
-    // Expression
-    const ctx = createExpressionContext(comp);
+    // Expression with pointers support
+    const ctx = createExpressionContext(comp, pointers);
     const decision = evaluateToBoolean(attr, ctx, ctx.allowBuiltins, ctx.logWarning);
     if (!decision) { // was false, invert to true
       node.removeAttribute('c-ifnot');

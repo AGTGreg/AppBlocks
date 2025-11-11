@@ -7,11 +7,14 @@ write a function for, you put it inside `methods`.
 
 This is how a method looks like in AppBlocks:
 ```js
-myMethod(appInstance) {
+myMethod(self) {
   // Do some stuff
 }
 
 ```
+
+> Notice the `self` parameter. The first parameter methods and filters is your app's instance. You can name it however you want, like `self`, `app` etc. AppBlocks will pass your app's instance to the first parameter automatically when you call a method or filter from the template and you can use it inside your method/filter to access data and methods from your app.
+> *Python developers are already familiar with this syntax where you must pass `self` on every method of your class. This has the same effect.*
 
 ## Accessing data
 
@@ -29,29 +32,29 @@ var app = new AppBlock({
   },
 
   methods: {
-    message(thisApp) {
-      return thisApp.data.message.toUpperCase();
+    message(self) {
+      return self.data.message.toUpperCase();
     }
   }
 
 })
 ```
 
-This parameter is optional, but it is important to remember it when calling your methods:
+This parameter is optional, but it is important to remember it when calling your methods from within AppBlocks:
 ```js
 methods: {
-  message(thisApp) {
-    return thisApp.data.message.toUpperCase();
+  message(self) {
+    return self.data.message.toUpperCase();
   },
 
-  changeMessage(thisApp) {
-    const oldMessage = thisApp.methods.message(thisApp);
+  changeMessage(self) {
+    const oldMessage = self.methods.message(self);
     return oldMessage + ' LOOK I HAVE CHANGED!';
   }
 }
 ```
 
-If you don't call `message` with `thisApp` argument, then `message` will not have access to our App's instance or its
+If you don't call `message` with `self` argument, then `message` will not have access to our App's instance or its
 data.
 
 Alternatively we can access our App by calling `this.Parent` which is also our App's instance:
@@ -70,8 +73,8 @@ var app = new AppBlock({
   ...
 
   methods: {
-    toggleMessage(thisApp) {
-      thisApp.setData({
+    toggleMessage(self) {
+      self.setData({
         seen: !this.Parent.data.seen
       });
     }
@@ -89,15 +92,13 @@ var app = new AppBlock({
 })
 ```
 
-This calls a method from `events` but you can call methods from other methods.
-
 Another use case for methods is to call them from another app:
 
 ```js
 var appA = new AppBlock({
   ...
   methods: {
-    methodA(thisApp) { return "Hello for appA!"; }
+    methodA(self) { return "Hello for appA!"; }
   },
   ...
 });
@@ -105,7 +106,7 @@ var appA = new AppBlock({
 var appB = new AppBlock({
   ...
   methods: {
-    callA(thisApp) { appA.methods.methodA(appA); }
+    callA(self) { appA.methods.methodA(appA); }
   },
   ...
 });
@@ -125,8 +126,8 @@ var app = new AppBlock({
   },
 
   methods: {
-    showSpan(thisApp) {
-      return thisApp.data.seen;
+    showSpan(self) {
+      return self.data.seen;
     }
   }
 })
@@ -151,11 +152,11 @@ var app = new AppBlock({
   },
 
   methods: {
-    isOldEnough(thisApp, age, minimum) {
+    isOldEnough(self, age, minimum) {
       return age >= minimum;
     },
 
-    isLarger(thisApp, a, b) {
+    isLarger(self, a, b) {
       return a > b;
     }
   }
@@ -169,7 +170,7 @@ var app = new AppBlock({
 </template>
 ```
 
-**Note:** The app instance is automatically passed as the first parameter to methods when called from `c-if`, `c-ifnot`, or expression contexts. You define the method with `methodName(thisApp, ...otherParams)` but call it in templates as `methodName(param1, param2)`.
+**Note:** The app instance is automatically passed as the first parameter to methods when called from `c-if`, `c-ifnot`, or expression contexts. You define the method with `methodName(self, ...otherParams)` but call it in templates as `methodName(param1, param2)`.
 
 ### Complex expressions:
 
@@ -184,11 +185,11 @@ var app = new AppBlock({
   },
 
   methods: {
-    isPassing(thisApp, score) {
+    isPassing(self, score) {
       return score >= 60;
     },
 
-    hasAttemptsLeft(thisApp, attempts) {
+    hasAttemptsLeft(self, attempts) {
       return attempts > 0;
     }
   }
@@ -215,35 +216,35 @@ var app = new AppBlock({
 AppBlocks offers some handy build-in methods to make your life easier. You can override these methods inside the
 methods object or call them from within your templates or App.
 
-### `beforeRender(appInstance)`
+### `beforeRender(self)`
 This method is called before a render is about to happen. You can place any code that needs to be executed before each
 render.
 ```js
 methods: {
-  beforeRender(appInstance) {
+  beforeRender(self) {
     console.log('Render is about to begin');
   }
 }
 ```
 
-### `afterRender(appInstance)`
+### `afterRender(self)`
 This method is called right after render has finished. Use it to place any code that needs to be executed after each
 render.
 ```js
 methods: {
-  afterRender(appInstance) {
+  afterRender(self) {
     console.log('Render has just finished');
   }
 }
 ```
 
-### `isLoading(appInstance)`
+### `isLoading(self)`
 This method returns the loading state of our App. It is meant to be used from the template when we make requests.
 
-### `isSuccessfull(appInstance)`
+### `isSuccessfull(self)`
 This method returns the success state of our App. It is meant to be used from the template when we make requests.
 
-### `hasError(appInstance)`
+### `hasError(self)`
 This method returns the error state of our App. It is meant to be used from the template when we make requests.
 
 ## Calling Methods in Templates
@@ -263,6 +264,8 @@ You can invoke custom methods directly in placeholders and directives, with impl
 
 ```js
 var app = new AppBlock({
+  el: document.getElementById('app'),
+  template: document.getElementById('appTemplate'),
   data: {
     firstName: 'John',
     lastName: 'Doe',
@@ -270,17 +273,17 @@ var app = new AppBlock({
   },
 
   methods: {
-    formatName(app, first, last) {
+    formatName(self, first, last) {
       return first + ' ' + last;
     },
 
-    calculateTotal(app, items) {
+    calculateTotal(self, items) {
       return items.reduce((a, b) => a + b, 0);
     }
   },
 
   filters: {
-    currency(app, value) {
+    currency(self, value) {
       return '$' + value.toFixed(2);
     }
   }

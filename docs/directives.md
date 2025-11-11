@@ -107,6 +107,40 @@ Expressions evaluate with access to `data` and instance methods. Results follow 
 
 **Important:** When calling methods from expressions, AppBlocks automatically injects the app instance as the first parameter. Define methods with `methodName(self, ...params)` but call them in templates as `methodName(param1, param2)`.
 
+### Using c-if and c-ifnot Inside c-for Loops
+
+When `c-if` or `c-ifnot` appear inside a `c-for` loop, they have access to the loop's pointer variables:
+
+```js
+var app = new AppBlock({
+  ...
+  data: {
+    todos: [
+      { id: 1, text: 'Learn AppBlocks', done: false },
+      { id: 2, text: 'Build an app', done: true }
+    ]
+  },
+  ...
+})
+```
+
+```html
+<template id="appTemplate">
+  <ul>
+    <li c-for="todo in data.todos">
+      <input type="checkbox" c-if="todo.done" checked>
+      <input type="checkbox" c-ifnot="todo.done">
+      <span>{todo.text}</span>
+    </li>
+  </ul>
+</template>
+```
+
+The `todo` pointer from `c-for` is directly accessible in the `c-if` and `c-ifnot` expressions. This works with:
+- Single pointer syntax: `item in data.items`
+- Dual pointer syntax: `key, value in data.settings`
+- Complex expressions: `item.value > 10 && item.active`
+
 ### Enabling Built-ins
 
 By default, global objects like `Math`, `Date`, `Object`, etc. are **blocked** for security. To use them in expressions, explicitly enable them in `allowBuiltins` option:
@@ -256,7 +290,7 @@ var app = new AppBlock({
     end: 5
   },
   methods: {
-    getRange: function(app, start, end) {
+    getRange: function(self, start, end) {
       return Array.from({length: end - start + 1}, (_, i) => start + i);
     }
   },
@@ -285,7 +319,7 @@ var app = new AppBlock({
 var app = new AppBlock({
   ...
   methods: {
-    getConfig: function(app) {
+    getConfig: function(self) {
       return {
         apiUrl: 'https://api.example.com',
         timeout: 5000,

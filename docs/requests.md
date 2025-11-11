@@ -44,8 +44,8 @@ var app = new AppBlock({
   },
 
   methods: {
-    loadUsers(app) {
-      app.fetchRequest(
+    loadUsers(self) {
+      self.fetchRequest(
         'https://jsonplaceholder.typicode.com/users',
         {
           method: 'GET',
@@ -55,10 +55,10 @@ var app = new AppBlock({
         },
         {
           success: function(data) {
-            app.setData({ users: data });
+            self.setData({ users: data });
           },
           error: function(err) {
-            app.setData({ errorMessage: err.message });
+            self.setData({ errorMessage: err.message });
           },
           finally: function() {
             console.log('Request completed');
@@ -103,8 +103,8 @@ var app = new AppBlock({
 
 ```js
 methods: {
-  createUser(app, userData) {
-    app.fetchRequest(
+  createUser(self, userData) {
+    self.fetchRequest(
       'https://jsonplaceholder.typicode.com/users',
       {
         method: 'POST',
@@ -116,11 +116,11 @@ methods: {
       {
         success: function(data) {
           console.log('Created user:', data);
-          var updatedUsers = app.data.users.concat(data);
-          app.setData({ users: updatedUsers });
+          var updatedUsers = self.data.users.concat(data);
+          self.setData({ users: updatedUsers });
         },
         error: function(err) {
-          app.setData({ errorMessage: 'Failed to create user: ' + err.message });
+          self.setData({ errorMessage: 'Failed to create user: ' + err.message });
         },
         finally: function() {
           console.log('Create user request completed');
@@ -202,8 +202,8 @@ var app = new AppBlock({
   },
 
   methods: {
-    loadPosts(app) {
-      app.axiosRequest(
+    loadPosts(self) {
+      self.axiosRequest(
         {
           url: 'https://jsonplaceholder.typicode.com/posts',
           method: 'GET',
@@ -213,13 +213,13 @@ var app = new AppBlock({
         },
         {
           success: function(response) {
-            app.setData({ posts: response.data });
+            self.setData({ posts: response.data });
           },
           error: function(error) {
             var message = error.response
               ? error.response.data.message
               : error.message;
-            app.setData({ errorMessage: message });
+            self.setData({ errorMessage: message });
           },
           finally: function() {
             console.log('Posts request completed');
@@ -235,8 +235,8 @@ var app = new AppBlock({
 
 ```js
 methods: {
-  createPost(app, postData) {
-    app.axiosRequest(
+  createPost(self, postData) {
+    self.axiosRequest(
       {
         url: 'https://jsonplaceholder.typicode.com/posts',
         method: 'POST',
@@ -249,10 +249,10 @@ methods: {
         success: function(response) {
           console.log('Created post:', response.data);
           var updatedPosts = app.data.posts.concat(response.data);
-          app.setData({ posts: updatedPosts });
+          self.setData({ posts: updatedPosts });
         },
         error: function(error) {
-          app.setData({
+          self.setData({
             errorMessage: 'Failed to create post: ' + error.message
           });
         }
@@ -313,9 +313,9 @@ You can manually reset the state using `resetState()`:
 
 ```js
 methods: {
-  retry(app) {
-    app.resetState(); // Clear loading, success, error flags
-    app.methods.loadData(app);
+  retry(self) {
+    self.resetState(); // Clear loading, success, error flags
+    self.methods.loadData(self);
   }
 }
 ```
@@ -336,24 +336,24 @@ var app = new AppBlock({
   },
 
   methods: {
-    loadUsers(app) {
-      app.fetchRequest(
+    loadUsers(self) {
+      self.fetchRequest(
         'https://jsonplaceholder.typicode.com/users',
         { method: 'GET' },
         {
           success: function(data) {
-            app.setData({ users: data });
+            self.setData({ users: data });
           },
           error: function(err) {
-            app.setData({ errorMessage: 'Failed to load users: ' + err.message });
+            self.setData({ errorMessage: 'Failed to load users: ' + err.message });
           }
         }
       );
     },
 
-    searchUsers(app) {
-      var query = app.data.searchQuery.toLowerCase();
-      return app.data.users.filter(function(user) {
+    searchUsers(self) {
+      var query = self.data.searchQuery.toLowerCase();
+      return self.data.users.filter(function(user) {
         return user.name.toLowerCase().includes(query) ||
                user.email.toLowerCase().includes(query);
       });
@@ -429,13 +429,13 @@ var app = new AppBlock({
   },
 
   methods: {
-    submitForm(app) {
-      if (!app.data.formData.title || !app.data.formData.body) {
-        app.setData({ errorMessage: 'Please fill in all fields' });
+    submitForm(self) {
+      if (!self.data.formData.title || !self.data.formData.body) {
+        self.setData({ errorMessage: 'Please fill in all fields' });
         return;
       }
 
-      app.fetchRequest(
+      self.fetchRequest(
         'https://jsonplaceholder.typicode.com/posts',
         {
           method: 'POST',
@@ -443,21 +443,21 @@ var app = new AppBlock({
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
-            title: app.data.formData.title,
-            body: app.data.formData.body,
+            title: self.data.formData.title,
+            body: self.data.formData.body,
             userId: 1
           })
         },
         {
           success: function(data) {
-            app.setData({
+            self.setData({
               submittedPost: data,
               formData: { title: '', body: '' },
               errorMessage: ''
             });
           },
           error: function(err) {
-            app.setData({ errorMessage: 'Submission failed: ' + err.message });
+            self.setData({ errorMessage: 'Submission failed: ' + err.message });
           }
         }
       );
@@ -542,21 +542,21 @@ var app = new AppBlock({
   },
 
   methods: {
-    loadMore(app) {
+    loadMore(self) {
       app.fetchRequest(
-        'https://jsonplaceholder.typicode.com/posts?_page=' + app.data.page + '&_limit=10',
+        'https://jsonplaceholder.typicode.com/posts?_page=' + self.data.page + '&_limit=10',
         { method: 'GET' },
         {
           success: function(data) {
-            var updatedPosts = app.data.posts.concat(data);
-            app.setData({
+            var updatedPosts = self.data.posts.concat(data);
+            self.setData({
               posts: updatedPosts,
-              page: app.data.page + 1,
+              page: self.data.page + 1,
               hasMore: data.length === 10
             });
           },
           error: function(err) {
-            app.setData({ errorMessage: err.message });
+            self.setData({ errorMessage: err.message });
           }
         }
       );
@@ -638,9 +638,9 @@ Clear previous states before new requests:
 
 ```js
 methods: {
-  refreshData(app) {
-    app.resetState();
-    app.methods.loadData(app);
+  refreshData(self) {
+    self.resetState();
+    self.methods.loadData(self);
   }
 }
 ```

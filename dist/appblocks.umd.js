@@ -5603,10 +5603,11 @@
 	    } : v];
 	  }));
 	}
-	function createExpressionContext(comp) {
+	function createExpressionContext(comp, pointers) {
 	  var wrappedMethods = wrapMethodsWithAppInstance(comp);
 	  return {
 	    data: comp.data,
+	    pointers: pointers || {},
 	    methods: wrappedMethods,
 	    allowBuiltins: comp.allowBuiltins || [],
 	    logWarning: function logWarning(msg) {
@@ -6025,8 +6026,8 @@
 	};
 
 	var expressionCache = new Map();
-	function compileExpression(expr, methodNames, builtinNames) {
-	  var cacheKey = expr + '|' + methodNames.join(',') + '|' + builtinNames.join(',');
+	function compileExpression(expr, methodNames, builtinNames, pointerNames) {
+	  var cacheKey = expr + '|' + methodNames.join(',') + '|' + builtinNames.join(',') + '|' + (pointerNames || []).join(',');
 	  if (expressionCache.has(cacheKey)) {
 	    return expressionCache.get(cacheKey);
 	  }
@@ -6041,9 +6042,11 @@
 	    return "const ".concat(k, " = methods.").concat(k, ";");
 	  })), _toConsumableArray(builtinNames.map(function (k) {
 	    return "const ".concat(k, " = builtins.").concat(k, ";");
+	  })), _toConsumableArray((pointerNames || []).map(function (k) {
+	    return "const ".concat(k, " = pointers.").concat(k, ";");
 	  }))).join('');
 	  var body = "\"use strict\"; ".concat(shadowDefs, " ").concat(scopeDefs, " return (").concat(expr, ");");
-	  var fn = new Function('data', 'methods', 'builtins', body);
+	  var fn = new Function('data', 'methods', 'builtins', 'pointers', body);
 	  expressionCache.set(cacheKey, fn);
 	  return fn;
 	}
@@ -6061,7 +6064,8 @@
 	    var builtinNames = allowBuiltins.filter(function (name) {
 	      return name in globalThis;
 	    });
-	    var fn = compileExpression(expr, methodNames, builtinNames);
+	    var pointerNames = ctx.pointers ? Object.keys(ctx.pointers) : [];
+	    var fn = compileExpression(expr, methodNames, builtinNames, pointerNames);
 	    var builtins = {};
 	    var _iterator = _createForOfIteratorHelper(builtinNames),
 	      _step;
@@ -6077,7 +6081,7 @@
 	    } finally {
 	      _iterator.f();
 	    }
-	    var result = fn.call(null, ctx.data, ctx.methods, builtins);
+	    var result = fn.call(null, ctx.data, ctx.methods, builtins, ctx.pointers || {});
 	    return !!result;
 	  } catch (err) {
 	    logWarning('Expression evaluation error: ' + err.message + ' in: ' + expr);
@@ -6088,7 +6092,7 @@
 	  'c-if': function cIf(comp, node, pointers, cache) {
 	    var attr = node.getAttribute('c-if');
 	    if (!attr) return true;
-	    var ctx = createExpressionContext(comp);
+	    var ctx = createExpressionContext(comp, pointers);
 	    var decision = evaluateToBoolean(attr, ctx, ctx.allowBuiltins, ctx.logWarning);
 	    if (!decision) {
 	      return false;
@@ -6100,7 +6104,7 @@
 	  'c-ifnot': function cIfnot(comp, node, pointers, cache) {
 	    var attr = node.getAttribute('c-ifnot');
 	    if (!attr) return true;
-	    var ctx = createExpressionContext(comp);
+	    var ctx = createExpressionContext(comp, pointers);
 	    var decision = evaluateToBoolean(attr, ctx, ctx.allowBuiltins, ctx.logWarning);
 	    if (!decision) {
 	      node.removeAttribute('c-ifnot');

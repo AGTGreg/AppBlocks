@@ -26,12 +26,15 @@ export function wrapMethodsWithAppInstance(comp) {
  * Creates the context object used for expression evaluation in directives.
  *
  * @param {Object} comp - The AppBlock component instance
- * @returns {Object} Context object with data, methods, allowBuiltins, and logWarning
+ * @param {Object} pointers - Optional pointer context from c-for loops
+ * @returns {Object} Context object with data, pointers, methods, allowBuiltins, and logWarning
  */
-export function createExpressionContext(comp) {
+export function createExpressionContext(comp, pointers) {
   const wrappedMethods = wrapMethodsWithAppInstance(comp);
+
   return {
     data: comp.data,
+    pointers: pointers || {},
     methods: wrappedMethods,
     allowBuiltins: comp.allowBuiltins || [],
     logWarning: (msg) => logError(comp, msg)

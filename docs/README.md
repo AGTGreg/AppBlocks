@@ -242,7 +242,7 @@ With tax 23%: $ 61.49
 
 > Notice the `self` parameter on every filter. The first parameter in filters and methods is your app's instance. You can name it however you want, like `self`, `app` etc. AppBlocks will pass your app's instance to the first parameter automatically when you call a method or filter from the template and you can use it inside your method/filter to access data and methods from your app (just like in the `afterTaxes` filter).
 
-[📖 Read more about Filters](filters.md)
+[📖 Read more about Filters](filters.md#filters)
 
 ### Directives - Control Your Template
 
@@ -378,7 +378,7 @@ var app = new AppBlock({
   </div>
 
   <div>
-    <input id="message-input" type="text" placeholder="Type something...">
+    <input id="message-input" type="text" placeholder="Type something..." value="{data.message}">
     <p>You typed: {data.message}</p>
   </div>
 </template>
@@ -388,7 +388,7 @@ var app = new AppBlock({
 
 The selector can include spaces and use descendant combinators for complex element targeting.
 
-[📖 Read more about Event Handling](api.md#events-object)
+[📖 Read more about Event Handling](api.md#events)
 
 
 ### Methods - Organize Your Logic
@@ -396,66 +396,82 @@ The selector can include spaces and use descendant combinators for complex eleme
 Methods are where your application logic lives. They keep your code DRY (Don't Repeat Yourself) and reusable.
 
 ```js
-var app = new AppBlock({
-  el: document.getElementById('app'),
-  template: document.getElementById('appTemplate'),
+  var app = new AppBlock({
+    el: document.getElementById('app'),
+    template: document.getElementById('appTemplate'),
 
-  data: {
-    todos: [],
-    newTodo: ''
-  },
+    data: {
+      todos: [],
+      newTodo: ''
+    },
 
-  methods: {
-    addTodo(app) {
-      if (app.data.newTodo.trim()) {
-        var updatedTodos = app.data.todos.concat({
-          id: Date.now(),
-          text: app.data.newTodo,
-          done: false
+    methods: {
+      addTodo(self) {
+        if (self.data.newTodo.trim()) {
+          var updatedTodos = self.data.todos.concat({
+            id: Date.now(),
+            text: self.data.newTodo,
+            done: false
+          });
+          self.setData({
+            todos: updatedTodos,
+            newTodo: ''
+          });
+        }
+      },
+
+      removeTodo(self, id) {
+        var updatedTodos = self.data.todos.filter(function(todo) {
+          return todo.id !== id;
         });
-        app.setData({
-          todos: updatedTodos,
-          newTodo: ''
+        self.setData({ todos: updatedTodos });
+      },
+
+      toggleTodo(self, id) {
+        var updatedTodos = self.data.todos.map(function(todo) {
+          if (todo.id === id) {
+            return { ...todo, done: !todo.done };
+          }
+          return todo;
         });
+        self.setData({ todos: updatedTodos });
       }
     },
 
-    removeTodo(app, id) {
-      var updatedTodos = app.data.todos.filter(function(todo) {
-        return todo.id !== id;
-      });
-      app.setData({ todos: updatedTodos });
-    },
-
-    toggleTodo(app, id) {
-      var updatedTodos = app.data.todos.map(function(todo) {
-        if (todo.id === id) {
-          return { ...todo, done: !todo.done };
-        }
-        return todo;
-      });
-      app.setData({ todos: updatedTodos });
+    events: {
+      'click #add-btn': function() {
+        this.Parent.methods.addTodo(this.Parent);
+      },
+      'input #new-todo-input': function(e, element) {
+        this.Parent.setData({ newTodo: element.value });
+      },
+      'click .remove-btn': function(e, element) {
+        var id = parseInt(element.dataset.id);
+        this.Parent.methods.removeTodo(this.Parent, id);
+      }
     }
-  },
+  });
+```
 
-  events: {
-    'click #add-btn': function() {
-      this.Parent.methods.addTodo(this.Parent);
-    },
-    'click .remove-btn': function(e, element) {
-      var id = parseInt(element.dataset.id);
-      this.Parent.methods.removeTodo(this.Parent, id);
-    }
-  }
-});
+```html
+<template id="appTemplate">
+  <input id="new-todo-input" type="text" placeholder="New todo" value="{data.newTodo}">
+  <button id="add-btn">Add Todo</button>
+  <ul>
+    <li c-for="todo in data.todos">
+      {todo.text}
+      <button class="remove-btn" data-id="{todo.id}">Remove</button>
+    </li>
+  </ul>
+</template>
 ```
 
 **Calling methods:**
 - From events: `this.Parent.methods.methodName(this.Parent, arg1, arg2)`
-- From templates (c-if): `methodName(arg1, arg2)` (app instance auto-injected)
+- From directives (c-if, c-ifnot, c-for): `methodName(arg1, arg2)` (app instance auto-injected)
 - From placeholders: `{methodName(arg1, arg2)}` (app instance auto-injected)
 
-[📖 Read more about Methods](methods.md)
+[📖 Read more about Methods](methods.md#methods)
 
 ### HTTP Requests - Fetch Data from APIs
 
@@ -528,7 +544,7 @@ var app = new AppBlock({
 - `isSuccessful()` - Returns `true` when request succeeds
 - `hasError()` - Returns `true` when request fails
 
-[📖 Read more about Requests](requests.md)
+[📖 Read more about Requests](requests.md#http-requests)
 
 ## What's Next?
 
@@ -536,13 +552,13 @@ You now have a solid understanding of AppBlocks basics! Here are some next steps
 
 ### Deep Dive into Features
 
-- **[Data Management](data.md)** - Learn `setData()`, direct updates, and data patterns
-- **[Filters](filters.md)** - Create custom filters and chain transformations
-- **[Directives](directives.md)** - Master `c-if`, `c-for`, and custom directives
-- **[Methods](methods.md)** - Build reusable application logic
-- **[HTTP Requests](requests.md)** - Work with APIs using fetch and Axios
-- **[Utilities](utils.md)** - Helper functions for DOM manipulation
-- **[API Reference](api.md)** - Complete API documentation
+- **[Data Management](data.md#data-management)** - Learn `setData()`, direct updates, and data patterns
+- **[Filters](filters.md#filters)** - Create custom filters and chain transformations
+- **[Directives](directives.md#directives)** - Master `c-if`, `c-for`, and custom directives
+- **[Methods](methods.md#methods)** - Build reusable application logic
+- **[HTTP Requests](requests.md#http-requests)** - Work with APIs using fetch and Axios
+- **[Utilities](utils.md#utilities)** - Helper functions for DOM manipulation
+- **[API Reference](api.md#api-reference)** - Complete API documentation
 
 ### Advanced Topics
 

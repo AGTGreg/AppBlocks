@@ -23,14 +23,6 @@ When `seen` is `true` our element is visible. If we set it to `false` our elemen
 
 > `c-if` evaluates to `false` if the value you passed to it is `undefined`, `null`, `false`, `0` or empty string.
 
-`c-if` directives can also work with
-[Comparison operators](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Comparison_Operators) and evaluate **numbers** and **booleans**. For instance we could do this and it would work as expected:
-```html
-<template id="appTemplate">
-  <span c-if="data.seen == true">Now you see me</span>
-</template>
-```
-
 **As we mentioned earlier directives have access to our methods:**
 ```js
 var app = new AppBlock({
@@ -40,8 +32,8 @@ var app = new AppBlock({
   },
 
   methods: {
-    showSpan(thisApp) {
-      return thisApp.data.seen;
+    showSpan(self) {
+      return self.data.seen;
     }
   }
 })
@@ -67,11 +59,11 @@ var app = new AppBlock({
 
   methods: {
     // Define with app instance as first param
-    isOldEnough(thisApp, age, minimum) {
+    isOldEnough(self, age, minimum) {
       return age >= minimum;
     },
 
-    isInRange(thisApp, value, min, max) {
+    isInRange(self, value, min, max) {
       return value >= min && value <= max;
     }
   }
@@ -80,7 +72,7 @@ var app = new AppBlock({
 
 ```html
 <template id="appTemplate">
-  <!-- Call without passing the app instance -->
+  <!-- Call without passing the app's instance -->
   <span c-if="isOldEnough(data.userAge, data.minimumAge)">You can proceed</span>
   <span c-if="isInRange(data.userAge, 18, 65)">Working age</span>
 </template>
@@ -88,7 +80,7 @@ var app = new AppBlock({
 
 ## c-ifnot
 
-This is the opposite of `c-if`. Think of it as writing if ... else:
+This is the opposite of `c-if`. Think of it as writing if ... else if:
 
 ```html
 <template id="appTemplate">
@@ -98,6 +90,44 @@ This is the opposite of `c-if`. Think of it as writing if ... else:
 ```
 
 Only one of the span elements can be visible depending on the value of `seen`.
+
+## Expression Support in c-if and c-ifnot
+
+`c-if` and `c-ifnot` support full JavaScript expressions for complex conditional logic:
+
+```html
+<template id="appTemplate">
+  <span c-if="data.messages.length >= 10">You have many messages</span>
+  <span c-if="hasUser(data.messages) && data.isLoggedIn">Welcome back!</span>
+  <span c-ifnot="data.messages.length >= 10">Keep the conversation going</span>
+</template>
+```
+
+Expressions evaluate with access to `data` and instance methods. Results follow JavaScript truthiness rules.
+
+**Important:** When calling methods from expressions, AppBlocks automatically injects the app instance as the first parameter. Define methods with `methodName(self, ...params)` but call them in templates as `methodName(param1, param2)`.
+
+### Enabling Built-ins
+
+By default, global objects like `Math`, `Date`, `Object`, etc. are **blocked** for security. To use them in expressions, explicitly enable them in `allowBuiltins` option:
+
+```js
+var app = new AppBlock({
+  data: { value: 42 },
+  allowBuiltins: ['Math'],
+  ...
+})
+```
+
+```html
+<span c-if="Math.max(data.value, 10) > 40">Big number</span>
+```
+
+Without `allowBuiltins: ['Math']`, the expression would fail with `Cannot read property 'max' of undefined`.
+
+**Available built-ins to enable**: `Math`, `Date`, `Object`, `Array`, `String`, `Number`, `Boolean`, `RegExp`, `JSON`, `Promise`, `Set`, `Map`, and others.
+
+> Dangerous constructs (assignments, function declarations, etc.) are automatically blocked with a warning.
 
 
 ## c-for
@@ -337,36 +367,3 @@ The result will be:
 > Hi there Greg!
 
 > Note that we have to return `true` in order for our element to show up. Otherwise AppBlocks would have discarded it.
-
-## Expression Support in c-if and c-ifnot
-
-`c-if` and `c-ifnot` support full JavaScript expressions for complex conditional logic:
-
-```html
-<template id="appTemplate">
-  <span c-if="data.messages.length >= 10">You have many messages</span>
-  <span c-if="hasUser(data.messages) && data.isLoggedIn">Welcome back!</span>
-  <span c-ifnot="data.messages.length >= 10">Keep the conversation going</span>
-</template>
-```
-
-Expressions evaluate with access to `data` and instance methods. Results follow JavaScript truthiness rules.
-
-**Important:** When calling methods from expressions, AppBlocks automatically injects the app instance as the first parameter. Define methods with `methodName(thisApp, ...params)` but call them in templates as `methodName(param1, param2)`.
-
-### Enabling Built-ins
-
-Built-ins like `Math` are blocked by default for security. Enable them in config:
-
-```js
-var app = new AppBlock({
-  data: { value: 42 },
-  config: { allowBuiltins: ['Math'] }
-})
-```
-
-```html
-<span c-if="Math.max(data.value, 10) > 40">Big number</span>
-```
-
-> Dangerous constructs (assignments, function declarations, etc.) are automatically blocked with a warning.

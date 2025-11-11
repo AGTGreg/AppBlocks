@@ -6024,12 +6024,19 @@ function compileExpression(expr, methodNames, builtinNames) {
   if (expressionCache.has(cacheKey)) {
     return expressionCache.get(cacheKey);
   }
+  var commonGlobals = ['Math', 'Date', 'Object', 'Array', 'String', 'Number', 'Boolean', 'RegExp', 'JSON', 'Promise', 'Set', 'Map', 'WeakMap', 'WeakSet', 'Symbol', 'Proxy', 'Reflect', 'Error', 'TypeError', 'ReferenceError', 'window', 'document', 'globalThis', 'console', 'setTimeout', 'setInterval'];
+  var disallowedGlobals = commonGlobals.filter(function (name) {
+    return !builtinNames.includes(name);
+  });
+  var shadowDefs = disallowedGlobals.map(function (g) {
+    return "const ".concat(g, " = undefined;");
+  }).join('');
   var scopeDefs = [].concat(_toConsumableArray(methodNames.map(function (k) {
     return "const ".concat(k, " = methods.").concat(k, ";");
   })), _toConsumableArray(builtinNames.map(function (k) {
     return "const ".concat(k, " = builtins.").concat(k, ";");
   }))).join('');
-  var body = "\"use strict\"; ".concat(scopeDefs, " return (").concat(expr, ");");
+  var body = "\"use strict\"; ".concat(shadowDefs, " ").concat(scopeDefs, " return (").concat(expr, ");");
   var fn = new Function('data', 'methods', 'builtins', body);
   expressionCache.set(cacheKey, fn);
   return fn;
@@ -6046,12 +6053,23 @@ function evaluateToBoolean(expr, ctx, allowBuiltins, logWarning) {
   try {
     var methodNames = Object.keys(ctx.methods);
     var builtinNames = allowBuiltins.filter(function (name) {
-      return name in globalThis || name === 'Math';
+      return name in globalThis;
     });
     var fn = compileExpression(expr, methodNames, builtinNames);
     var builtins = {};
-    if (allowBuiltins.includes('Math')) {
-      builtins.Math = Math;
+    var _iterator = _createForOfIteratorHelper(builtinNames),
+      _step;
+    try {
+      for (_iterator.s(); !(_step = _iterator.n()).done;) {
+        var name = _step.value;
+        if (name in globalThis) {
+          builtins[name] = globalThis[name];
+        }
+      }
+    } catch (err) {
+      _iterator.e(err);
+    } finally {
+      _iterator.f();
     }
     var result = fn.call(null, ctx.data, ctx.methods, builtins);
     return !!result;

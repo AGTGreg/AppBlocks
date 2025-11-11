@@ -16,12 +16,22 @@ function compileExpression(expr, methodNames, builtinNames) {
     return expressionCache.get(cacheKey);
   }
   // new Function with strict mode and scoped parameters
+  // Shadow all common globals unless explicitly allowed
+  const commonGlobals = ['Math', 'Date', 'Object', 'Array', 'String', 'Number', 'Boolean',
+                          'RegExp', 'JSON', 'Promise', 'Set', 'Map', 'WeakMap', 'WeakSet',
+                          'Symbol', 'Proxy', 'Reflect', 'Error', 'TypeError', 'ReferenceError',
+                          'window', 'document', 'globalThis', 'console', 'setTimeout', 'setInterval'];
+
+  const disallowedGlobals = commonGlobals.filter(name => !builtinNames.includes(name));
+  const shadowDefs = disallowedGlobals.map(g => `const ${g} = undefined;`).join('');
+
   // Make methods and builtins available in scope
   const scopeDefs = [
     ...methodNames.map(k => `const ${k} = methods.${k};`),
     ...builtinNames.map(k => `const ${k} = builtins.${k};`)
   ].join('');
-  const body = `"use strict"; ${scopeDefs} return (${expr});`;
+
+  const body = `"use strict"; ${shadowDefs} ${scopeDefs} return (${expr});`;
   const fn = new Function('data', 'methods', 'builtins', body);
   expressionCache.set(cacheKey, fn);
   return fn;
@@ -38,13 +48,15 @@ function evaluateToBoolean(expr, ctx, allowBuiltins, logWarning) {
   }
   try {
     const methodNames = Object.keys(ctx.methods);
-    const builtinNames = allowBuiltins.filter(name => name in globalThis || name === 'Math'); // simple check
+    const builtinNames = allowBuiltins.filter(name => name in globalThis);
     const fn = compileExpression(expr, methodNames, builtinNames);
     const builtins = {};
-    if (allowBuiltins.includes('Math')) {
-      builtins.Math = Math;
+    // Populate builtins object with allowed globals
+    for (const name of builtinNames) {
+      if (name in globalThis) {
+        builtins[name] = globalThis[name];
+      }
     }
-    // Shadow globals
     const result = fn.call(null, ctx.data, ctx.methods, builtins);
     return !!result; // truthiness
   } catch (err) {

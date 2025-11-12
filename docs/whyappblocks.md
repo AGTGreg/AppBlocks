@@ -1,8 +1,6 @@
 # Why use AppBlocks?
 
-Most modern front-end libraries/frameworks such as Vue, React and Angular are well-suited for building complex, scalable
-and maintainable applications if you know how to use them. There is no doubt these are battle tested, production-ready
-libraries/frameworks.
+AppBlocks is designed for seamless integration into existing front-end projects, making it easy to add reactivity and interactivity without a full rewrite or complex setup. Whether you want to enhance static pages, incrementally modernize legacy systems, or quickly prototype features, AppBlocks lets you work directly with the real DOM for straightforward, efficient updates.
 
 So you probably want to know where AppBlocks shines and how it can help you in developing your front-end more efficiently.
 
@@ -22,6 +20,6 @@ So you probably want to know where AppBlocks shines and how it can help you in d
 
 - **Embeddable Widgets:** For creating widgets that can be easily embedded into existing pages or platforms, such as dashboards, without needing to worry about framework compatibility.
 
-- **SEO-Focused Projects:** Since it's designed to enhance web pages rather than control the entire front-end, it's likely to be more search engine friendly out of the box for pages that require minimal interactivity. That is also the main reason why AppBlocks update real DOM trees instead of using a virtual DOM.
+- **SEO-Focused Projects:** Since it's designed to enhance web pages rather than control the entire front-end, it's likely to be more search engine friendly out of the box for pages that require some extra interactivity. That is also one of the reasons why AppBlocks update real DOM trees instead of using a virtual DOM.
 
 - **Performance-Sensitive Applications:** In scenarios where every kilobyte matters, AppBlocks' lightweight nature means faster load times, which is crucial for performance-sensitive environments like mobile web.

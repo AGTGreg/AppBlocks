@@ -1,39 +1,52 @@
 # Introduction
 
-AppBlocks is a tiny, fast and lightweight javascript library for building micro apps. It is designed to be used primarily as a script tag to enhance web pages with self-contained micro applications.
+## Getting Started with AppBlocks
 
-The goal of AppBlocks is to be a small library that provides all the necessary ingredients to develop micro apps in websites while being ridiculously easy to integrate in any project, practical and small.
+AppBlocks is a tiny, fast, and lightweight JavaScript library for building micro applications. It's designed to be used primarily as a script tag to enhance web pages with self-contained micro applications.
 
-Read about the [AppBlocks use case](whyappblocks.md).
+The goal of AppBlocks is to provide all the necessary ingredients to develop micro apps in websites while being ridiculously easy to integrate, practical, and small.
 
+> **New to AppBlocks?** Read about the [AppBlocks use case](whyappblocks.md) to understand when and why you might want to use it.
 
 ## Installation
 
-Download and include with a script tag in your document's head:
+### Option 1: CDN (Quickest)
+
+Add AppBlocks directly to your HTML:
 
 ```html
-<script src="/appblocks.umd.js"></script>
-
-<!-- Or if you prefer, this is the minified version -->
-<script src="/appblocks.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/appblocks@2.1.0/dist/appblocks.min.js"></script>
 ```
 
-or you can use the **CDN version**:
+### Option 2: NPM
 
-```html
-<script src="https://cdn.jsdelivr.net/npm/appblocks@2.0.3/dist/appblocks.min.js"></script>
-```
+Install via npm for use with bundlers:
 
-or you can install it via **npm**:
-
-```shell
+```bash
 npm install appblocks
 ```
 
+Then import in your JavaScript:
 
-## Getting started
+```javascript
+import { AppBlock } from 'appblocks';
+```
 
-Lets start with an empty HTML page:
+### Option 3: Direct Download
+
+Download the latest version and include it in your HTML:
+
+```html
+<!-- Development version -->
+<script src="/path/to/appblocks.umd.js"></script>
+
+<!-- Minified production version -->
+<script src="/path/to/appblocks.min.js"></script>
+```
+
+## Your First AppBlock
+
+Let's build a simple interactive app step by step. We'll start with an empty HTML page:
 
 ```html
 <!DOCTYPE html>
@@ -43,7 +56,7 @@ Lets start with an empty HTML page:
   </head>
   <body>
     <!-- Load AppBlocks. -->
-    <script src="https://cdn.jsdelivr.net/npm/appblocks@2.0.3/dist/appblocks.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/appblocks@2.1.0/dist/appblocks.min.js"></script>
     <script>
       // This is where we will write our AppBlock code
     </script>
@@ -51,337 +64,517 @@ Lets start with an empty HTML page:
 </html>
 ```
 
-In order to create an app with AppBlocks, the first thing we need to do is to create an element where our app will be rendered and a `<template>` element that contains all of our app's contents. Inside the body and before the script tags add these elements:
+### Step 1: Create the Container and Template
+
+An AppBlock needs two elements:
+1. **Container** - Where the app will render
+2. **Template** - What the app will display
+
+Add these inside the `<body>`, before the script tags:
 
 ```html
-<!-- This is the container where our app will be rendered. -->
+<!-- Container where our app will render -->
 <div id="app"></div>
 
-<!-- This is where we put the contents of our app. -->
+<!-- Template containing our app's markup -->
 <template id="appTemplate">
-  <p title="{data.message}">{data.message}</p>
+  <h1>{data.message}</h1>
+  <p>You've been here {data.visits} times.</p>
+  <button id="increment-btn">Visit Again</button>
 </template>
 ```
 
->To make things more interesting we add a placeholder that will output some data. Placeholders are enclosed in curly braces `{}`.
+> **Placeholders**: Notice the `{data.message}` and `{data.visits}` syntax? These are placeholders that will be replaced with actual data values.
 
-If you load the page now, you'll notice that nothing is displayed. We need to initialize our app first. To do that add this inside the script tag at the bottom:
+### Step 2: Initialize Your AppBlock
 
-```js
-var app = new AppBlock({
-  el: document.getElementById('app'),
-  template: document.getElementById('appTemplate'),
-  data: {
-    message: "Hello world!"
-  }
-});
+Add this JavaScript inside the `<script>` tag at the bottom:
+
+```html
+<script>
+  var app = new AppBlock({
+    el: document.getElementById('app'),
+    template: document.getElementById('appTemplate'),
+    data: {
+      message: "Welcome to AppBlocks!",
+      visits: 0
+    },
+    events: {
+      'click #increment-btn': function() {
+        var currentVisits = this.Parent.data.visits;
+        this.Parent.setData({ visits: currentVisits + 1 });
+      }
+    }
+  });
+</script>
 ```
-Reload the page and see the message.
 
-Great! **We have created our very first app!** Let's test this by updating our data! Open up your browser's console and type: `app.setData({message: "Hi console!"})`. Now you should see that our element is automatically updated to display the new message.
+### Step 3: See It in Action!
 
-> Updating the data directly in AppBlocks does not trigger it to render because that's not what we always want. If we want to update the data and see the changes immediately after that we can use the `appInstance.setData()` to pass in the new data. You can read more about this [here](data.md).
+Reload the page and click the button. Watch the visit count increase automatically!
 
-**So these are the steps we took:**
-1. Load AppBlocks with a `<script>` tag.
-2. Create the elements for rendering our app.
-3. Initialize our app.
+> **How it works**: When you call `setData()`, AppBlocks updates the data and automatically re-renders the interface to reflect the changes.
 
-**Here is the complete code:**
+### Complete Example
+
+Here's the full working code:
+
 ```html
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <title>My first app</title>
-  </head>
-  <body>
+<head>
+  <title>My First AppBlock</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    #app { max-width: 400px; margin: 0 auto; }
+    button { padding: 10px 20px; font-size: 16px; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <div id="app"></div>
 
-	  <!-- This is the container where our app will be rendered. -->
-    <div id="app"></div>
+  <template id="appTemplate">
+    <h1>{data.message}</h1>
+    <p>You've been here {data.visits} times.</p>
+    <button id="increment-btn">Visit Again</button>
+  </template>
 
-    <!-- This is where we put the contents of our app. -->
-    <template id="appTemplate">
-      <p title="{data.message}">{data.message}</p>
-    </template>
-
-    <!-- Load AppBlocks. -->
-    <script src="https://cdn.jsdelivr.net/npm/appblocks@2.0.2/dist/appblocks.min.js"></script>
-    <!-- Initialize our app. -->
-    <script>
-      var app = new AppBlock({
-        el: document.getElementById('app'),
-        template: document.getElementById('appTemplate'),
-        data: {
-          message: "Hello world!"
+  <script src="https://cdn.jsdelivr.net/npm/appblocks@2.1.0/dist/appblocks.min.js"></script>
+  <script>
+    var app = new AppBlock({
+      el: document.getElementById('app'),
+      template: document.getElementById('appTemplate'),
+      data: {
+        message: "Welcome to AppBlocks!",
+        visits: 0
+      },
+      events: {
+        'click #increment-btn': function() {
+          var currentVisits = this.Parent.data.visits;
+          this.Parent.setData({ visits: currentVisits + 1 });
         }
-      });
-    </script>
-
-  </body>
+      }
+    });
+  </script>
+</body>
 </html>
 ```
 
+### Try It Yourself
 
+Open your browser's console and experiment:
 
-For more information on how we update our App's data see [The data object](data.md).
+```javascript
+// Update the message
+app.setData({ message: "Hello from the console!" });
 
+// Reset the visits
+app.setData({ visits: 0 });
 
-## Filters
-In the example above we get the message directly from our data. But what if we want to edit it before we show it to the world? Lets say that we want to convert it to uppercase letters.
-
-This is were filters come in.
-> **filters** are functions that take an input value from a template and return another.
-
-So let's add a filter that will take any value and convert it to uppercase:
-```js
-var app = new AppBlock({
-  el: document.getElementById('app'),
-  template: document.getElementById('appTemplate'),
-  data: {
-    message: 'Hello world!'
-  },
-
-  filters: {
-    toUpperCase(app, value) {
-      return value.toUpperCase();
-    }
-  }
-
+// Update multiple properties at once
+app.setData({
+  message: "AppBlocks is awesome!",
+  visits: 100
 });
 ```
 
-And this is how we use it in our template:
+## Next Steps
 
-```html
-<template id="appTemplate">
-  <p title="{data.message}">{data.message|toUpperCase}</p>
-</template>
-```
+Now that you have your first AppBlock running, explore these core concepts:
 
-We can also chain multiple filters together and we can use filters in parameters.
-
-[Read more about Filters](filters.md)
-
-## Conditional rendering
-
-It is very easy to control the structure of our app with **if** and **for** directives. We add them as attributes to the elements we want to control.
+- **[Data Management](data.md)** - Learn how to work with data effectively
+- **[Filters](filters.md)** - Transform data before displaying it
+- **[Directives](directives.md)** - Control element visibility with `if` conditionals and loops
+- **[Methods](methods.md)** - Organize your application logic
+- **[Event Handling](events.md)** - Respond to user interactions
+- **[HTTP Requests](requests.md)** - Fetch data from APIs
 
 
-### c-if
+## Core Concepts Overview
 
-```html
-<template id="appTemplate">
-  <span c-if="data.seen">Now you see me</span>
-</template>
-```
+### Filters - Transform Your Data
+
+Filters are functions that transform values before displaying them. They're perfect for formatting data without cluttering your templates.
+
+**Example: filters**
 
 ```js
 var app = new AppBlock({
-  ...
+  el: document.getElementById('app'),
+  template: document.getElementById('appTemplate'),
   data: {
-    seen: true
+    name: 'john doe',
+    price: 49.99,
+    tax: 23,
+    rawText: '   hello world   '
   },
-  ...
-})
-```
-When `seen` is `true` our element is visible. If we set it to `false` our element is gone.
-
-> `c-if` evaluates to `false` if the value you passed to it is `undefined`, `null`, `false`, `0` or empty string.
-
-`c-if` directives can also work with
-[Comparison operators](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Comparison_Operators) and evaluate **numbers** and **booleans**. For instance we could do this and it would work as expected:
-```html
-<template id="appTemplate">
-  <span c-if="data.seen == true">Now you see me</span>
-  <span c-if="data.age >= 18">You are an adult</span>
-  <span c-if="data.score > 50 && data.attempts > 0">Keep trying!</span>
-</template>
-```
-
-You can also call methods from `c-if`. AppBlocks automatically passes the app instance as the first parameter:
-
-```js
-var app = new AppBlock({
-  ...
-  data: {
-    userAge: 25
-  },
-  methods: {
-    isAdult(thisApp, age) {
-      return age >= 18;
+  filters: {
+    uppercase(self, value) {
+      return value.toUpperCase();
+    },
+    afterTaxes(self, value) {
+      return value + (value * self.data.tax / 100);
+    },
+    currency(self, value) {
+      return '$ ' + value.toFixed(2);
     }
   }
-  ...
-})
+});
 ```
+
+**Usage in templates:**
 
 ```html
 <template id="appTemplate">
-  <span c-if="isAdult(data.userAge)">You are an adult</span>
+  <p>Welcome, {data.name|uppercase}!</p>
+  <p>Total: {data.price|currency}</p>
+  <!-- Chain multiple filters -->
+  <p>With tax {data.tax}%: {data.price|afterTaxes|currency}</p>
 </template>
 ```
 
-### c-ifnot
-
-This is the opposite of `c-if`. Think of it as writing if ... else:
-
-```html
-<template id="appTemplate">
-  <span c-if="data.seen">Now you see me</span>
-  <span c-ifnot="data.seen">Now you don't</span>
-</template>
+**Output:**
+```
+Welcome, JOHN DOE!
+Total: $ 49.99
+With tax 23%: $ 61.49
 ```
 
-Only one of the span elements can be visible depending on the value of `seen`.
+> Notice the `self` parameter on every filter. The first parameter in filters and methods is your app's instance. You can name it however you want, like `self`, `app` etc. AppBlocks will pass your app's instance to the first parameter automatically when you call a method or filter from the template and you can use it inside your method/filter to access data and methods from your app (just like in the `afterTaxes` filter).
 
+[📖 Read more about Filters](filters.md#filters)
 
-### c-for
+### Directives - Control Your Template
 
-We can use the `c-for` directive to display data from arrays:
+Directives are special attributes that control element visibility and behavior. They make it easy to build dynamic interfaces.
+
+#### c-if & c-ifnot - Conditional Rendering
+
+Show or hide elements based on conditions:
 
 ```js
 var app = new AppBlock({
-  ...
   data: {
-    grosseryList: [
-      {title: "Milk"},
-      {title: "Tomatoes"},
-      {title: "Orange juice"}
-    ]
-  },
-  ...
-})
+    isLoggedIn: false,
+    age: 25,
+    score: 85
+  }
+});
 ```
 
 ```html
 <template id="appTemplate">
+  <!-- Simple boolean check -->
+  <p c-if="data.isLoggedIn">Welcome back!</p>
+  <p c-ifnot="data.isLoggedIn">Please log in</p>
+
+  <!-- Comparison operators -->
+  <p c-if="data.age >= 18">You can vote</p>
+  <p c-if="data.score > 60">You passed!</p>
+
+  <!-- Complex expressions -->
+  <p c-if="data.age >= 18 && data.score > 60">Congratulations, adult graduate!</p>
+</template>
+```
+
+[📖 Read more about Conditional Rendering](directives.md#c-if)
+
+#### c-for - Loop Rendering
+
+Display lists and iterate over data:
+
+```js
+var app = new AppBlock({
+  data: {
+    users: [
+      { name: 'Alice', role: 'Admin' },
+      { name: 'Bob', role: 'User' },
+      { name: 'Charlie', role: 'User' }
+    ],
+    settings: {
+      theme: 'dark',
+      language: 'en',
+      notifications: true
+    }
+  }
+});
+```
+
+**Arrays:**
+```html
+<ul>
+  <li c-for="user in data.users">
+    {user.name} - {user.role}
+  </li>
+</ul>
+```
+
+**Output:**
+```
+• Alice - Admin
+• Bob - User
+• Charlie - User
+```
+
+**Objects:**
+```html
+<div c-for="key, value in data.settings">
+  <strong>{key}:</strong> {value}
+</div>
+```
+
+**Output:**
+```
+theme: dark
+language: en
+notifications: true
+```
+
+[📖 Read more about Directives](directives.md)
+
+
+### Event Handling - Respond to User Actions
+
+AppBlocks makes event handling clean and organized. Define all your event listeners in the `events` object:
+
+```js
+var app = new AppBlock({
+  el: document.getElementById('app'),
+  template: document.getElementById('appTemplate'),
+  data: {
+    count: 0,
+    message: ''
+  },
+  events: {
+    'click #increment': function(e, element) {
+      this.Parent.setData({
+        count: this.Parent.data.count + 1
+      });
+    },
+    'click #decrement': function(e, element) {
+      this.Parent.setData({
+        count: this.Parent.data.count - 1
+      });
+    },
+    'input #message-input': function(e, element) {
+      this.Parent.setData({
+        message: element.value
+      });
+    },
+    // Event delegation with complex selectors
+    'click .todo-list li .delete-btn': function(e, element) {
+      // Handle delete button clicks on todo items
+    }
+  }
+});
+```
+
+```html
+<template id="appTemplate">
+  <div>
+    <p>Count: {data.count}</p>
+    <button id="increment">+</button>
+    <button id="decrement">-</button>
+  </div>
+
+  <div>
+    <input id="message-input" type="text" placeholder="Type something..." value="{data.message}">
+    <p>You typed: {data.message}</p>
+  </div>
+</template>
+```
+
+**Event format:** `"eventName selector"`
+
+The selector can include spaces and use descendant combinators for complex element targeting.
+
+[📖 Read more about Event Handling](api.md#events)
+
+
+### Methods - Organize Your Logic
+
+Methods are where your application logic lives. They keep your code DRY (Don't Repeat Yourself) and reusable.
+
+```js
+  var app = new AppBlock({
+    el: document.getElementById('app'),
+    template: document.getElementById('appTemplate'),
+
+    data: {
+      todos: [],
+      newTodo: ''
+    },
+
+    methods: {
+      addTodo(self) {
+        if (self.data.newTodo.trim()) {
+          var updatedTodos = self.data.todos.concat({
+            id: Date.now(),
+            text: self.data.newTodo,
+            done: false
+          });
+          self.setData({
+            todos: updatedTodos,
+            newTodo: ''
+          });
+        }
+      },
+
+      removeTodo(self, id) {
+        var updatedTodos = self.data.todos.filter(function(todo) {
+          return todo.id !== id;
+        });
+        self.setData({ todos: updatedTodos });
+      },
+
+      toggleTodo(self, id) {
+        var updatedTodos = self.data.todos.map(function(todo) {
+          if (todo.id === id) {
+            return { ...todo, done: !todo.done };
+          }
+          return todo;
+        });
+        self.setData({ todos: updatedTodos });
+      }
+    },
+
+    events: {
+      'click #add-btn': function() {
+        this.Parent.methods.addTodo(this.Parent);
+      },
+      'input #new-todo-input': function(e, element) {
+        this.Parent.setData({ newTodo: element.value });
+      },
+      'click .remove-btn': function(e, element) {
+        var id = parseInt(element.dataset.id);
+        this.Parent.methods.removeTodo(this.Parent, id);
+      }
+    }
+  });
+```
+
+```html
+<template id="appTemplate">
+  <input id="new-todo-input" type="text" placeholder="New todo" value="{data.newTodo}">
+  <button id="add-btn">Add Todo</button>
   <ul>
-    <li c-for="item in data.grosseryList"> {item.title} </li>
+    <li c-for="todo in data.todos">
+      {todo.text}
+      <button class="remove-btn" data-id="{todo.id}">Remove</button>
+    </li>
   </ul>
 </template>
 ```
-> - Milk
-> - Tomatoes
-> - Orange juice
 
+**Calling methods:**
+- From events: `this.Parent.methods.methodName(this.Parent, arg1, arg2)`
+- From directives (c-if, c-ifnot, c-for): `methodName(arg1, arg2)` (app instance auto-injected)
+- From placeholders: `{methodName(arg1, arg2)}` (app instance auto-injected)
 
-[More about directives](directives.md)
+[📖 Read more about Methods](methods.md#methods)
 
+### HTTP Requests - Fetch Data from APIs
 
-## Event handling
-**`"eventTrigger selector": function(event) {}`**
+AppBlocks provides built-in methods for making HTTP requests with automatic state management. You can use either `fetch` or Axios.
 
-AppBlocks makes it easy for us to handle events while keeping everything nice and clean. `events` are grouped in the `events` object:
-
-```js
-var app = new AppBlock({
-  ...
-  events: {
-    'click #a-button': function(e) {
-      // Do something
-    }
-  }
-  ...
-})
-```
-
-Let's create an app where the user can toggle an element with a click of a button:
-
-```html
-<template id="appTemplate">
-  <span c-if="data.seen">Now you see me</span>
-  <span c-ifnot="data.seen">Now you don't</span>
-  <button id="message-toggler">Toggle message</button>
-</template>
-```
+#### Using fetchRequest
 
 ```js
 var app = new AppBlock({
-
   el: document.getElementById('app'),
   template: document.getElementById('appTemplate'),
 
   data: {
-    seen: true
+    users: [],
+    errorMessage: ''
   },
 
   events: {
-    'click #message-toggler': function(e) {
-      this.Parent.setData({
-        seen: !this.Parent.data.seen
-      })
+    'click #load-users': function() {
+      var app = this.Parent;
+
+      app.fetchRequest(
+        'https://jsonplaceholder.typicode.com/users',
+        { method: 'GET' },
+        {
+          success: function(data) {
+            app.setData({ users: data });
+          },
+          error: function(err) {
+            app.setData({ errorMessage: err.message });
+          },
+          finally: function() {
+            console.log('Request completed');
+          }
+        }
+      );
     }
   }
-
-})
+});
 ```
 
-But what if you want to trigger the same functionality from multiple events? You could just add more events and copy and paste your functionality there. **But this is not a good approach.** Your code should be reusable and DRY. This is where the `methods` come in.
+#### Template with Loading States
 
+```html
+<template id="appTemplate">
+  <button id="load-users">Load Users</button>
 
-## Methods
-The `methods` object is the right place to put all of our application's logic. From processing data to anything you would write a function for. This is a good way to keep our code DRY and reusable.
+  <!-- Loading state -->
+  <p c-if="isLoading()">Loading users...</p>
 
-We can call methods from placeholders, attributes and even directives.
+  <!-- Error state -->
+  <div c-if="hasError()">
+    <p style="color: red;">Error: {data.errorMessage}</p>
+  </div>
 
-Continuing on from the `events` example, let's now change `seen` when the mouse button is Up and change it again when it is down:
-
-```js
-var app = new AppBlock({
-
-  ...
-
-  methods: {
-    toggleMessage(thisApp) {
-      thisApp.setData({
-        seen: !this.Parent.data.seen
-      });
-    }
-  },
-
-  events: {
-    'mouseup #message-toggler': function(e) {
-      this.Parent.methods.toggleMessage(this.Parent);
-    },
-    'mousedown #message-toggler': function(e) {
-      this.Parent.methods.toggleMessage(this.Parent);
-    }
-  }
-
-})
+  <!-- Success state -->
+  <div c-if="isSuccessful()">
+    <h2>Users ({data.users.length})</h2>
+    <ul>
+      <li c-for="user in data.users">
+        {user.name} - {user.email}
+      </li>
+    </ul>
+  </div>
+</template>
 ```
 
-This might not seem like much to the untrained eye but believe me, when your apps become bigger and more complex, this pattern will make your life much easier ;)
+**Built-in state methods:**
+- `isLoading()` - Returns `true` while request is in progress
+- `isSuccessful()` - Returns `true` when request succeeds
+- `hasError()` - Returns `true` when request fails
 
-There is more to methods.
-[Read more about methods here.](methods.md)
+[📖 Read more about Requests](requests.md#http-requests)
 
-## Requests
+## What's Next?
 
-A key concept in AppBlocks, is to cover the most common use cases of a front-end micro app. One of those use cases is to be able to make requests.
+You now have a solid understanding of AppBlocks basics! Here are some next steps:
 
-With AppBlocks you can use `fetch` or [Axios](https://github.com/axios/axios) to make requests. AppBlocks wraps these APIs and takes care of our app's state and rendering for us.
+### Deep Dive into Features
 
-You can read all about making requests [here](requests.md).
+- **[Data Management](data.md#data-management)** - Learn `setData()`, direct updates, and data patterns
+- **[Filters](filters.md#filters)** - Create custom filters and chain transformations
+- **[Directives](directives.md#directives)** - Master `c-if`, `c-for`, and custom directives
+- **[Methods](methods.md#methods)** - Build reusable application logic
+- **[HTTP Requests](requests.md#http-requests)** - Work with APIs using fetch and Axios
+- **[Utilities](utils.md#utilities)** - Helper functions for DOM manipulation
+- **[API Reference](api.md#api-reference)** - Complete API documentation
 
-## Benchmarking (developer)
+### Advanced Topics
 
-AppBlocks includes a small benchmark helper (`scripts/benchmark.js`) you can use in Node/JSDOM to collect render timing samples and compare against a local baseline.
+- Custom placeholder delimiters
+- Expression evaluation with built-ins
+- Render engine options (Idiomorph vs plain)
+- Custom directives and filters
+- Performance optimization
 
-Quick example (Node):
+### Examples
 
-```js
-const { runBenchmark } = require('../scripts/benchmark');
+Check out practical examples and common patterns:
+- Todo List Application
+- Form Validation
+- Search with Debounce
+- Data Tables
+- Real-time Updates
 
-async function scenario() {
-  // create AppBlock with template/data and let it render
-}
-
-(async () => {
-  const result = await runBenchmark(scenario, 10);
-  console.log(result.report);
-  // Example output: "Mean 2.15ms (+4.5% vs baseline 2.06ms); outliers: 0/10"
-})();
-```
-
-Baseline file: `.benchmarks/baseline.json` (created automatically on first run, gitignored).
+Happy coding with AppBlocks! 🚀

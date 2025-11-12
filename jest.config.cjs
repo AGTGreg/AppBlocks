@@ -1,8 +1,16 @@
 module.exports = {
   testEnvironment: 'jest-environment-jsdom',
   testMatch: ['**/tests/**/*.test.js'],
-  collectCoverageFrom: ['src/**/*.js'],
-  coveragePathIgnorePatterns: ['/node_modules/'],
+  collectCoverageFrom: [
+    'build-cjs/**/*.js',
+    '!build-cjs/**/*.test.js',
+    '!build-cjs/**/__mocks__/**'
+  ],
+  coveragePathIgnorePatterns: [
+    '/node_modules/',
+    '/tests/',
+    '/scripts/'
+  ],
   moduleFileExtensions: ['js'],
   verbose: true,
   testPathIgnorePatterns: ['/node_modules/'],

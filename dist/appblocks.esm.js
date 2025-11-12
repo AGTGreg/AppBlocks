@@ -5415,138 +5415,6 @@ function requireEs_string_endsWith () {
 
 requireEs_string_endsWith();
 
-var es_string_split = {};
-
-var aConstructor;
-var hasRequiredAConstructor;
-function requireAConstructor () {
-	if (hasRequiredAConstructor) return aConstructor;
-	hasRequiredAConstructor = 1;
-	var isConstructor = requireIsConstructor();
-	var tryToString = requireTryToString();
-	var $TypeError = TypeError;
-	aConstructor = function (argument) {
-	  if (isConstructor(argument)) return argument;
-	  throw new $TypeError(tryToString(argument) + ' is not a constructor');
-	};
-	return aConstructor;
-}
-
-var speciesConstructor;
-var hasRequiredSpeciesConstructor;
-function requireSpeciesConstructor () {
-	if (hasRequiredSpeciesConstructor) return speciesConstructor;
-	hasRequiredSpeciesConstructor = 1;
-	var anObject = requireAnObject();
-	var aConstructor = requireAConstructor();
-	var isNullOrUndefined = requireIsNullOrUndefined();
-	var wellKnownSymbol = requireWellKnownSymbol();
-	var SPECIES = wellKnownSymbol('species');
-	speciesConstructor = function (O, defaultConstructor) {
-	  var C = anObject(O).constructor;
-	  var S;
-	  return C === undefined || isNullOrUndefined(S = anObject(C)[SPECIES]) ? defaultConstructor : aConstructor(S);
-	};
-	return speciesConstructor;
-}
-
-var hasRequiredEs_string_split;
-function requireEs_string_split () {
-	if (hasRequiredEs_string_split) return es_string_split;
-	hasRequiredEs_string_split = 1;
-	var call = requireFunctionCall();
-	var uncurryThis = requireFunctionUncurryThis();
-	var fixRegExpWellKnownSymbolLogic = requireFixRegexpWellKnownSymbolLogic();
-	var anObject = requireAnObject();
-	var isObject = requireIsObject();
-	var requireObjectCoercible = requireRequireObjectCoercible();
-	var speciesConstructor = requireSpeciesConstructor();
-	var advanceStringIndex = requireAdvanceStringIndex();
-	var toLength = requireToLength();
-	var toString = requireToString();
-	var getMethod = requireGetMethod();
-	var regExpExec = requireRegexpExecAbstract();
-	var stickyHelpers = requireRegexpStickyHelpers();
-	var fails = requireFails();
-	var UNSUPPORTED_Y = stickyHelpers.UNSUPPORTED_Y;
-	var MAX_UINT32 = 0xFFFFFFFF;
-	var min = Math.min;
-	var push = uncurryThis([].push);
-	var stringSlice = uncurryThis(''.slice);
-	var SPLIT_WORKS_WITH_OVERWRITTEN_EXEC = !fails(function () {
-	  var re = /(?:)/;
-	  var originalExec = re.exec;
-	  re.exec = function () { return originalExec.apply(this, arguments); };
-	  var result = 'ab'.split(re);
-	  return result.length !== 2 || result[0] !== 'a' || result[1] !== 'b';
-	});
-	var BUGGY = 'abbc'.split(/(b)*/)[1] === 'c' ||
-	  'test'.split(/(?:)/, -1).length !== 4 ||
-	  'ab'.split(/(?:ab)*/).length !== 2 ||
-	  '.'.split(/(.?)(.?)/).length !== 4 ||
-	  '.'.split(/()()/).length > 1 ||
-	  ''.split(/.?/).length;
-	fixRegExpWellKnownSymbolLogic('split', function (SPLIT, nativeSplit, maybeCallNative) {
-	  var internalSplit = '0'.split(undefined, 0).length ? function (separator, limit) {
-	    return separator === undefined && limit === 0 ? [] : call(nativeSplit, this, separator, limit);
-	  } : nativeSplit;
-	  return [
-	    function split(separator, limit) {
-	      var O = requireObjectCoercible(this);
-	      var splitter = isObject(separator) ? getMethod(separator, SPLIT) : undefined;
-	      return splitter
-	        ? call(splitter, separator, O, limit)
-	        : call(internalSplit, toString(O), separator, limit);
-	    },
-	    function (string, limit) {
-	      var rx = anObject(this);
-	      var S = toString(string);
-	      if (!BUGGY) {
-	        var res = maybeCallNative(internalSplit, rx, S, limit, internalSplit !== nativeSplit);
-	        if (res.done) return res.value;
-	      }
-	      var C = speciesConstructor(rx, RegExp);
-	      var unicodeMatching = rx.unicode;
-	      var flags = (rx.ignoreCase ? 'i' : '') +
-	                  (rx.multiline ? 'm' : '') +
-	                  (rx.unicode ? 'u' : '') +
-	                  (UNSUPPORTED_Y ? 'g' : 'y');
-	      var splitter = new C(UNSUPPORTED_Y ? '^(?:' + rx.source + ')' : rx, flags);
-	      var lim = limit === undefined ? MAX_UINT32 : limit >>> 0;
-	      if (lim === 0) return [];
-	      if (S.length === 0) return regExpExec(splitter, S) === null ? [S] : [];
-	      var p = 0;
-	      var q = 0;
-	      var A = [];
-	      while (q < S.length) {
-	        splitter.lastIndex = UNSUPPORTED_Y ? 0 : q;
-	        var z = regExpExec(splitter, UNSUPPORTED_Y ? stringSlice(S, q) : S);
-	        var e;
-	        if (
-	          z === null ||
-	          (e = min(toLength(splitter.lastIndex + (UNSUPPORTED_Y ? q : 0)), S.length)) === p
-	        ) {
-	          q = advanceStringIndex(S, q, unicodeMatching);
-	        } else {
-	          push(A, stringSlice(S, p, q));
-	          if (A.length === lim) return A;
-	          for (var i = 1; i <= z.length - 1; i++) {
-	            push(A, z[i]);
-	            if (A.length === lim) return A;
-	          }
-	          q = p = e;
-	        }
-	      }
-	      push(A, stringSlice(S, p));
-	      return A;
-	    }
-	  ];
-	}, BUGGY || !SPLIT_WORKS_WITH_OVERWRITTEN_EXEC, UNSUPPORTED_Y);
-	return es_string_split;
-}
-
-requireEs_string_split();
-
 var es_string_startsWith = {};
 
 var hasRequiredEs_string_startsWith;
@@ -5597,10 +5465,11 @@ function wrapMethodsWithAppInstance(comp) {
     } : v];
   }));
 }
-function createExpressionContext(comp) {
+function createExpressionContext(comp, pointers) {
   var wrappedMethods = wrapMethodsWithAppInstance(comp);
   return {
     data: comp.data,
+    pointers: pointers || {},
     methods: wrappedMethods,
     allowBuiltins: comp.allowBuiltins || [],
     logWarning: function logWarning(msg) {
@@ -6019,18 +5888,27 @@ var _processNode = function processNode(comp, node, pointers, cache) {
 };
 
 var expressionCache = new Map();
-function compileExpression(expr, methodNames, builtinNames) {
-  var cacheKey = expr + '|' + methodNames.join(',') + '|' + builtinNames.join(',');
+function compileExpression(expr, methodNames, builtinNames, pointerNames) {
+  var cacheKey = expr + '|' + methodNames.join(',') + '|' + builtinNames.join(',') + '|' + (pointerNames || []).join(',');
   if (expressionCache.has(cacheKey)) {
     return expressionCache.get(cacheKey);
   }
+  var commonGlobals = ['Math', 'Date', 'Object', 'Array', 'String', 'Number', 'Boolean', 'RegExp', 'JSON', 'Promise', 'Set', 'Map', 'WeakMap', 'WeakSet', 'Symbol', 'Proxy', 'Reflect', 'Error', 'TypeError', 'ReferenceError', 'window', 'document', 'globalThis', 'console', 'setTimeout', 'setInterval'];
+  var disallowedGlobals = commonGlobals.filter(function (name) {
+    return !builtinNames.includes(name);
+  });
+  var shadowDefs = disallowedGlobals.map(function (g) {
+    return "const ".concat(g, " = undefined;");
+  }).join('');
   var scopeDefs = [].concat(_toConsumableArray(methodNames.map(function (k) {
     return "const ".concat(k, " = methods.").concat(k, ";");
   })), _toConsumableArray(builtinNames.map(function (k) {
     return "const ".concat(k, " = builtins.").concat(k, ";");
+  })), _toConsumableArray((pointerNames || []).map(function (k) {
+    return "const ".concat(k, " = pointers.").concat(k, ";");
   }))).join('');
-  var body = "\"use strict\"; ".concat(scopeDefs, " return (").concat(expr, ");");
-  var fn = new Function('data', 'methods', 'builtins', body);
+  var body = "\"use strict\"; ".concat(shadowDefs, " ").concat(scopeDefs, " return (").concat(expr, ");");
+  var fn = new Function('data', 'methods', 'builtins', 'pointers', body);
   expressionCache.set(cacheKey, fn);
   return fn;
 }
@@ -6046,14 +5924,26 @@ function evaluateToBoolean(expr, ctx, allowBuiltins, logWarning) {
   try {
     var methodNames = Object.keys(ctx.methods);
     var builtinNames = allowBuiltins.filter(function (name) {
-      return name in globalThis || name === 'Math';
+      return name in globalThis;
     });
-    var fn = compileExpression(expr, methodNames, builtinNames);
+    var pointerNames = ctx.pointers ? Object.keys(ctx.pointers) : [];
+    var fn = compileExpression(expr, methodNames, builtinNames, pointerNames);
     var builtins = {};
-    if (allowBuiltins.includes('Math')) {
-      builtins.Math = Math;
+    var _iterator = _createForOfIteratorHelper(builtinNames),
+      _step;
+    try {
+      for (_iterator.s(); !(_step = _iterator.n()).done;) {
+        var name = _step.value;
+        if (name in globalThis) {
+          builtins[name] = globalThis[name];
+        }
+      }
+    } catch (err) {
+      _iterator.e(err);
+    } finally {
+      _iterator.f();
     }
-    var result = fn.call(null, ctx.data, ctx.methods, builtins);
+    var result = fn.call(null, ctx.data, ctx.methods, builtins, ctx.pointers || {});
     return !!result;
   } catch (err) {
     logWarning('Expression evaluation error: ' + err.message + ' in: ' + expr);
@@ -6064,7 +5954,7 @@ var directives = {
   'c-if': function cIf(comp, node, pointers, cache) {
     var attr = node.getAttribute('c-if');
     if (!attr) return true;
-    var ctx = createExpressionContext(comp);
+    var ctx = createExpressionContext(comp, pointers);
     var decision = evaluateToBoolean(attr, ctx, ctx.allowBuiltins, ctx.logWarning);
     if (!decision) {
       return false;
@@ -6076,7 +5966,7 @@ var directives = {
   'c-ifnot': function cIfnot(comp, node, pointers, cache) {
     var attr = node.getAttribute('c-ifnot');
     if (!attr) return true;
-    var ctx = createExpressionContext(comp);
+    var ctx = createExpressionContext(comp, pointers);
     var decision = evaluateToBoolean(attr, ctx, ctx.allowBuiltins, ctx.logWarning);
     if (!decision) {
       node.removeAttribute('c-ifnot');
@@ -6200,6 +6090,39 @@ function requireEnvironmentIsNode () {
 	var ENVIRONMENT = requireEnvironment();
 	environmentIsNode = ENVIRONMENT === 'NODE';
 	return environmentIsNode;
+}
+
+var aConstructor;
+var hasRequiredAConstructor;
+function requireAConstructor () {
+	if (hasRequiredAConstructor) return aConstructor;
+	hasRequiredAConstructor = 1;
+	var isConstructor = requireIsConstructor();
+	var tryToString = requireTryToString();
+	var $TypeError = TypeError;
+	aConstructor = function (argument) {
+	  if (isConstructor(argument)) return argument;
+	  throw new $TypeError(tryToString(argument) + ' is not a constructor');
+	};
+	return aConstructor;
+}
+
+var speciesConstructor;
+var hasRequiredSpeciesConstructor;
+function requireSpeciesConstructor () {
+	if (hasRequiredSpeciesConstructor) return speciesConstructor;
+	hasRequiredSpeciesConstructor = 1;
+	var anObject = requireAnObject();
+	var aConstructor = requireAConstructor();
+	var isNullOrUndefined = requireIsNullOrUndefined();
+	var wellKnownSymbol = requireWellKnownSymbol();
+	var SPECIES = wellKnownSymbol('species');
+	speciesConstructor = function (O, defaultConstructor) {
+	  var C = anObject(O).constructor;
+	  var S;
+	  return C === undefined || isNullOrUndefined(S = anObject(C)[SPECIES]) ? defaultConstructor : aConstructor(S);
+	};
+	return speciesConstructor;
 }
 
 var validateArgumentsLength;

@@ -26,12 +26,15 @@ export function wrapMethodsWithAppInstance(comp) {
  * Creates the context object used for expression evaluation in directives.
  *
  * @param {Object} comp - The AppBlock component instance
- * @returns {Object} Context object with data, methods, allowBuiltins, and logWarning
+ * @param {Object} pointers - Optional pointer context from c-for loops
+ * @returns {Object} Context object with data, pointers, methods, allowBuiltins, and logWarning
  */
-export function createExpressionContext(comp) {
+export function createExpressionContext(comp, pointers) {
   const wrappedMethods = wrapMethodsWithAppInstance(comp);
+
   return {
     data: comp.data,
+    pointers: pointers || {},
     methods: wrappedMethods,
     allowBuiltins: comp.allowBuiltins || [],
     logWarning: (msg) => logError(comp, msg)
@@ -67,39 +70,6 @@ export function buildDelimiterRegex(delimiters) {
   const open = escapeRegExp(validDelimiters[0]);
   const close = escapeRegExp(validDelimiters[1]);
   return new RegExp(open + '([\\s\\S]*?)' + close, 'g');
-}
-
-/**
- * Handles legacy operator evaluation for c-if/c-ifnot directives.
- * This maintains backward compatibility for simple comparison operations.
- *
- * @param {Object} comp - The AppBlock component instance
- * @param {string} attr - The attribute value to evaluate
- * @param {Object} pointers - Pointer context for c-for loops
- * @returns {*} The evaluated result or undefined
- */
-export function handleLegacyOperators(comp, attr, pointers) {
-  const operators = [' == ', ' === ', ' !== ', ' != ', ' > ', ' < ', ' >= ', ' <= '];
-  const validTypes = ['boolean', 'number', 'undefined'];
-
-  for (let i = 0; i < operators.length; i++) {
-    if (attr.includes(operators[i])) {
-      let condition = attr;
-      const cParts = condition.split(operators[i]);
-      const condLeft = getProp(comp, cParts[0].split('.'), pointers);
-
-      if (!validTypes.includes(String(typeof(condLeft)))) {
-        logError(comp, `${cParts[0]} cannot be evaluated because it is not a boolean nor a number.`);
-        return undefined;
-      } else {
-        condition = condition.replace(cParts[0], condLeft);
-        var evaluate = eval;
-        return evaluate(condition);
-      }
-    }
-  }
-
-  return undefined;
 }
 
 /**

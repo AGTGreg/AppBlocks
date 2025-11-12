@@ -1,6 +1,6 @@
 # Changelog
 
-## 2.1.0 (Unreleased)
+## 2.1.0
 - **New:** Method calls with parameters in placeholders and directives. Call app methods directly in templates with implicit app instance injection: `{sumMethod(data.a, data.b)}` or `c-for="item in getItems()"`.
 - **New:** Method call result caching (per-render ephemeral) to prevent duplicate evaluations in the same render cycle.
 - **New:** Object iteration in `c-for` directive. Iterate over plain JavaScript objects using dual-pointer syntax: `c-for="key, value in data.myObject"` or single-pointer for values only: `c-for="value in data.myObject"`. Works with both data properties and method calls. Uses `Object.entries()` for iteration (own enumerable properties only).

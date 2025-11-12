@@ -19,5 +19,4 @@
 - **ADVANCED**
 
 - [Testing Guide](testing.md)
-- [Benchmark](benchmark.md)
 - [Changelog](changelog.md)

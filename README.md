@@ -163,19 +163,9 @@ app.fetchRequest('https://api.example.com/data',
 - [Directives](https://agtgreg.github.io/AppBlocks/#/directives)
 - [Filters](https://agtgreg.github.io/AppBlocks/#/filters)
 - [Methods](https://agtgreg.github.io/AppBlocks/#/methods)
-- [Event Handling](https://agtgreg.github.io/AppBlocks/#/events)
+- [Event Handling](https://agtgreg.github.io/AppBlocks/#/README?id=event-handling)
 - [HTTP Requests](https://agtgreg.github.io/AppBlocks/#/requests)
 - [API Reference](https://agtgreg.github.io/AppBlocks/#/api)
-
-## Examples
-
-Check out the [Examples & Recipes](https://agtgreg.github.io/AppBlocks/#/examples) for common patterns:
-
-- Todo List Application
-- Form Validation
-- Search with Debounce
-- Loading States
-- Error Handling
 
 ## Browser Support
 

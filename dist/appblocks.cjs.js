@@ -2,7 +2,7 @@
 
 var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
-var es_array_indexOf = {};
+var es_array_forEach = {};
 
 var globalThis_1;
 var hasRequiredGlobalThis;
@@ -1237,6 +1237,223 @@ function requireFunctionUncurryThisClause () {
 	return functionUncurryThisClause;
 }
 
+var functionBindContext;
+var hasRequiredFunctionBindContext;
+function requireFunctionBindContext () {
+	if (hasRequiredFunctionBindContext) return functionBindContext;
+	hasRequiredFunctionBindContext = 1;
+	var uncurryThis = requireFunctionUncurryThisClause();
+	var aCallable = requireACallable();
+	var NATIVE_BIND = requireFunctionBindNative();
+	var bind = uncurryThis(uncurryThis.bind);
+	functionBindContext = function (fn, that) {
+	  aCallable(fn);
+	  return that === undefined ? fn : NATIVE_BIND ? bind(fn, that) : function () {
+	    return fn.apply(that, arguments);
+	  };
+	};
+	return functionBindContext;
+}
+
+var isArray;
+var hasRequiredIsArray;
+function requireIsArray () {
+	if (hasRequiredIsArray) return isArray;
+	hasRequiredIsArray = 1;
+	var classof = requireClassofRaw();
+	isArray = Array.isArray || function isArray(argument) {
+	  return classof(argument) === 'Array';
+	};
+	return isArray;
+}
+
+var toStringTagSupport;
+var hasRequiredToStringTagSupport;
+function requireToStringTagSupport () {
+	if (hasRequiredToStringTagSupport) return toStringTagSupport;
+	hasRequiredToStringTagSupport = 1;
+	var wellKnownSymbol = requireWellKnownSymbol();
+	var TO_STRING_TAG = wellKnownSymbol('toStringTag');
+	var test = {};
+	test[TO_STRING_TAG] = 'z';
+	toStringTagSupport = String(test) === '[object z]';
+	return toStringTagSupport;
+}
+
+var classof;
+var hasRequiredClassof;
+function requireClassof () {
+	if (hasRequiredClassof) return classof;
+	hasRequiredClassof = 1;
+	var TO_STRING_TAG_SUPPORT = requireToStringTagSupport();
+	var isCallable = requireIsCallable();
+	var classofRaw = requireClassofRaw();
+	var wellKnownSymbol = requireWellKnownSymbol();
+	var TO_STRING_TAG = wellKnownSymbol('toStringTag');
+	var $Object = Object;
+	var CORRECT_ARGUMENTS = classofRaw(function () { return arguments; }()) === 'Arguments';
+	var tryGet = function (it, key) {
+	  try {
+	    return it[key];
+	  } catch (error) {  }
+	};
+	classof = TO_STRING_TAG_SUPPORT ? classofRaw : function (it) {
+	  var O, tag, result;
+	  return it === undefined ? 'Undefined' : it === null ? 'Null'
+	    : typeof (tag = tryGet(O = $Object(it), TO_STRING_TAG)) == 'string' ? tag
+	    : CORRECT_ARGUMENTS ? classofRaw(O)
+	    : (result = classofRaw(O)) === 'Object' && isCallable(O.callee) ? 'Arguments' : result;
+	};
+	return classof;
+}
+
+var isConstructor;
+var hasRequiredIsConstructor;
+function requireIsConstructor () {
+	if (hasRequiredIsConstructor) return isConstructor;
+	hasRequiredIsConstructor = 1;
+	var uncurryThis = requireFunctionUncurryThis();
+	var fails = requireFails();
+	var isCallable = requireIsCallable();
+	var classof = requireClassof();
+	var getBuiltIn = requireGetBuiltIn();
+	var inspectSource = requireInspectSource();
+	var noop = function () {  };
+	var construct = getBuiltIn('Reflect', 'construct');
+	var constructorRegExp = /^\s*(?:class|function)\b/;
+	var exec = uncurryThis(constructorRegExp.exec);
+	var INCORRECT_TO_STRING = !constructorRegExp.test(noop);
+	var isConstructorModern = function isConstructor(argument) {
+	  if (!isCallable(argument)) return false;
+	  try {
+	    construct(noop, [], argument);
+	    return true;
+	  } catch (error) {
+	    return false;
+	  }
+	};
+	var isConstructorLegacy = function isConstructor(argument) {
+	  if (!isCallable(argument)) return false;
+	  switch (classof(argument)) {
+	    case 'AsyncFunction':
+	    case 'GeneratorFunction':
+	    case 'AsyncGeneratorFunction': return false;
+	  }
+	  try {
+	    return INCORRECT_TO_STRING || !!exec(constructorRegExp, inspectSource(argument));
+	  } catch (error) {
+	    return true;
+	  }
+	};
+	isConstructorLegacy.sham = true;
+	isConstructor = !construct || fails(function () {
+	  var called;
+	  return isConstructorModern(isConstructorModern.call)
+	    || !isConstructorModern(Object)
+	    || !isConstructorModern(function () { called = true; })
+	    || called;
+	}) ? isConstructorLegacy : isConstructorModern;
+	return isConstructor;
+}
+
+var arraySpeciesConstructor;
+var hasRequiredArraySpeciesConstructor;
+function requireArraySpeciesConstructor () {
+	if (hasRequiredArraySpeciesConstructor) return arraySpeciesConstructor;
+	hasRequiredArraySpeciesConstructor = 1;
+	var isArray = requireIsArray();
+	var isConstructor = requireIsConstructor();
+	var isObject = requireIsObject();
+	var wellKnownSymbol = requireWellKnownSymbol();
+	var SPECIES = wellKnownSymbol('species');
+	var $Array = Array;
+	arraySpeciesConstructor = function (originalArray) {
+	  var C;
+	  if (isArray(originalArray)) {
+	    C = originalArray.constructor;
+	    if (isConstructor(C) && (C === $Array || isArray(C.prototype))) C = undefined;
+	    else if (isObject(C)) {
+	      C = C[SPECIES];
+	      if (C === null) C = undefined;
+	    }
+	  } return C === undefined ? $Array : C;
+	};
+	return arraySpeciesConstructor;
+}
+
+var arraySpeciesCreate;
+var hasRequiredArraySpeciesCreate;
+function requireArraySpeciesCreate () {
+	if (hasRequiredArraySpeciesCreate) return arraySpeciesCreate;
+	hasRequiredArraySpeciesCreate = 1;
+	var arraySpeciesConstructor = requireArraySpeciesConstructor();
+	arraySpeciesCreate = function (originalArray, length) {
+	  return new (arraySpeciesConstructor(originalArray))(length === 0 ? 0 : length);
+	};
+	return arraySpeciesCreate;
+}
+
+var arrayIteration;
+var hasRequiredArrayIteration;
+function requireArrayIteration () {
+	if (hasRequiredArrayIteration) return arrayIteration;
+	hasRequiredArrayIteration = 1;
+	var bind = requireFunctionBindContext();
+	var uncurryThis = requireFunctionUncurryThis();
+	var IndexedObject = requireIndexedObject();
+	var toObject = requireToObject();
+	var lengthOfArrayLike = requireLengthOfArrayLike();
+	var arraySpeciesCreate = requireArraySpeciesCreate();
+	var push = uncurryThis([].push);
+	var createMethod = function (TYPE) {
+	  var IS_MAP = TYPE === 1;
+	  var IS_FILTER = TYPE === 2;
+	  var IS_SOME = TYPE === 3;
+	  var IS_EVERY = TYPE === 4;
+	  var IS_FIND_INDEX = TYPE === 6;
+	  var IS_FILTER_REJECT = TYPE === 7;
+	  var NO_HOLES = TYPE === 5 || IS_FIND_INDEX;
+	  return function ($this, callbackfn, that, specificCreate) {
+	    var O = toObject($this);
+	    var self = IndexedObject(O);
+	    var length = lengthOfArrayLike(self);
+	    var boundFunction = bind(callbackfn, that);
+	    var index = 0;
+	    var create = specificCreate || arraySpeciesCreate;
+	    var target = IS_MAP ? create($this, length) : IS_FILTER || IS_FILTER_REJECT ? create($this, 0) : undefined;
+	    var value, result;
+	    for (;length > index; index++) if (NO_HOLES || index in self) {
+	      value = self[index];
+	      result = boundFunction(value, index, O);
+	      if (TYPE) {
+	        if (IS_MAP) target[index] = result;
+	        else if (result) switch (TYPE) {
+	          case 3: return true;
+	          case 5: return value;
+	          case 6: return index;
+	          case 2: push(target, value);
+	        } else switch (TYPE) {
+	          case 4: return false;
+	          case 7: push(target, value);
+	        }
+	      }
+	    }
+	    return IS_FIND_INDEX ? -1 : IS_SOME || IS_EVERY ? IS_EVERY : target;
+	  };
+	};
+	arrayIteration = {
+	  forEach: createMethod(0),
+	  map: createMethod(1),
+	  filter: createMethod(2),
+	  some: createMethod(3),
+	  every: createMethod(4),
+	  find: createMethod(5),
+	  findIndex: createMethod(6),
+	  filterReject: createMethod(7)
+	};
+	return arrayIteration;
+}
+
 var arrayMethodIsStrict;
 var hasRequiredArrayMethodIsStrict;
 function requireArrayMethodIsStrict () {
@@ -1251,6 +1468,272 @@ function requireArrayMethodIsStrict () {
 	};
 	return arrayMethodIsStrict;
 }
+
+var arrayForEach;
+var hasRequiredArrayForEach;
+function requireArrayForEach () {
+	if (hasRequiredArrayForEach) return arrayForEach;
+	hasRequiredArrayForEach = 1;
+	var $forEach = requireArrayIteration().forEach;
+	var arrayMethodIsStrict = requireArrayMethodIsStrict();
+	var STRICT_METHOD = arrayMethodIsStrict('forEach');
+	arrayForEach = !STRICT_METHOD ? function forEach(callbackfn ) {
+	  return $forEach(this, callbackfn, arguments.length > 1 ? arguments[1] : undefined);
+	} : [].forEach;
+	return arrayForEach;
+}
+
+var hasRequiredEs_array_forEach;
+function requireEs_array_forEach () {
+	if (hasRequiredEs_array_forEach) return es_array_forEach;
+	hasRequiredEs_array_forEach = 1;
+	var $ = require_export();
+	var forEach = requireArrayForEach();
+	$({ target: 'Array', proto: true, forced: [].forEach !== forEach }, {
+	  forEach: forEach
+	});
+	return es_array_forEach;
+}
+
+requireEs_array_forEach();
+
+var es_array_from = {};
+
+var iteratorClose;
+var hasRequiredIteratorClose;
+function requireIteratorClose () {
+	if (hasRequiredIteratorClose) return iteratorClose;
+	hasRequiredIteratorClose = 1;
+	var call = requireFunctionCall();
+	var anObject = requireAnObject();
+	var getMethod = requireGetMethod();
+	iteratorClose = function (iterator, kind, value) {
+	  var innerResult, innerError;
+	  anObject(iterator);
+	  try {
+	    innerResult = getMethod(iterator, 'return');
+	    if (!innerResult) {
+	      if (kind === 'throw') throw value;
+	      return value;
+	    }
+	    innerResult = call(innerResult, iterator);
+	  } catch (error) {
+	    innerError = true;
+	    innerResult = error;
+	  }
+	  if (kind === 'throw') throw value;
+	  if (innerError) throw innerResult;
+	  anObject(innerResult);
+	  return value;
+	};
+	return iteratorClose;
+}
+
+var callWithSafeIterationClosing;
+var hasRequiredCallWithSafeIterationClosing;
+function requireCallWithSafeIterationClosing () {
+	if (hasRequiredCallWithSafeIterationClosing) return callWithSafeIterationClosing;
+	hasRequiredCallWithSafeIterationClosing = 1;
+	var anObject = requireAnObject();
+	var iteratorClose = requireIteratorClose();
+	callWithSafeIterationClosing = function (iterator, fn, value, ENTRIES) {
+	  try {
+	    return ENTRIES ? fn(anObject(value)[0], value[1]) : fn(value);
+	  } catch (error) {
+	    iteratorClose(iterator, 'throw', error);
+	  }
+	};
+	return callWithSafeIterationClosing;
+}
+
+var iterators;
+var hasRequiredIterators;
+function requireIterators () {
+	if (hasRequiredIterators) return iterators;
+	hasRequiredIterators = 1;
+	iterators = {};
+	return iterators;
+}
+
+var isArrayIteratorMethod;
+var hasRequiredIsArrayIteratorMethod;
+function requireIsArrayIteratorMethod () {
+	if (hasRequiredIsArrayIteratorMethod) return isArrayIteratorMethod;
+	hasRequiredIsArrayIteratorMethod = 1;
+	var wellKnownSymbol = requireWellKnownSymbol();
+	var Iterators = requireIterators();
+	var ITERATOR = wellKnownSymbol('iterator');
+	var ArrayPrototype = Array.prototype;
+	isArrayIteratorMethod = function (it) {
+	  return it !== undefined && (Iterators.Array === it || ArrayPrototype[ITERATOR] === it);
+	};
+	return isArrayIteratorMethod;
+}
+
+var createProperty;
+var hasRequiredCreateProperty;
+function requireCreateProperty () {
+	if (hasRequiredCreateProperty) return createProperty;
+	hasRequiredCreateProperty = 1;
+	var DESCRIPTORS = requireDescriptors();
+	var definePropertyModule = requireObjectDefineProperty();
+	var createPropertyDescriptor = requireCreatePropertyDescriptor();
+	createProperty = function (object, key, value) {
+	  if (DESCRIPTORS) definePropertyModule.f(object, key, createPropertyDescriptor(0, value));
+	  else object[key] = value;
+	};
+	return createProperty;
+}
+
+var getIteratorMethod;
+var hasRequiredGetIteratorMethod;
+function requireGetIteratorMethod () {
+	if (hasRequiredGetIteratorMethod) return getIteratorMethod;
+	hasRequiredGetIteratorMethod = 1;
+	var classof = requireClassof();
+	var getMethod = requireGetMethod();
+	var isNullOrUndefined = requireIsNullOrUndefined();
+	var Iterators = requireIterators();
+	var wellKnownSymbol = requireWellKnownSymbol();
+	var ITERATOR = wellKnownSymbol('iterator');
+	getIteratorMethod = function (it) {
+	  if (!isNullOrUndefined(it)) return getMethod(it, ITERATOR)
+	    || getMethod(it, '@@iterator')
+	    || Iterators[classof(it)];
+	};
+	return getIteratorMethod;
+}
+
+var getIterator;
+var hasRequiredGetIterator;
+function requireGetIterator () {
+	if (hasRequiredGetIterator) return getIterator;
+	hasRequiredGetIterator = 1;
+	var call = requireFunctionCall();
+	var aCallable = requireACallable();
+	var anObject = requireAnObject();
+	var tryToString = requireTryToString();
+	var getIteratorMethod = requireGetIteratorMethod();
+	var $TypeError = TypeError;
+	getIterator = function (argument, usingIterator) {
+	  var iteratorMethod = arguments.length < 2 ? getIteratorMethod(argument) : usingIterator;
+	  if (aCallable(iteratorMethod)) return anObject(call(iteratorMethod, argument));
+	  throw new $TypeError(tryToString(argument) + ' is not iterable');
+	};
+	return getIterator;
+}
+
+var arrayFrom;
+var hasRequiredArrayFrom;
+function requireArrayFrom () {
+	if (hasRequiredArrayFrom) return arrayFrom;
+	hasRequiredArrayFrom = 1;
+	var bind = requireFunctionBindContext();
+	var call = requireFunctionCall();
+	var toObject = requireToObject();
+	var callWithSafeIterationClosing = requireCallWithSafeIterationClosing();
+	var isArrayIteratorMethod = requireIsArrayIteratorMethod();
+	var isConstructor = requireIsConstructor();
+	var lengthOfArrayLike = requireLengthOfArrayLike();
+	var createProperty = requireCreateProperty();
+	var getIterator = requireGetIterator();
+	var getIteratorMethod = requireGetIteratorMethod();
+	var $Array = Array;
+	arrayFrom = function from(arrayLike ) {
+	  var O = toObject(arrayLike);
+	  var IS_CONSTRUCTOR = isConstructor(this);
+	  var argumentsLength = arguments.length;
+	  var mapfn = argumentsLength > 1 ? arguments[1] : undefined;
+	  var mapping = mapfn !== undefined;
+	  if (mapping) mapfn = bind(mapfn, argumentsLength > 2 ? arguments[2] : undefined);
+	  var iteratorMethod = getIteratorMethod(O);
+	  var index = 0;
+	  var length, result, step, iterator, next, value;
+	  if (iteratorMethod && !(this === $Array && isArrayIteratorMethod(iteratorMethod))) {
+	    result = IS_CONSTRUCTOR ? new this() : [];
+	    iterator = getIterator(O, iteratorMethod);
+	    next = iterator.next;
+	    for (;!(step = call(next, iterator)).done; index++) {
+	      value = mapping ? callWithSafeIterationClosing(iterator, mapfn, [step.value, index], true) : step.value;
+	      createProperty(result, index, value);
+	    }
+	  } else {
+	    length = lengthOfArrayLike(O);
+	    result = IS_CONSTRUCTOR ? new this(length) : $Array(length);
+	    for (;length > index; index++) {
+	      value = mapping ? mapfn(O[index], index) : O[index];
+	      createProperty(result, index, value);
+	    }
+	  }
+	  result.length = index;
+	  return result;
+	};
+	return arrayFrom;
+}
+
+var checkCorrectnessOfIteration;
+var hasRequiredCheckCorrectnessOfIteration;
+function requireCheckCorrectnessOfIteration () {
+	if (hasRequiredCheckCorrectnessOfIteration) return checkCorrectnessOfIteration;
+	hasRequiredCheckCorrectnessOfIteration = 1;
+	var wellKnownSymbol = requireWellKnownSymbol();
+	var ITERATOR = wellKnownSymbol('iterator');
+	var SAFE_CLOSING = false;
+	try {
+	  var called = 0;
+	  var iteratorWithReturn = {
+	    next: function () {
+	      return { done: !!called++ };
+	    },
+	    'return': function () {
+	      SAFE_CLOSING = true;
+	    }
+	  };
+	  iteratorWithReturn[ITERATOR] = function () {
+	    return this;
+	  };
+	  Array.from(iteratorWithReturn, function () { throw 2; });
+	} catch (error) {  }
+	checkCorrectnessOfIteration = function (exec, SKIP_CLOSING) {
+	  try {
+	    if (!SKIP_CLOSING && !SAFE_CLOSING) return false;
+	  } catch (error) { return false; }
+	  var ITERATION_SUPPORT = false;
+	  try {
+	    var object = {};
+	    object[ITERATOR] = function () {
+	      return {
+	        next: function () {
+	          return { done: ITERATION_SUPPORT = true };
+	        }
+	      };
+	    };
+	    exec(object);
+	  } catch (error) {  }
+	  return ITERATION_SUPPORT;
+	};
+	return checkCorrectnessOfIteration;
+}
+
+var hasRequiredEs_array_from;
+function requireEs_array_from () {
+	if (hasRequiredEs_array_from) return es_array_from;
+	hasRequiredEs_array_from = 1;
+	var $ = require_export();
+	var from = requireArrayFrom();
+	var checkCorrectnessOfIteration = requireCheckCorrectnessOfIteration();
+	var INCORRECT_ITERATION = !checkCorrectnessOfIteration(function (iterable) {
+	  Array.from(iterable);
+	});
+	$({ target: 'Array', stat: true, forced: INCORRECT_ITERATION }, {
+	  from: from
+	});
+	return es_array_from;
+}
+
+requireEs_array_from();
+
+var es_array_indexOf = {};
 
 var hasRequiredEs_array_indexOf;
 function requireEs_array_indexOf () {
@@ -1277,18 +1760,6 @@ function requireEs_array_indexOf () {
 requireEs_array_indexOf();
 
 var es_array_isArray = {};
-
-var isArray;
-var hasRequiredIsArray;
-function requireIsArray () {
-	if (hasRequiredIsArray) return isArray;
-	hasRequiredIsArray = 1;
-	var classof = requireClassofRaw();
-	isArray = Array.isArray || function isArray(argument) {
-	  return classof(argument) === 'Array';
-	};
-	return isArray;
-}
 
 var hasRequiredEs_array_isArray;
 function requireEs_array_isArray () {
@@ -1441,15 +1912,6 @@ function requireAddToUnscopables () {
 	  ArrayPrototype[UNSCOPABLES][key] = true;
 	};
 	return addToUnscopables;
-}
-
-var iterators;
-var hasRequiredIterators;
-function requireIterators () {
-	if (hasRequiredIterators) return iterators;
-	hasRequiredIterators = 1;
-	iterators = {};
-	return iterators;
 }
 
 var correctPrototypeGetter;
@@ -1797,110 +2259,6 @@ requireEs_array_iterator();
 
 var es_array_slice = {};
 
-var toStringTagSupport;
-var hasRequiredToStringTagSupport;
-function requireToStringTagSupport () {
-	if (hasRequiredToStringTagSupport) return toStringTagSupport;
-	hasRequiredToStringTagSupport = 1;
-	var wellKnownSymbol = requireWellKnownSymbol();
-	var TO_STRING_TAG = wellKnownSymbol('toStringTag');
-	var test = {};
-	test[TO_STRING_TAG] = 'z';
-	toStringTagSupport = String(test) === '[object z]';
-	return toStringTagSupport;
-}
-
-var classof;
-var hasRequiredClassof;
-function requireClassof () {
-	if (hasRequiredClassof) return classof;
-	hasRequiredClassof = 1;
-	var TO_STRING_TAG_SUPPORT = requireToStringTagSupport();
-	var isCallable = requireIsCallable();
-	var classofRaw = requireClassofRaw();
-	var wellKnownSymbol = requireWellKnownSymbol();
-	var TO_STRING_TAG = wellKnownSymbol('toStringTag');
-	var $Object = Object;
-	var CORRECT_ARGUMENTS = classofRaw(function () { return arguments; }()) === 'Arguments';
-	var tryGet = function (it, key) {
-	  try {
-	    return it[key];
-	  } catch (error) {  }
-	};
-	classof = TO_STRING_TAG_SUPPORT ? classofRaw : function (it) {
-	  var O, tag, result;
-	  return it === undefined ? 'Undefined' : it === null ? 'Null'
-	    : typeof (tag = tryGet(O = $Object(it), TO_STRING_TAG)) == 'string' ? tag
-	    : CORRECT_ARGUMENTS ? classofRaw(O)
-	    : (result = classofRaw(O)) === 'Object' && isCallable(O.callee) ? 'Arguments' : result;
-	};
-	return classof;
-}
-
-var isConstructor;
-var hasRequiredIsConstructor;
-function requireIsConstructor () {
-	if (hasRequiredIsConstructor) return isConstructor;
-	hasRequiredIsConstructor = 1;
-	var uncurryThis = requireFunctionUncurryThis();
-	var fails = requireFails();
-	var isCallable = requireIsCallable();
-	var classof = requireClassof();
-	var getBuiltIn = requireGetBuiltIn();
-	var inspectSource = requireInspectSource();
-	var noop = function () {  };
-	var construct = getBuiltIn('Reflect', 'construct');
-	var constructorRegExp = /^\s*(?:class|function)\b/;
-	var exec = uncurryThis(constructorRegExp.exec);
-	var INCORRECT_TO_STRING = !constructorRegExp.test(noop);
-	var isConstructorModern = function isConstructor(argument) {
-	  if (!isCallable(argument)) return false;
-	  try {
-	    construct(noop, [], argument);
-	    return true;
-	  } catch (error) {
-	    return false;
-	  }
-	};
-	var isConstructorLegacy = function isConstructor(argument) {
-	  if (!isCallable(argument)) return false;
-	  switch (classof(argument)) {
-	    case 'AsyncFunction':
-	    case 'GeneratorFunction':
-	    case 'AsyncGeneratorFunction': return false;
-	  }
-	  try {
-	    return INCORRECT_TO_STRING || !!exec(constructorRegExp, inspectSource(argument));
-	  } catch (error) {
-	    return true;
-	  }
-	};
-	isConstructorLegacy.sham = true;
-	isConstructor = !construct || fails(function () {
-	  var called;
-	  return isConstructorModern(isConstructorModern.call)
-	    || !isConstructorModern(Object)
-	    || !isConstructorModern(function () { called = true; })
-	    || called;
-	}) ? isConstructorLegacy : isConstructorModern;
-	return isConstructor;
-}
-
-var createProperty;
-var hasRequiredCreateProperty;
-function requireCreateProperty () {
-	if (hasRequiredCreateProperty) return createProperty;
-	hasRequiredCreateProperty = 1;
-	var DESCRIPTORS = requireDescriptors();
-	var definePropertyModule = requireObjectDefineProperty();
-	var createPropertyDescriptor = requireCreatePropertyDescriptor();
-	createProperty = function (object, key, value) {
-	  if (DESCRIPTORS) definePropertyModule.f(object, key, createPropertyDescriptor(0, value));
-	  else object[key] = value;
-	};
-	return createProperty;
-}
-
 var arrayMethodHasSpeciesSupport;
 var hasRequiredArrayMethodHasSpeciesSupport;
 function requireArrayMethodHasSpeciesSupport () {
@@ -2183,107 +2541,6 @@ function requireInternalMetadata () {
 	return internalMetadata.exports;
 }
 
-var functionBindContext;
-var hasRequiredFunctionBindContext;
-function requireFunctionBindContext () {
-	if (hasRequiredFunctionBindContext) return functionBindContext;
-	hasRequiredFunctionBindContext = 1;
-	var uncurryThis = requireFunctionUncurryThisClause();
-	var aCallable = requireACallable();
-	var NATIVE_BIND = requireFunctionBindNative();
-	var bind = uncurryThis(uncurryThis.bind);
-	functionBindContext = function (fn, that) {
-	  aCallable(fn);
-	  return that === undefined ? fn : NATIVE_BIND ? bind(fn, that) : function () {
-	    return fn.apply(that, arguments);
-	  };
-	};
-	return functionBindContext;
-}
-
-var isArrayIteratorMethod;
-var hasRequiredIsArrayIteratorMethod;
-function requireIsArrayIteratorMethod () {
-	if (hasRequiredIsArrayIteratorMethod) return isArrayIteratorMethod;
-	hasRequiredIsArrayIteratorMethod = 1;
-	var wellKnownSymbol = requireWellKnownSymbol();
-	var Iterators = requireIterators();
-	var ITERATOR = wellKnownSymbol('iterator');
-	var ArrayPrototype = Array.prototype;
-	isArrayIteratorMethod = function (it) {
-	  return it !== undefined && (Iterators.Array === it || ArrayPrototype[ITERATOR] === it);
-	};
-	return isArrayIteratorMethod;
-}
-
-var getIteratorMethod;
-var hasRequiredGetIteratorMethod;
-function requireGetIteratorMethod () {
-	if (hasRequiredGetIteratorMethod) return getIteratorMethod;
-	hasRequiredGetIteratorMethod = 1;
-	var classof = requireClassof();
-	var getMethod = requireGetMethod();
-	var isNullOrUndefined = requireIsNullOrUndefined();
-	var Iterators = requireIterators();
-	var wellKnownSymbol = requireWellKnownSymbol();
-	var ITERATOR = wellKnownSymbol('iterator');
-	getIteratorMethod = function (it) {
-	  if (!isNullOrUndefined(it)) return getMethod(it, ITERATOR)
-	    || getMethod(it, '@@iterator')
-	    || Iterators[classof(it)];
-	};
-	return getIteratorMethod;
-}
-
-var getIterator;
-var hasRequiredGetIterator;
-function requireGetIterator () {
-	if (hasRequiredGetIterator) return getIterator;
-	hasRequiredGetIterator = 1;
-	var call = requireFunctionCall();
-	var aCallable = requireACallable();
-	var anObject = requireAnObject();
-	var tryToString = requireTryToString();
-	var getIteratorMethod = requireGetIteratorMethod();
-	var $TypeError = TypeError;
-	getIterator = function (argument, usingIterator) {
-	  var iteratorMethod = arguments.length < 2 ? getIteratorMethod(argument) : usingIterator;
-	  if (aCallable(iteratorMethod)) return anObject(call(iteratorMethod, argument));
-	  throw new $TypeError(tryToString(argument) + ' is not iterable');
-	};
-	return getIterator;
-}
-
-var iteratorClose;
-var hasRequiredIteratorClose;
-function requireIteratorClose () {
-	if (hasRequiredIteratorClose) return iteratorClose;
-	hasRequiredIteratorClose = 1;
-	var call = requireFunctionCall();
-	var anObject = requireAnObject();
-	var getMethod = requireGetMethod();
-	iteratorClose = function (iterator, kind, value) {
-	  var innerResult, innerError;
-	  anObject(iterator);
-	  try {
-	    innerResult = getMethod(iterator, 'return');
-	    if (!innerResult) {
-	      if (kind === 'throw') throw value;
-	      return value;
-	    }
-	    innerResult = call(innerResult, iterator);
-	  } catch (error) {
-	    innerError = true;
-	    innerResult = error;
-	  }
-	  if (kind === 'throw') throw value;
-	  if (innerError) throw innerResult;
-	  anObject(innerResult);
-	  return value;
-	};
-	return iteratorClose;
-}
-
 var iterate;
 var hasRequiredIterate;
 function requireIterate () {
@@ -2363,50 +2620,6 @@ function requireAnInstance () {
 	  throw new $TypeError('Incorrect invocation');
 	};
 	return anInstance;
-}
-
-var checkCorrectnessOfIteration;
-var hasRequiredCheckCorrectnessOfIteration;
-function requireCheckCorrectnessOfIteration () {
-	if (hasRequiredCheckCorrectnessOfIteration) return checkCorrectnessOfIteration;
-	hasRequiredCheckCorrectnessOfIteration = 1;
-	var wellKnownSymbol = requireWellKnownSymbol();
-	var ITERATOR = wellKnownSymbol('iterator');
-	var SAFE_CLOSING = false;
-	try {
-	  var called = 0;
-	  var iteratorWithReturn = {
-	    next: function () {
-	      return { done: !!called++ };
-	    },
-	    'return': function () {
-	      SAFE_CLOSING = true;
-	    }
-	  };
-	  iteratorWithReturn[ITERATOR] = function () {
-	    return this;
-	  };
-	  Array.from(iteratorWithReturn, function () { throw 2; });
-	} catch (error) {  }
-	checkCorrectnessOfIteration = function (exec, SKIP_CLOSING) {
-	  try {
-	    if (!SKIP_CLOSING && !SAFE_CLOSING) return false;
-	  } catch (error) { return false; }
-	  var ITERATION_SUPPORT = false;
-	  try {
-	    var object = {};
-	    object[ITERATOR] = function () {
-	      return {
-	        next: function () {
-	          return { done: ITERATION_SUPPORT = true };
-	        }
-	      };
-	    };
-	    exec(object);
-	  } catch (error) {  }
-	  return ITERATION_SUPPORT;
-	};
-	return checkCorrectnessOfIteration;
 }
 
 var inheritIfRequired;
@@ -3008,7 +3221,7 @@ function requireEs_string_trim () {
 
 requireEs_string_trim();
 
-var web_domCollections_iterator = {};
+var web_domCollections_forEach = {};
 
 var domIterables;
 var hasRequiredDomIterables;
@@ -3062,6 +3275,35 @@ function requireDomTokenListPrototype () {
 	domTokenListPrototype = DOMTokenListPrototype === Object.prototype ? undefined : DOMTokenListPrototype;
 	return domTokenListPrototype;
 }
+
+var hasRequiredWeb_domCollections_forEach;
+function requireWeb_domCollections_forEach () {
+	if (hasRequiredWeb_domCollections_forEach) return web_domCollections_forEach;
+	hasRequiredWeb_domCollections_forEach = 1;
+	var globalThis = requireGlobalThis();
+	var DOMIterables = requireDomIterables();
+	var DOMTokenListPrototype = requireDomTokenListPrototype();
+	var forEach = requireArrayForEach();
+	var createNonEnumerableProperty = requireCreateNonEnumerableProperty();
+	var handlePrototype = function (CollectionPrototype) {
+	  if (CollectionPrototype && CollectionPrototype.forEach !== forEach) try {
+	    createNonEnumerableProperty(CollectionPrototype, 'forEach', forEach);
+	  } catch (error) {
+	    CollectionPrototype.forEach = forEach;
+	  }
+	};
+	for (var COLLECTION_NAME in DOMIterables) {
+	  if (DOMIterables[COLLECTION_NAME]) {
+	    handlePrototype(globalThis[COLLECTION_NAME] && globalThis[COLLECTION_NAME].prototype);
+	  }
+	}
+	handlePrototype(DOMTokenListPrototype);
+	return web_domCollections_forEach;
+}
+
+requireWeb_domCollections_forEach();
+
+var web_domCollections_iterator = {};
 
 var hasRequiredWeb_domCollections_iterator;
 function requireWeb_domCollections_iterator () {
@@ -3967,104 +4209,6 @@ function _unsupportedIterableToArray(r, a) {
 
 var es_array_filter = {};
 
-var arraySpeciesConstructor;
-var hasRequiredArraySpeciesConstructor;
-function requireArraySpeciesConstructor () {
-	if (hasRequiredArraySpeciesConstructor) return arraySpeciesConstructor;
-	hasRequiredArraySpeciesConstructor = 1;
-	var isArray = requireIsArray();
-	var isConstructor = requireIsConstructor();
-	var isObject = requireIsObject();
-	var wellKnownSymbol = requireWellKnownSymbol();
-	var SPECIES = wellKnownSymbol('species');
-	var $Array = Array;
-	arraySpeciesConstructor = function (originalArray) {
-	  var C;
-	  if (isArray(originalArray)) {
-	    C = originalArray.constructor;
-	    if (isConstructor(C) && (C === $Array || isArray(C.prototype))) C = undefined;
-	    else if (isObject(C)) {
-	      C = C[SPECIES];
-	      if (C === null) C = undefined;
-	    }
-	  } return C === undefined ? $Array : C;
-	};
-	return arraySpeciesConstructor;
-}
-
-var arraySpeciesCreate;
-var hasRequiredArraySpeciesCreate;
-function requireArraySpeciesCreate () {
-	if (hasRequiredArraySpeciesCreate) return arraySpeciesCreate;
-	hasRequiredArraySpeciesCreate = 1;
-	var arraySpeciesConstructor = requireArraySpeciesConstructor();
-	arraySpeciesCreate = function (originalArray, length) {
-	  return new (arraySpeciesConstructor(originalArray))(length === 0 ? 0 : length);
-	};
-	return arraySpeciesCreate;
-}
-
-var arrayIteration;
-var hasRequiredArrayIteration;
-function requireArrayIteration () {
-	if (hasRequiredArrayIteration) return arrayIteration;
-	hasRequiredArrayIteration = 1;
-	var bind = requireFunctionBindContext();
-	var uncurryThis = requireFunctionUncurryThis();
-	var IndexedObject = requireIndexedObject();
-	var toObject = requireToObject();
-	var lengthOfArrayLike = requireLengthOfArrayLike();
-	var arraySpeciesCreate = requireArraySpeciesCreate();
-	var push = uncurryThis([].push);
-	var createMethod = function (TYPE) {
-	  var IS_MAP = TYPE === 1;
-	  var IS_FILTER = TYPE === 2;
-	  var IS_SOME = TYPE === 3;
-	  var IS_EVERY = TYPE === 4;
-	  var IS_FIND_INDEX = TYPE === 6;
-	  var IS_FILTER_REJECT = TYPE === 7;
-	  var NO_HOLES = TYPE === 5 || IS_FIND_INDEX;
-	  return function ($this, callbackfn, that, specificCreate) {
-	    var O = toObject($this);
-	    var self = IndexedObject(O);
-	    var length = lengthOfArrayLike(self);
-	    var boundFunction = bind(callbackfn, that);
-	    var index = 0;
-	    var create = specificCreate || arraySpeciesCreate;
-	    var target = IS_MAP ? create($this, length) : IS_FILTER || IS_FILTER_REJECT ? create($this, 0) : undefined;
-	    var value, result;
-	    for (;length > index; index++) if (NO_HOLES || index in self) {
-	      value = self[index];
-	      result = boundFunction(value, index, O);
-	      if (TYPE) {
-	        if (IS_MAP) target[index] = result;
-	        else if (result) switch (TYPE) {
-	          case 3: return true;
-	          case 5: return value;
-	          case 6: return index;
-	          case 2: push(target, value);
-	        } else switch (TYPE) {
-	          case 4: return false;
-	          case 7: push(target, value);
-	        }
-	      }
-	    }
-	    return IS_FIND_INDEX ? -1 : IS_SOME || IS_EVERY ? IS_EVERY : target;
-	  };
-	};
-	arrayIteration = {
-	  forEach: createMethod(0),
-	  map: createMethod(1),
-	  filter: createMethod(2),
-	  some: createMethod(3),
-	  every: createMethod(4),
-	  find: createMethod(5),
-	  findIndex: createMethod(6),
-	  filterReject: createMethod(7)
-	};
-	return arrayIteration;
-}
-
 var hasRequiredEs_array_filter;
 function requireEs_array_filter () {
 	if (hasRequiredEs_array_filter) return es_array_filter;
@@ -4082,36 +4226,6 @@ function requireEs_array_filter () {
 }
 
 requireEs_array_filter();
-
-var es_array_forEach = {};
-
-var arrayForEach;
-var hasRequiredArrayForEach;
-function requireArrayForEach () {
-	if (hasRequiredArrayForEach) return arrayForEach;
-	hasRequiredArrayForEach = 1;
-	var $forEach = requireArrayIteration().forEach;
-	var arrayMethodIsStrict = requireArrayMethodIsStrict();
-	var STRICT_METHOD = arrayMethodIsStrict('forEach');
-	arrayForEach = !STRICT_METHOD ? function forEach(callbackfn ) {
-	  return $forEach(this, callbackfn, arguments.length > 1 ? arguments[1] : undefined);
-	} : [].forEach;
-	return arrayForEach;
-}
-
-var hasRequiredEs_array_forEach;
-function requireEs_array_forEach () {
-	if (hasRequiredEs_array_forEach) return es_array_forEach;
-	hasRequiredEs_array_forEach = 1;
-	var $ = require_export();
-	var forEach = requireArrayForEach();
-	$({ target: 'Array', proto: true, forced: [].forEach !== forEach }, {
-	  forEach: forEach
-	});
-	return es_array_forEach;
-}
-
-requireEs_array_forEach();
 
 var es_array_includes = {};
 
@@ -4778,35 +4892,6 @@ function requireEs_string_replace () {
 }
 
 requireEs_string_replace();
-
-var web_domCollections_forEach = {};
-
-var hasRequiredWeb_domCollections_forEach;
-function requireWeb_domCollections_forEach () {
-	if (hasRequiredWeb_domCollections_forEach) return web_domCollections_forEach;
-	hasRequiredWeb_domCollections_forEach = 1;
-	var globalThis = requireGlobalThis();
-	var DOMIterables = requireDomIterables();
-	var DOMTokenListPrototype = requireDomTokenListPrototype();
-	var forEach = requireArrayForEach();
-	var createNonEnumerableProperty = requireCreateNonEnumerableProperty();
-	var handlePrototype = function (CollectionPrototype) {
-	  if (CollectionPrototype && CollectionPrototype.forEach !== forEach) try {
-	    createNonEnumerableProperty(CollectionPrototype, 'forEach', forEach);
-	  } catch (error) {
-	    CollectionPrototype.forEach = forEach;
-	  }
-	};
-	for (var COLLECTION_NAME in DOMIterables) {
-	  if (DOMIterables[COLLECTION_NAME]) {
-	    handlePrototype(globalThis[COLLECTION_NAME] && globalThis[COLLECTION_NAME].prototype);
-	  }
-	}
-	handlePrototype(DOMTokenListPrototype);
-	return web_domCollections_forEach;
-}
-
-requireWeb_domCollections_forEach();
 
 var es_array_some = {};
 
@@ -5706,91 +5791,6 @@ function requireEs_symbol_iterator () {
 }
 
 requireEs_symbol_iterator();
-
-var es_array_from = {};
-
-var callWithSafeIterationClosing;
-var hasRequiredCallWithSafeIterationClosing;
-function requireCallWithSafeIterationClosing () {
-	if (hasRequiredCallWithSafeIterationClosing) return callWithSafeIterationClosing;
-	hasRequiredCallWithSafeIterationClosing = 1;
-	var anObject = requireAnObject();
-	var iteratorClose = requireIteratorClose();
-	callWithSafeIterationClosing = function (iterator, fn, value, ENTRIES) {
-	  try {
-	    return ENTRIES ? fn(anObject(value)[0], value[1]) : fn(value);
-	  } catch (error) {
-	    iteratorClose(iterator, 'throw', error);
-	  }
-	};
-	return callWithSafeIterationClosing;
-}
-
-var arrayFrom;
-var hasRequiredArrayFrom;
-function requireArrayFrom () {
-	if (hasRequiredArrayFrom) return arrayFrom;
-	hasRequiredArrayFrom = 1;
-	var bind = requireFunctionBindContext();
-	var call = requireFunctionCall();
-	var toObject = requireToObject();
-	var callWithSafeIterationClosing = requireCallWithSafeIterationClosing();
-	var isArrayIteratorMethod = requireIsArrayIteratorMethod();
-	var isConstructor = requireIsConstructor();
-	var lengthOfArrayLike = requireLengthOfArrayLike();
-	var createProperty = requireCreateProperty();
-	var getIterator = requireGetIterator();
-	var getIteratorMethod = requireGetIteratorMethod();
-	var $Array = Array;
-	arrayFrom = function from(arrayLike ) {
-	  var O = toObject(arrayLike);
-	  var IS_CONSTRUCTOR = isConstructor(this);
-	  var argumentsLength = arguments.length;
-	  var mapfn = argumentsLength > 1 ? arguments[1] : undefined;
-	  var mapping = mapfn !== undefined;
-	  if (mapping) mapfn = bind(mapfn, argumentsLength > 2 ? arguments[2] : undefined);
-	  var iteratorMethod = getIteratorMethod(O);
-	  var index = 0;
-	  var length, result, step, iterator, next, value;
-	  if (iteratorMethod && !(this === $Array && isArrayIteratorMethod(iteratorMethod))) {
-	    result = IS_CONSTRUCTOR ? new this() : [];
-	    iterator = getIterator(O, iteratorMethod);
-	    next = iterator.next;
-	    for (;!(step = call(next, iterator)).done; index++) {
-	      value = mapping ? callWithSafeIterationClosing(iterator, mapfn, [step.value, index], true) : step.value;
-	      createProperty(result, index, value);
-	    }
-	  } else {
-	    length = lengthOfArrayLike(O);
-	    result = IS_CONSTRUCTOR ? new this(length) : $Array(length);
-	    for (;length > index; index++) {
-	      value = mapping ? mapfn(O[index], index) : O[index];
-	      createProperty(result, index, value);
-	    }
-	  }
-	  result.length = index;
-	  return result;
-	};
-	return arrayFrom;
-}
-
-var hasRequiredEs_array_from;
-function requireEs_array_from () {
-	if (hasRequiredEs_array_from) return es_array_from;
-	hasRequiredEs_array_from = 1;
-	var $ = require_export();
-	var from = requireArrayFrom();
-	var checkCorrectnessOfIteration = requireCheckCorrectnessOfIteration();
-	var INCORRECT_ITERATION = !checkCorrectnessOfIteration(function (iterable) {
-	  Array.from(iterable);
-	});
-	$({ target: 'Array', stat: true, forced: INCORRECT_ITERATION }, {
-	  from: from
-	});
-	return es_array_from;
-}
-
-requireEs_array_from();
 
 var es_array_join = {};
 
@@ -7156,7 +7156,7 @@ function AppBlock(config) {
     wrapper.appendChild(tmpDOM);
     _processNode(comp, wrapper, cache);
     updateTextNodePlaceholders(comp, wrapper, null, cache);
-    return wrapper;
+    return wrapper.childNodes;
   };
   this.render = function (callback) {
     var comp = this;
@@ -7173,8 +7173,11 @@ function AppBlock(config) {
     if (callback instanceof Function) callback();
   };
   this.plainRender = function (tmpDOM) {
+    var _this2 = this;
     this.el.innerHTML = '';
-    this.el.appendChild(tmpDOM);
+    Array.from(tmpDOM).forEach(function (child) {
+      _this2.el.appendChild(child);
+    });
   };
   this.idiomorphRender = function (tmpDOM) {
     Idiomorph.morph(this.el, tmpDOM, {

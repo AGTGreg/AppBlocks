@@ -35,7 +35,7 @@ Here's a complete "Hello World" app in under 30 lines:
   </template>
 
   <!-- Load AppBlocks from CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/appblocks@2.1.0/dist/appblocks.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/appblocks@2.1.1/dist/appblocks.min.js"></script>
 
   <!-- Initialize the app -->
   <script>
@@ -63,7 +63,7 @@ Here's a complete "Hello World" app in under 30 lines:
 ### CDN (Recommended for Quick Start)
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/appblocks@2.1.0/dist/appblocks.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/appblocks@2.1.1/dist/appblocks.min.js"></script>
 ```
 
 ### NPM

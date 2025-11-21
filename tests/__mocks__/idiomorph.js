@@ -11,9 +11,19 @@ module.exports = {
       while (targetEl.firstChild) {
         targetEl.removeChild(targetEl.firstChild);
       }
-      const fragment = tmpDOM.cloneNode(true);
-      while (fragment.firstChild) {
-        targetEl.appendChild(fragment.firstChild);
+
+      // Handle different input types like real Idiomorph
+      if (tmpDOM instanceof NodeList || Array.isArray(tmpDOM)) {
+        // NodeList or Array - append each child
+        Array.from(tmpDOM).forEach(child => {
+          targetEl.appendChild(child.cloneNode(true));
+        });
+      } else if (tmpDOM && tmpDOM.cloneNode) {
+        // Element or DocumentFragment
+        const fragment = tmpDOM.cloneNode(true);
+        while (fragment.firstChild) {
+          targetEl.appendChild(fragment.firstChild);
+        }
       }
     }
   }

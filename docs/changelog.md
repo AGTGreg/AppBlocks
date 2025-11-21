@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.1.1
+- **FIX:** Return a NodeList from prepareTmpDom so that idiomorph can handle the elements directly.
+
 ## 2.1.0
 - **New:** Method calls with parameters in placeholders and directives. Call app methods directly in templates with implicit app instance injection: `{sumMethod(data.a, data.b)}` or `c-for="item in getItems()"`.
 - **New:** Method call result caching (per-render ephemeral) to prevent duplicate evaluations in the same render cycle.

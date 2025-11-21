@@ -15,7 +15,7 @@ The goal of AppBlocks is to provide all the necessary ingredients to develop mic
 Add AppBlocks directly to your HTML:
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/appblocks@2.1.0/dist/appblocks.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/appblocks@2.1.1/dist/appblocks.min.js"></script>
 ```
 
 ### Option 2: NPM
@@ -56,7 +56,7 @@ Let's build a simple interactive app step by step. We'll start with an empty HTM
   </head>
   <body>
     <!-- Load AppBlocks. -->
-    <script src="https://cdn.jsdelivr.net/npm/appblocks@2.1.0/dist/appblocks.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/appblocks@2.1.1/dist/appblocks.min.js"></script>
     <script>
       // This is where we will write our AppBlock code
     </script>
@@ -139,7 +139,7 @@ Here's the full working code:
     <button id="increment-btn">Visit Again</button>
   </template>
 
-  <script src="https://cdn.jsdelivr.net/npm/appblocks@2.1.0/dist/appblocks.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/appblocks@2.1.1/dist/appblocks.min.js"></script>
   <script>
     var app = new AppBlock({
       el: document.getElementById('app'),

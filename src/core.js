@@ -56,7 +56,8 @@ export function AppBlock(config) {
     processNode(comp, wrapper, cache);
     updateTextNodePlaceholders(comp, wrapper, null, cache);
 
-    return wrapper;
+    // Return the processed children, not the wrapper div
+    return wrapper.childNodes;
   }
   this.render = function(callback) {
     const comp = this;
@@ -80,11 +81,15 @@ export function AppBlock(config) {
   // Render engines
   this.plainRender = function(tmpDOM) {
     this.el.innerHTML = '';
-    this.el.appendChild(tmpDOM);
+    // tmpDOM is a NodeList, append each child
+    Array.from(tmpDOM).forEach(child => {
+      this.el.appendChild(child);
+    });
   }
 
 
   this.idiomorphRender = function(tmpDOM) {
+    // tmpDOM is a NodeList - Idiomorph handles it directly
     Idiomorph.morph(this.el, tmpDOM, {morphStyle:'innerHTML'});
   }
 
